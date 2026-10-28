@@ -1,0 +1,78 @@
+[
+  {
+    "id": "caso_1_tapas_cajas_medidores",
+    "nombre": "Suministro de tapas y cajas de medidores",
+    "objeto": "Suministro de tapas y cajas de medidores para la ESPY",
+    "estudio_previo": "Se requiere el suministro oportuno de elementos de acueducto y micromedición: tapas para cajas de medidor y cajillas protectoras para medidor de agua de 1/2 pulgada, cumpliendo normas técnicas de la ESPY.",
+    "propuesta_economica": "1. Cajilla para medidor marcada ESPY con visor y chapa\n2. Tapa para medidor marcada ESPY de alta resistencia en polipropileno",
+    "codigos_esperados": ["40141762", "41112505", "24112409", "30121605", "41112504"],
+    "codigos_prohibidos": ["55121700", "55121901", "25191602", "55121718", "42295124", "39121029"]
+  },
+  {
+    "id": "caso_2_operacion_ptap_ptar",
+    "nombre": "Operación y mantenimiento de plantas de tratamiento de agua potable y residual",
+    "objeto": "Operación y mantenimiento de plantas de tratamiento de agua potable y residual de la ESPY",
+    "estudio_previo": "Servicios operativos y técnicos especializados para la operación, control fisicoquímico, monitoreo de calidad del agua y mantenimiento integral de la planta de tratamiento de agua potable (PTAP) y la planta de tratamiento de aguas residuales (PTAR) del municipio.",
+    "propuesta_economica": "1. Operación técnica y dosificación de reactivos en PTAP\n2. Control y análisis de calidad del agua tratada\n3. Mantenimiento y desarenado de unidades en PTAR y tratamiento de aguas negras",
+    "codigos_esperados": ["70171601", "70171602", "76121701", "83101501"],
+    "codigos_prohibidos": ["73131605", "73181018"]
+  },
+  {
+    "id": "caso_3_hipoclorito_ptap",
+    "nombre": "Suministro de hipoclorito para la planta de tratamiento",
+    "objeto": "Suministro de hipoclorito de sodio y sustancias químicas para la potabilización en la planta de tratamiento de agua potable",
+    "estudio_previo": "Suministro periódico de insumos químicos para la desinfección y potabilización del agua en la PTAP municipal, garantizando el cumplimiento de los índices de cloro residual y calidad del agua para consumo humano.",
+    "propuesta_economica": "1. Hipoclorito de sodio al 13% en canecas plásticas para desinfección de agua potable\n2. Sulfato de aluminio para coagulación",
+    "codigos_esperados": ["47101600", "12141901", "12352104"],
+    "codigos_prohibidos": ["10161600"]
+  },
+  {
+    "id": "caso_4_medidores_agua",
+    "nombre": "Suministro de medidores de agua",
+    "objeto": "Suministro de micromedidores de agua potable para la reposición de acometidas domiciliarias de la ESPY",
+    "estudio_previo": "Adquisición de medidores volumétricos de agua potable de 1/2 pulgada chorro único clase metrológica B o C, para control de pérdidas y micromedición en las redes de acueducto urbano.",
+    "propuesta_economica": "1. Medidores de agua potable domiciliarios de 1/2 pulgada chorro único con acoples de bronce\n2. Válvulas de corte antifraude",
+    "codigos_esperados": ["41112504", "41112505"],
+    "codigos_prohibidos": ["47101500", "42152800"]
+  },
+  {
+    "id": "caso_5_papeleria_oficina",
+    "nombre": "Suministro de papelería y útiles de oficina",
+    "objeto": "Suministro de papelería, consumibles y útiles de oficina para las diferentes dependencias administrativas de la ESPY",
+    "estudio_previo": "Contratación de los insumos de oficina necesarios para la gestión administrativa, archivo y facturación de la empresa: resmas de papel bond carta y oficio, lapiceros, cosedoras, carpetas y suministros de escritorio.",
+    "propuesta_economica": "1. Papel bond tamaño carta y oficio de 75 gr\n2. Bolígrafos, lápices, resaltadores y borradores\n3. Carpetas de archivo y archivadores AZ\n4. Grapadoras y cosedoras metálicas",
+    "codigos_esperados": ["14111500", "14111519", "44121500", "44121700", "44122000", "44103103"],
+    "codigos_prohibidos": ["43212105"]
+  },
+  {
+    "id": "caso_6_asesoria_juridica",
+    "nombre": "Asesoría jurídica en contratación",
+    "objeto": "Prestación de servicios profesionales de asesoría jurídica especializada en contratación estatal y derecho administrativo para la ESPY",
+    "estudio_previo": "Se requiere el acompañamiento y asesoría legal en la estructuración de estudios previos, minutas contractuales, respuestas a recursos, conceptos jurídicos y liquidación de contratos de conformidad con la Ley 142 de 1994 y la normativa contractual aplicable.",
+    "propuesta_economica": "1. Asesoría jurídica en estructuración de procesos contractuales y pliegos\n2. Emisión de conceptos jurídicos en contratación y servicios públicos\n3. Elaboración de actas de liquidación y seguimiento de minutas",
+    "codigos_esperados": ["80121704", "80121600", "80121500", "77101706"],
+    "codigos_prohibidos": ["80151605"]
+  },
+  {
+    "id": "caso_7_pasamanos_madera_plastica",
+    "nombre": "Instalación de pasamanos en madera plástica Represa El Sereno",
+    "objeto": "Seleccionar a la persona natural o jurídica que ofrezca las mejores condiciones para el contrato de \"INSTALACION DE PASAMANOS EN MADERA PLASTICA A TODO COSTO PARA LOS SITIOS DE TRANSITO PEATONAL DE LA REPRESA EL SERENO DEL MUNICIPIO DE YOLOMBÓ\"",
+    "estudio_previo": "ESTUDIOS PREVIOS DE JUSTIFICACION Y CONVENIENCIA\nINSTALACION DE PASAMANOS EN MADERA PLASTICA A TODO COSTO PARA LOS SITIOS DE TRANSITO PEATONAL DE LA REPRESA EL SERENO DEL MUNICIPIO DE YOLOMBÓ\n\nOBJETO: Seleccionar a la persona natural o jurídica que ofrezca las mejores condiciones para el contrato de \"INSTALACION DE PASAMANOS EN MADERA PLASTICA A TODO COSTO PARA LOS SITIOS DE TRANSITO PEATONAL DE LA REPRESA EL SERENO DEL MUNICIPIO DE YOLOMBÓ\".\n\nTIPO DE CONTRATO: El contrato a celebrar es de PRESTACIÓN DE SERVICIOS.\n\nDESCRIPCION DE LA NECESIDAD: Se requiere la adecuación e instalación de pasamanos en madera plástica a todo costo en los sitios de tránsito peatonal de la Represa El Sereno del municipio de Yolombó, con el fin de brindar protección y seguridad a los operarios y transeúntes.",
+    "propuesta_economica": "ASUNTO: COTIZACION PARA INSTALACION DE PASAMANOS\nAutonomía, compromiso y | ASOCOMUNAL YOLOMBO\nDESCRIPCIÓN | CANT.\n1. Parales estacón 8x8x115 - Cant: 60\n2. Baretas 4x13x230 - Cant: 106\n3. Tornillos 3/8 x 1/2 x 4 - Cant: 380\n4. Parales 12x12x300\n5. Estibas 50x70 - Cant: 10\n6. Visita técnica\n7. Mano de obra en días - Cant: 10\nTotal: $11.922.726",
+    "codigos_esperados": [
+      "72152300",
+      "30191601",
+      "30102905",
+      "30265800",
+      "31161508"
+    ],
+    "codigos_prohibidos": [
+      "85101600",
+      "83101601",
+      "86101800",
+      "86101802",
+      "90101600"
+    ]
+  }
+]
+

@@ -1,0 +1,282 @@
+{
+  "motor_evaluado": "clasico",
+  "total_casos": 7,
+  "acierto_top1_pct": 28.57142857142857,
+  "recall_global_pct": 37.93103448275862,
+  "codigos_prohibidos_total": 3,
+  "detalles": [
+    {
+      "id": "caso_1_tapas_cajas_medidores",
+      "nombre": "Suministro de tapas y cajas de medidores",
+      "top1_ok": true,
+      "codigos_obtenidos": [
+        "40141762",
+        "24112409",
+        "41112505",
+        "41111607",
+        "31261500"
+      ],
+      "codigos_esperados": [
+        "41112504",
+        "24112409",
+        "40141762",
+        "41112505",
+        "30121605"
+      ],
+      "encontrados": [
+        "24112409",
+        "41112505",
+        "40141762"
+      ],
+      "sobrantes": [
+        "41111607",
+        "31261500"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 0.6,
+      "objeto_detectado": "Suministro de tapas y cajas de medidores para la ESPY",
+      "actividades_extraidas": [
+        "Cajilla para medidor marcada ESPY con visor y chapa",
+        "Tapa para medidor marcada ESPY de alta resistencia en polipropileno",
+        "Suministro de tapas",
+        "Suministro de cajas de medidores"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    },
+    {
+      "id": "caso_2_operacion_ptap_ptar",
+      "nombre": "Operación y mantenimiento de plantas de tratamiento de agua potable y residual",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "73131605",
+        "73151700",
+        "73131502",
+        "73152108",
+        "73181018"
+      ],
+      "codigos_esperados": [
+        "70171602",
+        "76121701",
+        "83101501",
+        "70171601"
+      ],
+      "encontrados": [],
+      "sobrantes": [
+        "73151700",
+        "73152108",
+        "73131605",
+        "73181018",
+        "73131502"
+      ],
+      "prohibidos_detectados": [
+        "73181018",
+        "73131605"
+      ],
+      "recall": 0.0,
+      "objeto_detectado": "Operación y mantenimiento de plantas de tratamiento de agua potable y residual de la ESPY",
+      "actividades_extraidas": [
+        "Operación técnica y dosificación de reactivos en PTAP",
+        "Control y análisis de calidad del agua tratada",
+        "Mantenimiento y desarenado de unidades en PTAR y tratamiento de aguas negras"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    },
+    {
+      "id": "caso_3_hipoclorito_ptap",
+      "nombre": "Suministro de hipoclorito para la planta de tratamiento",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "47121700",
+        "12141806",
+        "10215484",
+        "11101528",
+        "47101500"
+      ],
+      "codigos_esperados": [
+        "47101600",
+        "12141901",
+        "12352104"
+      ],
+      "encontrados": [],
+      "sobrantes": [
+        "47101500",
+        "12141806",
+        "11101528",
+        "10215484",
+        "47121700"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 0.0,
+      "objeto_detectado": "Suministro de hipoclorito de sodio y sustancias químicas para la potabilización en la planta de tratamiento de agua potable",
+      "actividades_extraidas": [
+        "Hipoclorito de sodio al 13% en canecas plásticas para desinfección de agua potable",
+        "Sulfato de aluminio para coagulación",
+        "Suministro de hipoclorito de sodio",
+        "Suministro de sustancias químicas para la potabilización en la planta de tratamiento de agua potable"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    },
+    {
+      "id": "caso_4_medidores_agua",
+      "nombre": "Suministro de medidores de agua",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "40141762",
+        "41112504",
+        "30181808",
+        "31401802",
+        "31201637"
+      ],
+      "codigos_esperados": [
+        "41112504",
+        "41112505"
+      ],
+      "encontrados": [
+        "41112504"
+      ],
+      "sobrantes": [
+        "40141762",
+        "31201637",
+        "31401802",
+        "30181808"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 0.5,
+      "objeto_detectado": "Suministro de micromedidores de agua potable para la reposición de acometidas domiciliarias de la ESPY",
+      "actividades_extraidas": [
+        "Medidores de agua potable domiciliarios de 1/2 pulgada chorro único con acoples de bronce",
+        "Válvulas de corte antifraude",
+        "Suministro de micromedidores de agua potable para la reposición de acometidas domiciliarias de la espy"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    },
+    {
+      "id": "caso_5_papeleria_oficina",
+      "nombre": "Suministro de papelería y útiles de oficina",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "43212105",
+        "44103103",
+        "60121104",
+        "60121531",
+        "44122000"
+      ],
+      "codigos_esperados": [
+        "44121700",
+        "14111519",
+        "14111500",
+        "44103103",
+        "44122000",
+        "44121500"
+      ],
+      "encontrados": [
+        "44122000",
+        "44103103"
+      ],
+      "sobrantes": [
+        "60121531",
+        "60121104",
+        "43212105"
+      ],
+      "prohibidos_detectados": [
+        "43212105"
+      ],
+      "recall": 0.3333333333333333,
+      "objeto_detectado": "Suministro de papelería, consumibles y útiles de oficina para las diferentes dependencias administrativas de la ESPY",
+      "actividades_extraidas": [
+        "Papel bond tamaño carta y oficio de 75 gr",
+        "Bolígrafos, lápices, resaltadores y borradores",
+        "Carpetas de archivo y archivadores AZ",
+        "Grapadoras y cosedoras metálicas"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    },
+    {
+      "id": "caso_6_asesoria_juridica",
+      "nombre": "Asesoría jurídica en contratación",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "80121605",
+        "80121502",
+        "80111701",
+        "84121700",
+        "84111802"
+      ],
+      "codigos_esperados": [
+        "77101706",
+        "80121704",
+        "80121600",
+        "80121500"
+      ],
+      "encontrados": [],
+      "sobrantes": [
+        "84121700",
+        "84111802",
+        "80121502",
+        "80121605",
+        "80111701"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 0.0,
+      "objeto_detectado": "Prestación de servicios profesionales de asesoría jurídica especializada en contratación estatal y derecho administrativo para la ESPY",
+      "actividades_extraidas": [
+        "Asesoría jurídica en estructuración de procesos contractuales y pliegos",
+        "Emisión de conceptos jurídicos en contratación y servicios públicos",
+        "Elaboración de actas de liquidación y seguimiento de minutas"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    },
+    {
+      "id": "caso_7_pasamanos_madera_plastica",
+      "nombre": "Instalación de pasamanos en madera plástica Represa El Sereno",
+      "top1_ok": true,
+      "codigos_obtenidos": [
+        "30102905",
+        "30265800",
+        "31161508",
+        "30102904",
+        "24112700",
+        "72152300",
+        "30191601"
+      ],
+      "codigos_esperados": [
+        "30265800",
+        "31161508",
+        "72152300",
+        "30102905",
+        "30191601"
+      ],
+      "encontrados": [
+        "30265800",
+        "31161508",
+        "72152300",
+        "30102905",
+        "30191601"
+      ],
+      "sobrantes": [
+        "24112700",
+        "30102904"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 1.0,
+      "objeto_detectado": "INSTALACION DE PASAMANOS EN MADERA PLASTICA A TODO COSTO PARA LOS SITIOS DE TRANSITO PEATONAL DE LA REPRESA EL SERENO DEL MUNICIPIO DE YOLOMBÓ",
+      "actividades_extraidas": [
+        "Parales estacón 8x8x115",
+        "Baretas 4x13x230",
+        "Tornillos 3/8x1/2x4",
+        "Parales 12x12x300",
+        "Estibas 50x70",
+        "Visita técnica",
+        "Mano de obra, días"
+      ],
+      "motor_usado": "clasico",
+      "uso_ia": true
+    }
+  ]
+}

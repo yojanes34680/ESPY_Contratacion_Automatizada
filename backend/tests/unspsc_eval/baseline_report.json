@@ -1,0 +1,147 @@
+{
+  "total_casos": 6,
+  "acierto_top1_pct": 16.666666666666664,
+  "recall_global_pct": 31.818181818181817,
+  "codigos_prohibidos_total": 3,
+  "detalles": [
+    {
+      "id": "caso_1_tapas_cajas_medidores",
+      "nombre": "Suministro de tapas y cajas de medidores",
+      "top1_ok": true,
+      "codigos_obtenidos": [
+        "40141762",
+        "24112409",
+        "30121605",
+        "31261500",
+        "41112504"
+      ],
+      "codigos_esperados": [
+        "40141762",
+        "41112505",
+        "30121605",
+        "41112504",
+        "24112409"
+      ],
+      "encontrados": [
+        "40141762",
+        "41112504",
+        "24112409",
+        "30121605"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 0.8
+    },
+    {
+      "id": "caso_2_operacion_ptap_ptar",
+      "nombre": "Operación y mantenimiento de plantas de tratamiento de agua potable y residual",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "73131605",
+        "73151700",
+        "73131502",
+        "73152108",
+        "73181018"
+      ],
+      "codigos_esperados": [
+        "70171601",
+        "83101501",
+        "76121701",
+        "70171602"
+      ],
+      "encontrados": [],
+      "prohibidos_detectados": [
+        "73131605",
+        "73181018"
+      ],
+      "recall": 0.0
+    },
+    {
+      "id": "caso_3_hipoclorito_ptap",
+      "nombre": "Suministro de hipoclorito para la planta de tratamiento",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "47121700",
+        "12141806",
+        "10215484",
+        "11101528",
+        "47101500"
+      ],
+      "codigos_esperados": [
+        "12141901",
+        "12352104",
+        "47101600"
+      ],
+      "encontrados": [],
+      "prohibidos_detectados": [],
+      "recall": 0.0
+    },
+    {
+      "id": "caso_4_medidores_agua",
+      "nombre": "Suministro de medidores de agua",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "40141762",
+        "41112504",
+        "30181808",
+        "31401803",
+        "40142207"
+      ],
+      "codigos_esperados": [
+        "41112505",
+        "41112504"
+      ],
+      "encontrados": [
+        "41112504"
+      ],
+      "prohibidos_detectados": [],
+      "recall": 0.5
+    },
+    {
+      "id": "caso_5_papeleria_oficina",
+      "nombre": "Suministro de papelería y útiles de oficina",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "43212105",
+        "44103103",
+        "60121104",
+        "60121531",
+        "44122000"
+      ],
+      "codigos_esperados": [
+        "14111500",
+        "44122000",
+        "44121500",
+        "44121700",
+        "44103103"
+      ],
+      "encontrados": [
+        "44103103",
+        "44122000"
+      ],
+      "prohibidos_detectados": [
+        "43212105"
+      ],
+      "recall": 0.4
+    },
+    {
+      "id": "caso_6_asesoria_juridica",
+      "nombre": "Asesoría jurídica en contratación",
+      "top1_ok": false,
+      "codigos_obtenidos": [
+        "80121605",
+        "80121502",
+        "80111701",
+        "85151504",
+        "84121700"
+      ],
+      "codigos_esperados": [
+        "80121600",
+        "80121500",
+        "80121704"
+      ],
+      "encontrados": [],
+      "prohibidos_detectados": [],
+      "recall": 0.0
+    }
+  ]
+}

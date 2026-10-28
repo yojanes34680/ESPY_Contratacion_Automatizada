@@ -1,0 +1,2574 @@
+/* ==========================================================================
+   ESPY - Sistema de Contratación Automatizada
+   Identidad y Arquitectura de Marca Oficial (Manual de Marca ESPY 2026)
+   Light Mode Institucional
+   ========================================================================== */
+
+/* 1. Tipografía Oficial: Poppins (Manual de Marca Página 36) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Manual de Marca Oficial ESPY 2026 - Paleta de Colores Oficial (Página 33) */
+    --espy-green: #009540;          /* Verde Principal: Compromiso ambiental, sostenibilidad */
+    --espy-green-hover: #007a34;
+    --espy-green-light: #7FB340;    /* Verde Lima: Frescura, acentos e indicadores */
+    --espy-blue-dark: #03008F;      /* Azul Institucional: Autoridad, respaldo, agua profunda */
+    --espy-blue: #1590D3;           /* Azul Agua: Transparencia, dinamismo y servicio */
+    --espy-blue-light: #55C6DE;     /* Celeste Agua: Claridad y agua cristalina */
+    --espy-white: #FFFFFF;          /* Blanco Puro */
+
+    /* Paleta Light Mode Institucional (Default) */
+    --bg-app: #f8fafc;              /* Slate 50 - Fondo principal limpio */
+    --bg-surface: #ffffff;          /* Blanco sólido para tarjetas */
+    --bg-surface-secondary: #f1f5f9;/* Slate 100 para fondos secundarios */
+    --text-primary: #03008F;        /* Azul oscuro institucional para títulos y cifras */
+    --text-body: #1e293b;           /* Slate 800 para texto principal */
+    --text-secondary: #334155;      /* Slate 700 para texto secundario */
+    --text-muted: #64748b;          /* Slate 500 para notas y fechas */
+    
+    /* Bordes y Sombras sutiles */
+    --border-subtle: #e2e8f0;       /* Slate 200 */
+    --border-card: #e2e8f0;
+    --border-focus: #1590D3;
+    --border-input: #cbd5e1;
+    --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    --shadow-card-hover: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+    --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    /* Variables de compatibilidad */
+    --primary: var(--espy-green);
+    --primary-dark: var(--espy-green-hover);
+    --primary-light: var(--espy-blue);
+    --secondary: var(--espy-blue-dark);
+    --card-bg: #ffffff;
+    --card-border: var(--border-subtle);
+    --accent-emerald: var(--espy-green);
+    --accent-amber: #009540;
+    --accent-indigo: var(--espy-blue);
+    --accent-rose: #dc2626;
+}
+
+/* Modo Oscuro (html.dark) */
+html.dark {
+    --bg-app: #070d19;              /* Azul oscuro profundo institucional */
+    --bg-surface: #0c1427;          /* Azul pizarra oscuro para tarjetas */
+    --bg-surface-secondary: #111c38;/* Superficie secundaria */
+    --text-primary: #55C6DE;        /* Celeste agua para títulos principales en dark */
+    --text-body: #e2e8f0;           /* Slate 200 para texto legible */
+    --text-secondary: #cbd5e1;      /* Slate 300 para texto secundario */
+    --text-muted: #94a3b8;          /* Slate 400 */
+    --border-subtle: #1e293b;       /* Borde oscuro */
+    --border-card: #1e293b;
+    --border-focus: #55C6DE;
+    --border-input: #334155;
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 8px 25px rgba(0, 0, 0, 0.6);
+    --card-bg: #0c1427;
+    --card-border: #1e293b;
+}
+
+/* Base Body con Tipografía Poppins Global */
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+}
+
+/* ==========================================================================
+   REGLAS GLOBALES DE ALTA VISIBILIDAD PARA MODO CLARO (html:not(.dark))
+   Asegura que absolutamente ninguna información sea invisible en modo claro
+   ========================================================================== */
+
+html:not(.dark) body {
+    background-color: #f8fafc !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) h1,
+html:not(.dark) h2,
+html:not(.dark) h3,
+html:not(.dark) h4,
+html:not(.dark) h5,
+html:not(.dark) h6,
+html:not(.dark) .font-heading {
+    color: #03008F !important;
+}
+
+/* En Modo Claro: Prevenir textos transparentes o invisibles por degradados */
+html:not(.dark) .bg-clip-text {
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    -webkit-text-fill-color: #03008F !important;
+    color: #03008F !important;
+}
+
+/* En Modo Claro: Convertir textos blancos y grises tenues residuales a tonos oscuros nítidos */
+html:not(.dark) .text-white:not(button):not(button *):not(.btn-primary):not(.btn-primary *):not(.gradient-btn):not(.gradient-btn *):not(.btn-secondary):not(.btn-secondary *):not([class*="bg-[#009540]"]):not([class*="bg-[#009540]"] *):not([class*="bg-[#1590D3]"]):not([class*="bg-[#1590D3]"] *):not([class*="bg-emerald-600"]):not([class*="bg-emerald-600"] *):not([class*="bg-blue-600"]):not([class*="bg-blue-600"] *):not([class*="bg-indigo-600"]):not([class*="bg-indigo-600"] *):not([class*="bg-rose-600"]):not([class*="bg-rose-600"] *):not(.badge-status):not(.badge-status *):not(.user-badge-admin):not(.user-badge-admin *) {
+    color: #1e293b !important;
+}
+
+html:not(.dark) .text-slate-100:not(button):not(button *),
+html:not(.dark) .text-slate-200:not(button):not(button *) {
+    color: #1e293b !important;
+}
+
+html:not(.dark) .text-slate-300:not(button):not(button *) {
+    color: #334155 !important;
+}
+
+html:not(.dark) .text-slate-400:not(button):not(button *) {
+    color: #475569 !important;
+}
+
+/* En Modo Claro: Mejorar contraste de colores neón o pastel en textos y datos */
+html:not(.dark) [class*="text-[#55C6DE]"]:not(button):not(button *):not(.btn-primary):not(.btn-primary *),
+html:not(.dark) [class*="text-[#00d2ff]"]:not(button):not(button *):not(.btn-primary):not(.btn-primary *) {
+    color: #03008F !important;
+}
+
+html:not(.dark) [class*="text-sky-300"]:not(button):not(button *),
+html:not(.dark) [class*="text-sky-400"]:not(button):not(button *) {
+    color: #1590D3 !important;
+}
+
+html:not(.dark) [class*="text-emerald-300"]:not(button):not(button *),
+html:not(.dark) [class*="text-teal-300"]:not(button):not(button *),
+html:not(.dark) [class*="text-teal-400"]:not(button):not(button *) {
+    color: #009540 !important;
+}
+
+html:not(.dark) [class*="text-amber-300"]:not(button):not(button *),
+html:not(.dark) [class*="text-amber-400"]:not(button):not(button *) {
+    color: #b45309 !important;
+}
+
+html:not(.dark) [class*="text-purple-300"]:not(button):not(button *) {
+    color: #6b21a8 !important;
+}
+
+/* En Modo Claro: Convertir todas las tarjetas, paneles y cajas de fondo oscuro a blanco nítido */
+html:not(.dark) .glass-card,
+html:not(.dark) .glass-panel,
+html:not(.dark) .execution-glow-card,
+html:not(.dark) .timeline-card,
+html:not(.dark) .timeline-card-v2,
+html:not(.dark) .kpi-card-interactive,
+html:not(.dark) .access-gateway-card,
+html:not(.dark) [class*="bg-slate-900"]:not(button):not(button *):not(.btn-primary):not(.gradient-btn):not(#timeline-drawer-backdrop):not(#mobile-drawer-overlay):not([id*="backdrop"]):not([class*="backdrop"]),
+html:not(.dark) [class*="bg-slate-950"]:not(button):not(button *):not(.btn-primary):not(.gradient-btn):not(#timeline-drawer-backdrop):not(#mobile-drawer-overlay):not([id*="backdrop"]):not([class*="backdrop"]),
+html:not(.dark) [class*="bg-slate-800"]:not(button):not(button *):not(.btn-primary):not(.gradient-btn):not(#timeline-drawer-backdrop):not(#mobile-drawer-overlay):not([id*="backdrop"]):not([class*="backdrop"]),
+html:not(.dark) [class*="bg-slate-850"]:not(button):not(button *):not(.btn-primary):not(.gradient-btn):not(#timeline-drawer-backdrop):not(#mobile-drawer-overlay):not([id*="backdrop"]):not([class*="backdrop"]),
+html:not(.dark) [class*="bg-[#061129]"],
+html:not(.dark) [class*="bg-[#05102a]"],
+html:not(.dark) [class*="bg-[#030712]"],
+html:not(.dark) [class*="bg-[#070d19]"],
+html:not(.dark) [class*="bg-[#0c1427]"] {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+/* En Modo Claro: Paneles modales, drawers y popups con fondo blanco limpio */
+html:not(.dark) #timeline-side-drawer,
+html:not(.dark) #mobile-drawer,
+html:not(.dark) [id*="modal"] > div > div,
+html:not(.dark) [id*="drawer"],
+html:not(.dark) .modal-content {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) #timeline-side-drawer > div:first-child,
+html:not(.dark) #timeline-side-drawer > div:last-child,
+html:not(.dark) [id*="modal"] header,
+html:not(.dark) [id*="modal"] > div > div > div:first-child,
+html:not(.dark) [id*="modal"] > div > div > div:last-child,
+html:not(.dark) [id*="drawer"] header,
+html:not(.dark) [id*="drawer"] footer {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #03008F !important;
+}
+
+html:not(.dark) #timeline-side-drawer > div:nth-child(2) {
+    background-color: #f8fafc !important;
+}
+
+/* En Modo Claro: Paneles internos del drawer y modales con fondos blancos y textos oscuros */
+html:not(.dark) #timeline-side-drawer div[class*="rounded-xl"]:not([class*="kpi-"]):not([class*="card-"]),
+html:not(.dark) [id*="modal"] div[class*="rounded-xl"]:not([class*="mpd-kpi-"]):not([class*="mcp-card-"]):not([class*="mcd-card-"]):not(#mpd-estampillas-highlight-box):not(.mpd-stamp-chip) {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+/* Textos oscuros garantizados en el drawer para Modo Claro */
+html:not(.dark) #drawer-contract-code {
+    color: #03008F !important;
+}
+
+html:not(.dark) #drawer-contractor-name {
+    color: #03008F !important;
+}
+
+html:not(.dark) #drawer-contractor-doc {
+    color: #475569 !important;
+}
+
+html:not(.dark) #drawer-objeto {
+    color: #1e293b !important;
+}
+
+html:not(.dark) #drawer-valor-total {
+    color: #009540 !important;
+}
+
+html:not(.dark) #drawer-finances-breakdown {
+    color: #334155 !important;
+}
+
+html:not(.dark) #drawer-plazo {
+    color: #1590D3 !important;
+}
+
+html:not(.dark) #drawer-fecha-suscripcion,
+html:not(.dark) #drawer-fecha-inicio,
+html:not(.dark) #drawer-fecha-terminacion {
+    color: #1e293b !important;
+}
+
+html:not(.dark) #drawer-supervisor-name {
+    color: #03008F !important;
+}
+
+html:not(.dark) #drawer-supervisor-role {
+    color: #475569 !important;
+}
+
+/* Cintillo de métricas de la línea de tiempo en Modo Claro */
+html:not(.dark) #timeline-kpi-banner > div {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) #timeline-kpi-total {
+    color: #009540 !important;
+}
+
+html:not(.dark) #timeline-kpi-predominante {
+    color: #03008F !important;
+}
+
+html:not(.dark) #timeline-kpi-reciente {
+    color: #03008F !important;
+}
+
+html:not(.dark) [id$="-modal"] label,
+html:not(.dark) [id^="modal-"] label,
+html:not(.dark) [id*="modal"] label {
+    color: #334155 !important;
+}
+
+/* Bordes en Modo Claro */
+html:not(.dark) [class*="border-slate-800"],
+html:not(.dark) [class*="border-slate-700"],
+html:not(.dark) [class*="border-slate-900"] {
+    border-color: #e2e8f0 !important;
+}
+
+/* En Modo Claro: Badges, tags y etiquetas de estado con fondos oscuros convertidos a pasteles nítidos con texto oscuro */
+html:not(.dark) [class*="bg-emerald-950"],
+html:not(.dark) [class*="bg-emerald-900"],
+html:not(.dark) [class*="bg-teal-950"],
+html:not(.dark) [class*="bg-teal-900"] {
+    background-color: rgba(0, 149, 64, 0.12) !important;
+    border-color: rgba(0, 149, 64, 0.3) !important;
+    color: #009540 !important;
+}
+
+html:not(.dark) [class*="bg-sky-950"],
+html:not(.dark) [class*="bg-sky-900"],
+html:not(.dark) [class*="bg-blue-950"],
+html:not(.dark) [class*="bg-blue-900"] {
+    background-color: rgba(21, 144, 211, 0.12) !important;
+    border-color: rgba(21, 144, 211, 0.3) !important;
+    color: #03008F !important;
+}
+
+html:not(.dark) [class*="bg-amber-950"],
+html:not(.dark) [class*="bg-amber-900"],
+html:not(.dark) [class*="bg-yellow-950"] {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    color: #b45309 !important;
+}
+
+html:not(.dark) [class*="bg-purple-950"],
+html:not(.dark) [class*="bg-purple-900"],
+html:not(.dark) [class*="bg-violet-950"],
+html:not(.dark) [class*="bg-indigo-950"] {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+    border-color: rgba(168, 85, 247, 0.35) !important;
+    color: #6b21a8 !important;
+}
+
+html:not(.dark) [class*="bg-rose-950"],
+html:not(.dark) [class*="bg-rose-900"],
+html:not(.dark) [class*="bg-red-950"] {
+    background-color: rgba(244, 63, 94, 0.15) !important;
+    border-color: rgba(244, 63, 94, 0.35) !important;
+    color: #be123c !important;
+}
+
+/* En Modo Claro: Botones secundarios con bordes limpios */
+html:not(.dark) button[class*="bg-slate-900"],
+html:not(.dark) button[class*="bg-slate-800"],
+html:not(.dark) button[class*="bg-slate-950"] {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+html:not(.dark) button[class*="bg-slate-900"]:hover,
+html:not(.dark) button[class*="bg-slate-800"]:hover,
+html:not(.dark) button[class*="bg-slate-950"]:hover {
+    background-color: #f1f5f9 !important;
+    color: #03008F !important;
+    border-color: #1590D3 !important;
+}
+
+/* En Modo Claro: Tablas de todas las pestañas (Contratos, Ejecución, etc.) */
+html:not(.dark) table {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) table thead,
+html:not(.dark) table thead tr,
+html:not(.dark) table thead th {
+    background-color: #f1f5f9 !important;
+    color: #03008F !important;
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) table thead th.sticky {
+    background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) table tbody tr {
+    border-color: #e2e8f0 !important;
+    background-color: #ffffff !important;
+}
+
+html:not(.dark) table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+html:not(.dark) table tbody td {
+    color: #1e293b !important;
+}
+
+html:not(.dark) table tbody td.sticky,
+html:not(.dark) [class*="bg-[#05102a]"] {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) table tbody tr:hover td.sticky {
+    background-color: #f8fafc !important;
+}
+
+/* En Modo Claro: Inputs, Selects y Formularios */
+html:not(.dark) input:not([type="checkbox"]):not([type="radio"]),
+html:not(.dark) select,
+html:not(.dark) textarea {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) select option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* En Modo Claro: Cifras y KPIs */
+html:not(.dark) #exec-kpi-total-contracted,
+html:not(.dark) #exec-kpi-total-orders,
+html:not(.dark) #exec-kpi-net-paid,
+html:not(.dark) #exec-kpi-total-withholdings,
+html:not(.dark) #exec-kpi-total-pending,
+html:not(.dark) #exec-kpi-advance-balance,
+html:not(.dark) #contracts-count-badge,
+html:not(.dark) #total-contracts-count,
+html:not(.dark) #active-contractors-count {
+    color: #03008F !important;
+}
+
+/* ==========================================================================
+   REGLAS PARA MODO OSCURO (html.dark)
+   Garantiza contraste óptimo y legibilidad completa sobre fondos oscuros
+   ========================================================================== */
+html.dark body {
+    background-color: #070d19 !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark header {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark #desktop-nav {
+    background-color: #070d19 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark .nav-link {
+    color: #94a3b8 !important;
+}
+
+html.dark .nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(21, 144, 211, 0.15) !important;
+    border-color: rgba(21, 144, 211, 0.3) !important;
+}
+
+html.dark .nav-link-active {
+    background: rgba(21, 144, 211, 0.22) !important;
+    color: #55C6DE !important;
+    border-color: rgba(21, 144, 211, 0.45) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark .glass-card,
+html.dark .glass-panel,
+html.dark .execution-glow-card,
+html.dark .timeline-card,
+html.dark .timeline-card-v2,
+html.dark .kpi-card-interactive,
+html.dark #timeline-side-drawer,
+html.dark #mobile-drawer,
+html.dark [id$="-modal"] > div:not(.fixed),
+html.dark [id^="modal-"] > div:not(.fixed),
+html.dark [id*="modal"] .glass-card,
+html.dark [id*="modal"] .glass-panel,
+html.dark [id*="modal"] .modal-content {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Backdrops semitransparentes en modo oscuro para todas las ventanas y modales */
+html.dark [id$="-modal"],
+html.dark [id^="modal-"],
+html.dark #timeline-drawer-backdrop,
+html.dark #mobile-drawer-overlay,
+html.dark .modal-backdrop {
+    background-color: rgba(7, 13, 25, 0.82) !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark .font-heading {
+    color: #ffffff !important;
+}
+
+/* En Modo Oscuro: Textos azul oscuro institucional deben volverse celestes o blancos legibles */
+html.dark [class*="text-[#03008F]"] {
+    color: #55C6DE !important;
+}
+
+html.dark [class*="text-[#009540]"] {
+    color: #7FB340 !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+    color: #ffffff !important;
+}
+
+html.dark .text-slate-700 {
+    color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-600 {
+    color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+html.dark table {
+    background-color: #0c1427 !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark table thead,
+html.dark table thead tr,
+html.dark table thead th {
+    background-color: #070d19 !important;
+    color: #94a3b8 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark table thead th.sticky {
+    background-color: #070d19 !important;
+}
+
+html.dark table tbody tr {
+    border-color: #1e293b !important;
+    background-color: #0c1427 !important;
+}
+
+html.dark table tbody tr:hover {
+    background-color: #111c38 !important;
+}
+
+html.dark table tbody td {
+    color: #cbd5e1 !important;
+}
+
+html.dark table tbody td.sticky,
+html.dark [class*="bg-[#05102a]"] {
+    background-color: #0c1427 !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark table tbody tr:hover td.sticky {
+    background-color: #111c38 !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+    background-color: #070d19 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+html.dark select option {
+    background-color: #0c1427 !important;
+    color: #f8fafc !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* ==========================================================================
+   REGLAS ESPECÍFICAS PARA EL PANEL LATERAL DE TIEMPO (DRAWER) Y TODAS LAS VENTANAS
+   ========================================================================== */
+html.dark #timeline-side-drawer {
+    background-color: #0c1427 !important;
+    border-left-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark #timeline-side-drawer > div:first-child,
+html.dark #timeline-side-drawer > div:last-child {
+    background-color: #070d19 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark #timeline-side-drawer > div:nth-child(2) {
+    background-color: #070d19 !important;
+}
+
+/* En Modo Oscuro: Convertir todas las tarjetas y sub-paneles internos a fondo oscuro */
+html.dark #timeline-side-drawer div[class*="rounded"],
+html.dark #mobile-drawer div[class*="rounded"],
+html.dark [id*="modal"] div[class*="rounded"],
+html.dark [id*="drawer"] div[class*="rounded"],
+html.dark [id*="modal"] form,
+html.dark [id*="drawer"] form {
+    background-color: #0c1427;
+    border-color: #1e293b !important;
+    color: #e2e8f0;
+}
+
+/* Forzar que cualquier elemento con fondo claro residual dentro de ventanas sea oscuro */
+html.dark [class*="bg-white"]:not(button):not(.btn-primary):not(.gradient-btn):not(.user-badge-admin),
+html.dark [class*="bg-[#f8fafc]"],
+html.dark [class*="bg-slate-50"]:not(button):not(button *),
+html.dark [class*="bg-slate-100"]:not(button):not(button *),
+html.dark [class*="bg-gray-50"]:not(button):not(button *),
+html.dark [class*="bg-gray-100"]:not(button):not(button *) {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+/* Fondos semitransparentes o pasteles claros adaptados en modo oscuro */
+html.dark [class*="bg-sky-50"],
+html.dark [class*="bg-blue-50"],
+html.dark [class*="bg-cyan-50"] {
+    background-color: rgba(21, 144, 211, 0.15) !important;
+    border-color: rgba(21, 144, 211, 0.35) !important;
+    color: #55C6DE !important;
+}
+
+html.dark [class*="bg-emerald-50"],
+html.dark [class*="bg-green-50"] {
+    background-color: rgba(0, 149, 64, 0.18) !important;
+    border-color: rgba(0, 149, 64, 0.35) !important;
+    color: #7FB340 !important;
+}
+
+html.dark [class*="bg-lime-50"] {
+    background-color: rgba(127, 179, 64, 0.18) !important;
+    border-color: rgba(127, 179, 64, 0.35) !important;
+    color: #a3e635 !important;
+}
+
+html.dark [class*="bg-amber-50"],
+html.dark [class*="bg-yellow-50"] {
+    background-color: rgba(245, 158, 11, 0.18) !important;
+    border-color: rgba(245, 158, 11, 0.35) !important;
+    color: #fbbf24 !important;
+}
+
+html.dark [class*="bg-purple-50"],
+html.dark [class*="bg-indigo-50"],
+html.dark [class*="bg-violet-50"] {
+    background-color: rgba(168, 85, 247, 0.18) !important;
+    border-color: rgba(168, 85, 247, 0.35) !important;
+    color: #c084fc !important;
+}
+
+/* Textos oscuros en Light Mode que deben ser 100% claros en Dark Mode dentro del drawer */
+html.dark #timeline-side-drawer #drawer-contract-code {
+    color: #ffffff !important;
+}
+
+html.dark #timeline-side-drawer #drawer-contractor-name {
+    color: #ffffff !important;
+}
+
+html.dark #timeline-side-drawer #drawer-contractor-doc {
+    color: #94a3b8 !important;
+}
+
+html.dark #timeline-side-drawer #drawer-objeto,
+html.dark #drawer-objeto {
+    color: #e2e8f0 !important;
+}
+
+html.dark #timeline-side-drawer #drawer-valor-total {
+    color: #7FB340 !important;
+}
+
+html.dark #timeline-side-drawer #drawer-finances-breakdown {
+    color: #cbd5e1 !important;
+}
+
+html.dark #timeline-side-drawer #drawer-plazo {
+    color: #55C6DE !important;
+}
+
+html.dark #timeline-side-drawer #drawer-fecha-suscripcion,
+html.dark #timeline-side-drawer #drawer-fecha-inicio,
+html.dark #timeline-side-drawer #drawer-fecha-terminacion {
+    color: #f8fafc !important;
+}
+
+html.dark #timeline-side-drawer #drawer-supervisor-name {
+    color: #ffffff !important;
+}
+
+html.dark #timeline-side-drawer #drawer-supervisor-role {
+    color: #94a3b8 !important;
+}
+
+/* Botones secundarios en Dark Mode dentro de ventanas */
+html.dark #timeline-side-drawer button:not(#drawer-btn-expediente),
+html.dark [id*="modal"] button.bg-slate-100,
+html.dark [id*="modal"] button.bg-white,
+html.dark [id*="drawer"] button.bg-slate-100,
+html.dark [id*="drawer"] button.bg-white {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+html.dark #timeline-side-drawer button:not(#drawer-btn-expediente):hover,
+html.dark [id*="modal"] button.bg-slate-100:hover,
+html.dark [id*="modal"] button.bg-white:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+}
+
+/* Cintillo de métricas de la línea de tiempo en Dark Mode */
+html.dark #timeline-kpi-banner > div,
+html.dark .timeline-filter-chip {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark #timeline-kpi-total {
+    color: #7FB340 !important;
+}
+
+html.dark #timeline-kpi-predominante {
+    color: #55C6DE !important;
+}
+
+html.dark #timeline-kpi-reciente {
+    color: #ffffff !important;
+}
+
+/* Badges oficiales de tipologías en Modo Oscuro */
+html.dark .badge-prestacion_servicios,
+html.dark .badge-prestacion-servicios,
+html.dark .badge-prestacion_de_servicios,
+html.dark .badge-servicios {
+    background-color: rgba(21, 144, 211, 0.2) !important;
+    color: #55C6DE !important;
+    border-color: rgba(85, 198, 222, 0.4) !important;
+}
+
+html.dark .badge-suministro {
+    background-color: rgba(0, 149, 64, 0.22) !important;
+    color: #7FB340 !important;
+    border-color: rgba(127, 179, 64, 0.4) !important;
+}
+
+html.dark .badge-obra {
+    background-color: rgba(127, 179, 64, 0.2) !important;
+    color: #a3e635 !important;
+    border-color: rgba(163, 230, 53, 0.4) !important;
+}
+
+html.dark .badge-arrendamiento,
+html.dark .badge-arriendo {
+    background-color: rgba(85, 198, 222, 0.2) !important;
+    color: #55C6DE !important;
+    border-color: rgba(85, 198, 222, 0.4) !important;
+}
+
+html.dark .badge-consultoria {
+    background-color: rgba(21, 144, 211, 0.2) !important;
+    color: #55C6DE !important;
+    border-color: rgba(85, 198, 222, 0.4) !important;
+}
+
+html.dark .badge-interventoria {
+    background-color: rgba(0, 149, 64, 0.22) !important;
+    color: #7FB340 !important;
+    border-color: rgba(127, 179, 64, 0.4) !important;
+}
+
+/* Widgets e interacción en Modo Oscuro */
+html.dark .contractor-dropdown-item {
+    background-color: #0c1427 !important;
+    color: #f8fafc !important;
+    border-bottom-color: #1e293b !important;
+}
+
+html.dark .contractor-dropdown-item:hover,
+html.dark .contractor-dropdown-item:active {
+    background-color: #111c38 !important;
+    color: #55C6DE !important;
+}
+
+html.dark .chart-tooltip {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
+}
+
+html.dark .table-scroll-hint {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+html.dark #mobile-bottom-bar {
+    background-color: #0c1427 !important;
+    border-top-color: #1e293b !important;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.dark .bottom-bar-btn {
+    color: #94a3b8 !important;
+}
+
+html.dark .bottom-bar-btn.bottom-bar-active {
+    color: #55C6DE !important;
+    background: rgba(21, 144, 211, 0.18) !important;
+    border-color: rgba(21, 144, 211, 0.35) !important;
+}
+
+html.dark .mobile-nav-link {
+    color: #94a3b8 !important;
+}
+
+html.dark .mobile-nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(21, 144, 211, 0.15) !important;
+}
+
+html.dark .mobile-nav-link.mobile-nav-active {
+    background: rgba(21, 144, 211, 0.22) !important;
+    color: #55C6DE !important;
+    border-color: rgba(21, 144, 211, 0.4) !important;
+}
+
+html.dark .mobile-nav-link .mobile-nav-icon {
+    background-color: #070d19 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark .dropzone {
+    background-color: #070d19 !important;
+    border-color: #334155 !important;
+}
+
+html.dark .dropzone:hover {
+    border-color: #55C6DE !important;
+}
+
+html.dark .access-gateway-card {
+    background-color: #0c1427 !important;
+    border-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+html.dark .login-role-card {
+    background-color: #070d19 !important;
+    border-color: #1e293b !important;
+}
+
+html.dark .login-role-card:hover {
+    background-color: #111c38 !important;
+    border-color: #334155 !important;
+}
+
+/* Scrollbars en Modo Oscuro */
+html.dark ::-webkit-scrollbar-track,
+html.dark .timeline-scroll-track::-webkit-scrollbar-track,
+html.dark .overflow-x-auto::-webkit-scrollbar-track {
+    background: #070d19 !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+html.dark .timeline-scroll-track::-webkit-scrollbar-thumb,
+html.dark .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #1e293b !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover,
+html.dark .timeline-scroll-track::-webkit-scrollbar-thumb:hover,
+html.dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #334155 !important;
+}
+
+/* Botones Oficiales ESPY */
+.btn-primary, .gradient-btn {
+    background-color: var(--espy-green) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 149, 64, 0.2);
+    border: none;
+}
+
+.btn-primary:hover, .gradient-btn:hover {
+    background-color: var(--espy-green-hover) !important;
+    box-shadow: 0 4px 8px rgba(0, 149, 64, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: var(--espy-blue) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    border-radius: 0.75rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(21, 144, 211, 0.2);
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #1178b0 !important;
+    box-shadow: 0 4px 8px rgba(21, 144, 211, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Navigation Links con estilo activo institucional */
+.nav-link {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid transparent;
+    color: #475569;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #03008F;
+    background: rgba(21, 144, 211, 0.08);
+    border-color: rgba(21, 144, 211, 0.15);
+}
+
+.nav-link-active {
+    background: rgba(3, 0, 143, 0.08) !important;
+    color: #03008F !important;
+    border: 1px solid rgba(3, 0, 143, 0.25) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    font-weight: 600 !important;
+}
+
+/* ==========================================================================
+   Badges y Etiquetas de Tipologías Contractuales (Paleta Oficial 2026)
+   Opacidades 10%-15% en fondo y color sólido en texto
+   ========================================================================== */
+
+/* 1. PRESTACIÓN DE SERVICIOS (Azul Agua #1590D3) */
+.badge-prestacion_servicios,
+.badge-prestacion-servicios,
+.badge-prestacion_de_servicios,
+.badge-servicios {
+    background-color: rgba(21, 144, 211, 0.12);
+    color: #1590D3;
+    border: 1px solid rgba(21, 144, 211, 0.30);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+}
+
+/* 2. SUMINISTRO (Verde Oficial #009540) */
+.badge-suministro {
+    background-color: rgba(0, 149, 64, 0.12);
+    color: #009540;
+    border: 1px solid rgba(0, 149, 64, 0.30);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+}
+
+/* 3. OBRA E INFRAESTRUCTURA (Verde Lima #7FB340) */
+.badge-obra {
+    background-color: rgba(127, 179, 64, 0.15);
+    color: #5c8526;
+    border: 1px solid rgba(127, 179, 64, 0.35);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+}
+
+/* 4. ARRENDAMIENTO / INMUEBLES (Celeste Agua #55C6DE) */
+.badge-arrendamiento,
+.badge-arriendo {
+    background-color: rgba(85, 198, 222, 0.18);
+    color: #0f7694;
+    border: 1px solid rgba(85, 198, 222, 0.40);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+}
+
+/* 5. CONSULTORÍA (Azul Institucional #03008F) */
+.badge-consultoria {
+    background-color: rgba(3, 0, 143, 0.08);
+    color: #03008F;
+    border: 1px solid rgba(3, 0, 143, 0.22);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+}
+
+/* 6. INTERVENTORÍA (Verde Oficial #009540) */
+.badge-interventoria {
+    background-color: rgba(0, 149, 64, 0.10);
+    color: #009540;
+    border: 1px solid rgba(0, 149, 64, 0.25);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 0.5rem;
+}
+
+.badge-status {
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    font-size: 0.725rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* Dropzone styling institucional */
+.dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 1rem;
+    background: #f8fafc;
+    transition: all 0.25s ease;
+}
+
+.dropzone:hover, .dropzone.dragover {
+    border-color: #009540;
+    background: rgba(0, 149, 64, 0.05);
+}
+
+/* Tablas Institucionales (Light Mode) */
+table thead th {
+    background: #f8fafc;
+    color: #03008F;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s ease;
+}
+
+table tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+/* Campos de formulario */
+input, select, textarea {
+    font-family: 'Poppins', sans-serif;
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #1590D3 !important;
+    box-shadow: 0 0 0 3px rgba(21, 144, 211, 0.15) !important;
+    outline: none !important;
+}
+
+html:not(.dark) select {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) select option {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    padding: 8px 12px;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ==========================================================================
+   Módulo de Ejecución Contractual y Finanzas
+   ========================================================================== */
+.execution-glow-card {
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.execution-glow-card:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: var(--shadow-card-hover);
+}
+
+.execution-glow-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #009540, #1590D3, #55C6DE);
+    opacity: 0.9;
+}
+
+.progress-track {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+html.dark .progress-track {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.progress-fill-gradient {
+    background: linear-gradient(90deg, #009540 0%, #1590D3 100%);
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.contractor-pill {
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+}
+
+.contractor-pill:hover, .contractor-pill.active {
+    background: rgba(21, 144, 211, 0.12);
+    border-color: #1590D3;
+    color: #03008F;
+    transform: translateY(-1px);
+}
+
+html.dark .contractor-pill {
+    border-color: #334155;
+    background: #1e293b;
+    color: #cbd5e1;
+}
+
+html.dark .contractor-pill:hover, html.dark .contractor-pill.active {
+    background: rgba(21, 144, 211, 0.25);
+    border-color: #55C6DE;
+    color: #ffffff;
+}
+
+.voucher-badge {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+
+html:not(.dark) .voucher-badge {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #03008F !important;
+}
+
+/* Donut Charts & Interactive Analytics */
+.donut-slice {
+    cursor: pointer;
+    transition: stroke-width 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s ease, opacity 0.2s ease;
+}
+
+.donut-slice:hover {
+    stroke-width: 6.2 !important;
+    opacity: 1 !important;
+}
+
+.donut-container {
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.06));
+}
+
+html:not(.dark) .donut-ring-base {
+    stroke: #e2e8f0 !important;
+}
+
+html.dark .donut-ring-base {
+    stroke: #1e293b !important;
+}
+
+html:not(.dark) .donut-text-main {
+    fill: #03008F !important;
+}
+
+html.dark .donut-text-main {
+    fill: #ffffff !important;
+}
+
+html:not(.dark) .donut-text-sub {
+    fill: #475569 !important;
+}
+
+html.dark .donut-text-sub {
+    fill: #94a3b8 !important;
+}
+
+.visual-stacked-bar {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+html.dark .visual-stacked-bar {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+.visual-stacked-segment {
+    transition: width 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+
+/* =========================================================
+   TIMELINE CONTRACTUAL (DASHBOARD)
+   ========================================================= */
+.timeline-card, .timeline-card-v2 {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.timeline-card:hover, .timeline-card-v2:hover {
+    transform: translateY(-2px);
+    border-color: #cbd5e1;
+    box-shadow: var(--shadow-card-hover);
+}
+
+.timeline-card-v2.timeline-active-card {
+    border-color: #1590D3 !important;
+    background: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(21, 144, 211, 0.18) !important;
+    transform: translateY(-2px);
+}
+
+html.dark .timeline-card-v2.timeline-active-card {
+    border-color: #55C6DE !important;
+    background: #111c38 !important;
+    box-shadow: 0 4px 20px rgba(85, 198, 222, 0.28) !important;
+    transform: translateY(-2px);
+}
+
+.timeline-node-active {
+    outline: 3px solid #1590D3 !important;
+    box-shadow: 0 0 10px rgba(21, 144, 211, 0.3) !important;
+    transform: scale(1.15) !important;
+    z-index: 30 !important;
+}
+
+html.dark .timeline-node-active {
+    outline: 3px solid #55C6DE !important;
+    box-shadow: 0 0 14px rgba(85, 198, 222, 0.45) !important;
+    transform: scale(1.15) !important;
+    z-index: 30 !important;
+}
+
+.timeline-item-dimmed {
+    opacity: 0.35 !important;
+    filter: grayscale(80%) !important;
+    transform: scale(0.98) !important;
+    pointer-events: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.timeline-scroll-track {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 #0f172a;
+}
+
+.timeline-scroll-track::-webkit-scrollbar {
+    height: 6px !important;
+    width: 6px !important;
+}
+
+.timeline-scroll-track::-webkit-scrollbar-track {
+    background: #0f172a !important;
+    border-radius: 9999px;
+}
+
+.timeline-scroll-track::-webkit-scrollbar-thumb {
+    background: #334155 !important;
+    border-radius: 9999px;
+    border: 1px solid #1e293b !important;
+}
+
+.timeline-scroll-track::-webkit-scrollbar-thumb:hover {
+    background: #475569 !important;
+}
+
+.kpi-card-interactive {
+    cursor: pointer;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.kpi-card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: #1590D3 !important;
+    box-shadow: var(--shadow-card-hover) !important;
+}
+
+/* Tooltip interactivo para gráficos SVG */
+.chart-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    color: #1e293b;
+    z-index: 100;
+    white-space: nowrap;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* =========================================================
+   SISTEMA DE AUTENTICACIÓN Y ROLES (ADMIN / INVITADO)
+   ========================================================= */
+
+/* Ocultamiento estricto para usuarios Invitados */
+body.role-invitado [data-admin-only="true"],
+body.role-invitado .admin-only,
+body.role-invitado #dashboard-action-panel,
+body.role-invitado #contracts-action-panel,
+body.role-invitado #execution-action-panel,
+body.role-invitado button[onclick*="openNewVigenciaModal"],
+body.role-invitado button[onclick*="openContractAdditionModal"],
+body.role-invitado button[onclick*="openImportPaymentsModal"],
+body.role-invitado button[onclick*="openNewPaymentModal"],
+body.role-invitado button[onclick*="handleDeleteContract"],
+body.role-invitado button[onclick*="confirmDeletePayment"],
+body.role-invitado button[onclick*="syncContractExcel"],
+body.role-invitado button[onclick*="saveContractStatusChange"],
+body.role-invitado button[onclick*="saveContractAdditionQuick"],
+body.role-invitado button[onclick*="handleCreateGuestSubmit"],
+body.role-invitado #btn-manage-users,
+body.role-invitado #nav-users,
+body.role-invitado #nav-contractors,
+body.role-invitado #nav-wizard,
+body.role-invitado #nav-excel,
+body.role-invitado #nav-templates,
+body.role-invitado #nav-settings,
+body.role-invitado #nav-reports,
+body.role-invitado #mobnav-reports,
+body.role-invitado #bnav-reports,
+body.role-invitado button[onclick*="switchTab('reports')"],
+body.role-invitado #tab-reports,
+body.role-invitado #btn-modal-create-addition,
+body.role-invitado #btn-modal-sync-excel,
+body.role-invitado #btn-modal-delete-excel,
+body.role-invitado #btn-modal-delete-contract {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+.guest-only {
+    display: none !important;
+}
+body.role-invitado .guest-only {
+    display: flex !important;
+}
+
+body.role-invitado input:not([type="search"]):not([id="contracts-search"]):not([id="exec-contractors-search"]):not([id="exec-contracts-search"]):not([id="exec-payments-search"]):not([id="login-documento"]):not([id="login-password"]),
+body.role-invitado textarea,
+body.role-invitado select:not([id="global-vigencia-select"]):not([id="filter-tipologia"]):not([id="filter-estado"]):not([id="filter-rubro"]) {
+    pointer-events: none !important;
+    opacity: 0.65 !important;
+    background-color: #f1f5f9 !important;
+    cursor: not-allowed !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Panel Individual de Acceso (Login Gateway) */
+#panel-acceso-independiente {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background-color: #f8fafc;
+    position: relative;
+    z-index: 100;
+}
+
+.access-gateway-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    border-radius: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    z-index: 2;
+    animation: gatewayAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes gatewayAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.97) translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.login-role-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.login-role-card:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+}
+
+/* Badges de Usuario en Navbar */
+.user-badge-admin {
+    background: rgba(0, 149, 64, 0.12);
+    border: 1px solid rgba(0, 149, 64, 0.3);
+    color: #009540;
+}
+
+.user-badge-guest {
+    background: rgba(21, 144, 211, 0.12);
+    border: 1px solid rgba(21, 144, 211, 0.3);
+    color: #1590D3;
+}
+
+#guest-notice-banner {
+    background: #f0fdf4;
+    border-bottom: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+#panel-aplicacion-principal {
+    width: 100%;
+}
+
+/* ==========================================================================
+   ARQUITECTURA RESPONSIVE: MÓVIL, TABLET Y ESCRITORIO (ESPY 2026)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+.contractor-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-bottom: 1px solid #f1f5f9;
+    min-height: 46px;
+    background: #ffffff;
+    color: #1e293b;
+}
+
+.contractor-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.contractor-dropdown-item:hover,
+.contractor-dropdown-item:active {
+    background: rgba(21, 144, 211, 0.08);
+}
+
+.overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.table-scroll-hint {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.4rem 0.85rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 1023px) {
+    .table-scroll-hint {
+        display: flex;
+    }
+}
+
+/* Menú Desplegable Lateral Móvil (Off-Canvas Drawer) */
+#mobile-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#mobile-drawer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#mobile-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 88vw;
+    max-width: 340px;
+    background: #ffffff;
+    border-left: 1px solid #e2e8f0;
+    box-shadow: -10px 0 25px rgba(0, 0, 0, 0.08);
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#mobile-drawer.open {
+    transform: translateX(0);
+}
+
+.mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.85rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    min-height: 48px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.mobile-nav-link:hover, .mobile-nav-link:active {
+    background: rgba(21, 144, 211, 0.08);
+    border-color: rgba(21, 144, 211, 0.15);
+    color: #03008F;
+}
+
+.mobile-nav-link.mobile-nav-active {
+    background: rgba(3, 0, 143, 0.08) !important;
+    color: #03008F !important;
+    border: 1px solid rgba(3, 0, 143, 0.25) !important;
+}
+
+.mobile-nav-link .mobile-nav-icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+.mobile-nav-link.mobile-nav-active .mobile-nav-icon {
+    background: rgba(3, 0, 143, 0.12);
+    border-color: rgba(3, 0, 143, 0.3);
+}
+
+/* Barra de Navegación Inferior Móvil (< 768px) */
+#mobile-bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05);
+    padding: 0.35rem 0.5rem;
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    #mobile-bottom-bar {
+        display: none !important;
+    }
+}
+
+.bottom-bar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.35rem 0.4rem;
+    border-radius: 0.65rem;
+    color: #64748b;
+    font-size: 0.65rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    flex: 1;
+    max-width: 75px;
+    min-height: 48px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.bottom-bar-btn.bottom-bar-active {
+    color: #03008F !important;
+    background: rgba(3, 0, 143, 0.06);
+    border-color: rgba(3, 0, 143, 0.15);
+    font-weight: 700;
+}
+
+/* Modales */
+@media (max-width: 768px) {
+    [id^="modal-"],
+    [id$="-modal"] {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0.5rem !important;
+    }
+
+    .modal-dialog,
+    .modal-content,
+    [id^="modal-"] > div,
+    [id$="-modal"] > div {
+        max-width: 98vw !important;
+        width: 100% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        max-height: 92vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+}
+
+/* ==========================================================================
+   PANEL ANIMADO DE DETALLE DE PAGO Y RETENCIONES (ESPY TREASURY SUITE)
+   ========================================================================== */
+.payment-detail-backdrop {
+    background: rgba(4, 8, 20, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.payment-detail-card {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(7, 13, 25, 0.98));
+    border: 1px solid rgba(85, 198, 222, 0.25);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 35px rgba(21, 144, 211, 0.15);
+    animation: paymentCardPop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+html:not(.dark) .payment-detail-card {
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+    border: 1px solid rgba(21, 144, 211, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.2), 0 0 25px rgba(21, 144, 211, 0.1);
+}
+
+@keyframes paymentCardPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.93) translateY(18px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.retencion-card-animated {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: staggerRetencion 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes staggerRetencion {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.voucher-glow-badge {
+    box-shadow: 0 0 16px rgba(85, 198, 222, 0.35);
+    border: 1px solid rgba(85, 198, 222, 0.5);
+}
+
+.distribution-progress-segment {
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================================
+   REGLAS DE DISEÑO EJECUTIVO PARA MODO CLARO: REVISIÓN DE PAGOS Y CONTRATOS
+   (Modal Detalle de Pago CE, Modal Pagos Contrato, Gráficas y Retenciones)
+   ========================================================================== */
+
+/* 1. Slices de Gráficos Donut SVG en Modo Claro: Sólidos y de Alto Contraste */
+html:not(.dark) .donut-slice-ejecutado { stroke: #0284c7 !important; }
+html:not(.dark) .donut-slice-saldo-libre { stroke: #7c3aed !important; }
+html:not(.dark) .donut-slice-neto-girado { stroke: #059669 !important; }
+html:not(.dark) .donut-slice-retenciones { stroke: #d97706 !important; }
+
+/* 2. Modal Detalle de Pago (#modal-payment-detail) */
+html:not(.dark) #modal-payment-detail {
+    background-color: rgba(15, 23, 42, 0.45) !important;
+}
+
+html:not(.dark) #modal-payment-detail .payment-detail-card {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.15), 0 0 25px rgba(21, 144, 211, 0.08) !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-voucher-code {
+    color: #03008F !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-status-pagado {
+    background: #ecfdf5 !important;
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-status-source {
+    background: #faf5ff !important;
+    background-color: #faf5ff !important;
+    color: #6b21a8 !important;
+    border: 1px solid #e9d5ff !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-voucher-date {
+    color: #0369a1 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-action-btn {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-action-btn:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-close-btn {
+    color: #64748b !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-close-btn:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+/* Franja de Contexto de Contrato y Beneficiario */
+html:not(.dark) #modal-payment-detail .mpd-context-strip {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-context-strip span.uppercase {
+    color: #475569 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-contract-code {
+    color: #03008F !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-contract-val {
+    color: #334155 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-beneficiary-name {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-contractor-doc {
+    color: #334155 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-budget-rubro {
+    color: #4338ca !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-vigencia {
+    background: #e0f2fe !important;
+    background-color: #e0f2fe !important;
+    color: #0369a1 !important;
+    border: 1px solid #bae6fd !important;
+}
+
+/* 3. Las 4 Tarjetas Macro de Comprobante (Presentación Ejecutiva en Modo Claro) */
+/* Tarjeta 1: Total Orden (Bruto) */
+html:not(.dark) #modal-payment-detail .mpd-kpi-orden {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    background-color: #f0f9ff !important;
+    background-image: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd !important;
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.12) !important;
+}
+html:not(.dark) #modal-payment-detail .mpd-kpi-orden span.uppercase {
+    color: #0369a1 !important;
+    font-weight: 700 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-total-orden {
+    color: #0c4a6e !important;
+    font-weight: 800 !important;
+}
+html:not(.dark) #modal-payment-detail .mpd-kpi-orden span.font-mono:last-child {
+    color: #0284c7 !important;
+    font-weight: 700 !important;
+}
+
+/* Tarjeta 2: Total Retenciones */
+html:not(.dark) #modal-payment-detail .mpd-kpi-retencion {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    background-color: #fffbeb !important;
+    background-image: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    border: 1px solid #fde68a !important;
+    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.12) !important;
+}
+html:not(.dark) #modal-payment-detail .mpd-kpi-retencion span.uppercase {
+    color: #92400e !important;
+    font-weight: 700 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-total-retencion {
+    color: #78350f !important;
+    font-weight: 800 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-pct-ret-orden {
+    color: #92400e !important;
+    font-weight: 700 !important;
+}
+
+/* Tarjeta 3: Total a Pagar (Neto) */
+html:not(.dark) #modal-payment-detail .mpd-kpi-pagar {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    background-color: #ecfdf5 !important;
+    background-image: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    border: 1px solid #a7f3d0 !important;
+    box-shadow: 0 4px 14px rgba(5, 150, 105, 0.12) !important;
+}
+html:not(.dark) #modal-payment-detail .mpd-kpi-pagar span.uppercase {
+    color: #065f46 !important;
+    font-weight: 700 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-total-pagar {
+    color: #064e3b !important;
+    font-weight: 800 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-pct-neto-orden {
+    color: #047857 !important;
+    font-weight: 700 !important;
+}
+
+/* Tarjeta 4: Estampillas y Tasas */
+html:not(.dark) #modal-payment-detail .mpd-kpi-estampillas {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+    background-color: #faf5ff !important;
+    background-image: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+    border: 1px solid #e9d5ff !important;
+    box-shadow: 0 4px 14px rgba(147, 51, 234, 0.12) !important;
+}
+html:not(.dark) #modal-payment-detail .mpd-kpi-estampillas span.uppercase {
+    color: #6b21a8 !important;
+    font-weight: 700 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-total-estampillas {
+    color: #4c1d95 !important;
+    font-weight: 800 !important;
+}
+html:not(.dark) #modal-payment-detail #mpd-pct-est-ret {
+    color: #7e22ce !important;
+    font-weight: 700 !important;
+}
+
+/* 4. Barra de Distribución del Recurso Financiero */
+html:not(.dark) #modal-payment-detail .mpd-distribution-container {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-distribution-container span.font-bold {
+    color: #0f172a !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-distribution-track {
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-legend-neto {
+    color: #047857 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-legend-est {
+    color: #6b21a8 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-legend-otras {
+    color: #92400e !important;
+    font-weight: 700 !important;
+}
+
+/* 5. Discriminación Individual de Retenciones */
+html:not(.dark) #modal-payment-detail #mpd-retenciones-count {
+    background: #faf5ff !important;
+    background-color: #faf5ff !important;
+    color: #6b21a8 !important;
+    border: 1px solid #e9d5ff !important;
+}
+
+html:not(.dark) #modal-payment-detail .retencion-card-animated {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) #modal-payment-detail .retencion-card-animated:hover {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-title {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-base {
+    color: #475569 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-base-val {
+    color: #0f172a !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-rate {
+    background: #f1f5f9 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-progress-track {
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-part-info span {
+    color: #475569 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-part-pct {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail .cat-badge-stamp {
+    background: #faf5ff !important;
+    background-color: #faf5ff !important;
+    color: #6b21a8 !important;
+    border: 1px solid #e9d5ff !important;
+}
+
+html:not(.dark) #modal-payment-detail .cat-badge-ica {
+    background: #f0f9ff !important;
+    background-color: #f0f9ff !important;
+    color: #0369a1 !important;
+    border: 1px solid #bae6fd !important;
+}
+
+html:not(.dark) #modal-payment-detail .cat-badge-fuente {
+    background: #fffbeb !important;
+    background-color: #fffbeb !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+}
+
+html:not(.dark) #modal-payment-detail .cat-badge-other {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-val-stamp {
+    color: #4c1d95 !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-val-ica {
+    color: #0284c7 !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-val-fuente {
+    color: #78350f !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-payment-detail .ret-val-other {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+}
+
+/* 6. Caja Destacada: Estampillas Territoriales (Recaudo Oficial) */
+html:not(.dark) #modal-payment-detail #mpd-estampillas-highlight-box {
+    background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%) !important;
+    background-color: #faf5ff !important;
+    background-image: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%) !important;
+    border: 1px solid #ddd6fe !important;
+    box-shadow: 0 4px 16px rgba(147, 51, 234, 0.08) !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-estampillas-highlight-box span {
+    color: #4c1d95 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-estampillas-sum-badge {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #581c87 !important;
+    border: 1px solid #c084fc !important;
+    padding: 3px 12px !important;
+    border-radius: 9999px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 1px 4px rgba(147, 51, 234, 0.15) !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-stamp-chip {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #e9d5ff !important;
+    box-shadow: 0 1px 3px rgba(147, 51, 234, 0.08) !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-stamp-label {
+    color: #334155 !important;
+    font-weight: 600 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-stamp-val {
+    color: #4c1d95 !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-stamp-dot {
+    background-color: #9333ea !important;
+}
+
+/* 7. Caja de Dispersión Bancaria y Certificación Oficial */
+html:not(.dark) #modal-payment-detail .mpd-bank-box {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+html:not(.dark) #modal-payment-detail .mpd-bank-box span.font-bold {
+    color: #0f172a !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-bank-status {
+    color: #047857 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-bank-details {
+    color: #334155 !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-bank-details strong {
+    color: #0f172a !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-prev-btn,
+html:not(.dark) #modal-payment-detail #mpd-next-btn {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+html:not(.dark) #modal-payment-detail #mpd-prev-btn:hover:not(:disabled),
+html:not(.dark) #modal-payment-detail #mpd-next-btn:hover:not(:disabled) {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #94a3b8 !important;
+}
+
+/* 8. Tarjetas de Resumen Financiero en Modales de Pagos y Contratista */
+/* Valor Total */
+html:not(.dark) #modal-contract-payments .mcp-card-total,
+html:not(.dark) #modal-contractor-dossier .mcd-card-contracted {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    background-color: #f8fafc !important;
+    background-image: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-total .mcp-card-lbl,
+html:not(.dark) #modal-contractor-dossier .mcd-card-contracted span.uppercase {
+    color: #475569 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-total .mcp-card-val,
+html:not(.dark) #modal-contractor-dossier #modal-cd-total-contracted {
+    color: #0f172a !important;
+    font-weight: 800 !important;
+}
+
+/* Total Órdenes / Ejecutado */
+html:not(.dark) #modal-contract-payments .mcp-card-orden,
+html:not(.dark) #modal-contractor-dossier .mcd-card-executed {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    background-color: #f0f9ff !important;
+    background-image: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 1px solid #bae6fd !important;
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.08) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-orden .mcp-card-lbl,
+html:not(.dark) #modal-contractor-dossier .mcd-card-executed span.uppercase {
+    color: #0369a1 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-orden .mcp-card-val,
+html:not(.dark) #modal-contractor-dossier #modal-cd-total-executed {
+    color: #0c4a6e !important;
+    font-weight: 800 !important;
+}
+
+/* Total Retenciones */
+html:not(.dark) #modal-contract-payments .mcp-card-ret,
+html:not(.dark) #modal-contractor-dossier .mcd-card-retentions {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    background-color: #fffbeb !important;
+    background-image: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    border: 1px solid #fde68a !important;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.08) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-ret .mcp-card-lbl,
+html:not(.dark) #modal-contractor-dossier .mcd-card-retentions span.uppercase {
+    color: #92400e !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-ret .mcp-card-val,
+html:not(.dark) #modal-contractor-dossier #modal-cd-total-retentions {
+    color: #78350f !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-stamp-badge {
+    color: #581c87 !important;
+    font-weight: 700 !important;
+}
+
+/* Saldo Pendiente */
+html:not(.dark) #modal-contract-payments .mcp-card-saldo,
+html:not(.dark) #modal-contractor-dossier .mcd-card-balance {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+    background-color: #faf5ff !important;
+    background-image: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+    border: 1px solid #e9d5ff !important;
+    box-shadow: 0 2px 6px rgba(147, 51, 234, 0.08) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-saldo .mcp-card-lbl,
+html:not(.dark) #modal-contractor-dossier .mcd-card-balance span.uppercase {
+    color: #6b21a8 !important;
+    font-weight: 700 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-card-saldo .mcp-card-val,
+html:not(.dark) #modal-contractor-dossier #modal-cd-balance {
+    color: #4c1d95 !important;
+    font-weight: 800 !important;
+}
+
+/* 9. Paneles de Analítica Gráfica (Donut y Barras Acumuladas) */
+html:not(.dark) #modal-contract-payments .mcp-analytics-panel,
+html:not(.dark) #modal-contractor-dossier .mcd-analytics-panel {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-panel-title,
+html:not(.dark) #modal-contractor-dossier .mcd-panel-title {
+    color: #0f172a !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-panel-badge,
+html:not(.dark) #modal-contractor-dossier .mcd-panel-badge {
+    background: #e0f2fe !important;
+    background-color: #e0f2fe !important;
+    color: #0284c7 !important;
+    border-color: #bae6fd !important;
+}
+
+/* Cajas de Gráfica Donut */
+html:not(.dark) #modal-contract-payments .mcp-donut-box-budget,
+html:not(.dark) #modal-contractor-dossier .mcd-donut-box-budget {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.06) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-donut-box-budget .mcp-donut-sub,
+html:not(.dark) #modal-contractor-dossier .mcd-donut-box-budget .mcd-donut-sub {
+    color: #0284c7 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-donut-box-budget .mcp-donut-heading,
+html:not(.dark) #modal-contractor-dossier .mcd-donut-box-budget .mcd-donut-heading {
+    color: #03008F !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-donut-box-disb,
+html:not(.dark) #modal-contractor-dossier .mcd-donut-box-disb {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.06) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-donut-box-disb .mcp-donut-sub,
+html:not(.dark) #modal-contractor-dossier .mcd-donut-box-disb .mcd-donut-sub {
+    color: #059669 !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-donut-box-disb .mcp-donut-heading,
+html:not(.dark) #modal-contractor-dossier .mcd-donut-box-disb .mcd-donut-heading {
+    color: #03008F !important;
+}
+
+/* Ítems de Leyenda de Donut */
+html:not(.dark) #modal-contract-payments .mcp-legend-item,
+html:not(.dark) #modal-contractor-dossier .mcd-legend-item {
+    background: #f8fafc !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+}
+
+html:not(.dark) #modal-contract-payments .mcp-legend-item span.text-slate-600,
+html:not(.dark) #modal-contractor-dossier .mcd-legend-item span.text-slate-600,
+html:not(.dark) #modal-contract-payments .mcp-legend-item span.text-slate-400,
+html:not(.dark) #modal-contractor-dossier .mcd-legend-item span.text-slate-400 {
+    color: #334155 !important;
+    font-weight: 600 !important;
+}
+
+html:not(.dark) #modal-cp-legend-ejecutado,
+html:not(.dark) #modal-cd-legend-ejecutado {
+    color: #0284c7 !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-cp-legend-saldo,
+html:not(.dark) #modal-cd-legend-saldo {
+    color: #7c3aed !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-cp-legend-neto,
+html:not(.dark) #modal-cd-legend-neto {
+    color: #047857 !important;
+    font-weight: 800 !important;
+}
+
+html:not(.dark) #modal-cp-legend-ret,
+html:not(.dark) #modal-cd-legend-ret {
+    color: #92400e !important;
+    font-weight: 800 !important;
+}
+
+/* Barra Stacked Segmentada */
+html:not(.dark) .visual-stacked-bar {
+    background: #e2e8f0 !important;
+    background-color: #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Botón "Ver Panel" en la tabla de pagos */
+html:not(.dark) .btn-ver-panel {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f5f3ff 100%) !important;
+    background-color: #f5f3ff !important;
+    border: 1px solid #c084fc !important;
+    color: #6b21a8 !important;
+    box-shadow: 0 1px 3px rgba(107, 33, 168, 0.08) !important;
+}
+
+html:not(.dark) .btn-ver-panel:hover {
+    background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%) !important;
+    background-color: #7c3aed !important;
+    color: #ffffff !important;
+    border-color: #6d28d9 !important;
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25) !important;
+}
+
+
+
+/* ==========================================================================
+   NAVEGACIÓN CATEGORIZADA Y MENÚS DESPLEGABLES (DESKTOP & MOBILE)
+   ========================================================================== */
+.nav-cat-btn {
+    border: 1px solid transparent;
+}
+.nav-cat-btn:hover {
+    border-color: rgba(2, 132, 199, 0.2);
+}
+.nav-cat-active {
+    background: rgba(3, 0, 143, 0.08) !important;
+    color: #03008F !important;
+    border: 1px solid rgba(3, 0, 143, 0.25) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    font-weight: 700 !important;
+}
+html.dark .nav-cat-active {
+    background: rgba(21, 144, 211, 0.18) !important;
+    color: #55C6DE !important;
+    border-color: rgba(85, 198, 222, 0.35) !important;
+}
+
+.nav-dropdown-menu {
+    transform-origin: top;
+}
+.nav-dropdown-menu.dropdown-open {
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+.nav-sub-item.sub-item-active {
+    background: rgba(3, 0, 143, 0.06) !important;
+    border: 1px solid rgba(3, 0, 143, 0.15) !important;
+}
+html.dark .nav-sub-item.sub-item-active {
+    background: rgba(21, 144, 211, 0.15) !important;
+    border: 1px solid rgba(85, 198, 222, 0.25) !important;
+}
+
+/* ==========================================================================
+   OPTIMIZACIÓN RESPONSIVA Y ZOOM DEL HEADER / NAVBAR INSTITUCIONAL (ESPY 2026)
+   Garantiza que el botón 'Salir' y el panel de sesión sean 100% visibles sin importar el zoom o resolución.
+   ========================================================================== */
+
+/* Header sticky y contenedor de barra superior */
+header {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+}
+
+/* Transición inteligente entre Desktop Nav y Menú Móvil/Drawer según el ancho real disponible */
+@media (max-width: 1179px) {
+    #desktop-nav {
+        display: none !important;
+    }
+    #btn-mobile-menu-toggle {
+        display: flex !important;
+    }
+}
+
+@media (min-width: 1180px) {
+    #desktop-nav {
+        display: flex !important;
+    }
+    #btn-mobile-menu-toggle {
+        display: none !important;
+    }
+}
+
+/* Panel de Sesión y Botón de Salir: SIEMPRE VISIBLE Y SIN RECORTE */
+#user-header-controls {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    align-items: center;
+}
+
+#btn-header-logout {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    align-items: center;
+    cursor: pointer;
+}
+
+.user-badge-admin,
+.user-badge-guest {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+}
+
+#user-role-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* En pantallas ultra compactas o zoom elevado (> 200%) */
+@media (max-width: 639px) {
+    #btn-header-share-link,
+    #theme-toggle-btn {
+        display: none !important;
+    }
+    .user-badge-admin,
+    .user-badge-guest {
+        max-width: 75px;
+    }
+}
+

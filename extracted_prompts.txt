@@ -1,0 +1,729 @@
+--- PAGE 1 ---
+Prompts para Antigravity – Mejoras de la auditoría ESPY
+Cada prompt es una tarea completa que Antigravity puede ejecutar sola en tu computador: lee
+los archivos, hace los cambios, corre las pruebas, guarda un punto de control en Git y te entrega
+un informe.
+Versión 3 (26 de octubre, tarde). Revisé la versión con la limpieza del CDP y el nuevo motor
+UNSPSC. Los prompts 0 a 10 siguen vigentes; el prompt 0 ahora también ordena los scripts nuevos.
+Se agregaron el prompt 11 (terminar y conectar el motor UNSPSC nuevo) y el prompt 12 (una sola
+regla para el texto del CDP).
+Cómo usarlos
+1. Abre la carpeta ESPY_Contratacion_Automatizada de tu computador en Antigravity.
+2. Detén el servidor (DETENER_SISTEMA_ESPY.bat) antes de cada prompt.
+3. Abre una conversación nueva por cada prompt, copia el bloque completo y pégalo tal cual.
+4. Usa el modo de agente (Agent / Planning) y aprueba los comandos de terminal que te pida.
+5. Cuando termine, lee su informe, inicia el sistema y prueba en el navegador lo que indique la
+sección "Prueba manual".
+6. Orden recomendado: 0 → 12 → 1 → 2 → 3 → 11 → 4 → 5 → 6 → 7 → 8 → 9 → 10. Los urgentes son
+0, 1, 2, 3 y 11. El 12 es corto y conviene hacerlo pronto porque toca documentos que ya se
+están generando.
+7. Si algo sale mal, pídele a Antigravity: "Revierte al último commit con git reset --hard HEAD".
+--- PAGE 2 ---
+Prompt 0 – Preparación: respaldo, Git y línea base
+Eres el desarrollador del sistema ESPY Contratación Automatizada (FastAPI en backend/,
+interfaz en frontend/). Ejecuta esta tarea de principio a fin sin pedirme confirmación,
+salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md antes de empezar y respeta su "Regla de Cero Regresiones".
+- No modifiques la lógica de negocio ni los textos jurídicos que generan los agentes.
+- Estamos en Windows: usa comandos compatibles con PowerShell.
+PASOS
+1. Respaldo de datos: crea la carpeta respaldos_auditoria/ en la raíz y copia ahí
+backend/espy_contratacion.db (y sus archivos -wal y -shm si existen), backend/master_excel/
+completa y backend/.env si existe. Si el servidor está corriendo (puerto 8000 ocupado),
+detente y avísame.
+2. Comprueba si git está instalado (git --version). Si no lo está, detente y dime que lo
+instale desde https://git-scm.com.
+3. Si la carpeta no es un repositorio Git, ejecuta git init y configura la rama main.
+4. Crea .gitignore en la raíz con: .env, backend/.env, __pycache__/, .pytest_cache/, *.pyc,
+*.db, *.db-wal, *.db-shm, backend/storage/uploads/, backend/storage/generated/,
+backend/storage/exports/, backend/storage/temp_unspsc/, backups/, scratch/,
+respaldos_auditoria/, *.pickle, *.npy, backend/page_test_0.png. Los .pickle (catálogo
+UNSPSC e índice BM25) son archivos generados: copia los dos de backend/app/resources/ a
+respaldos_auditoria/ y escribe en README.md cómo regenerarlos (el índice BM25 con el script
+build_unspsc_index.py).
+5. Limpieza segura:
+- La carpeta tools/ ya existe (tiene limpiar_cdp_existentes.py). Mueve ahí, desde
+backend/: sanear_ce_00271.py, patch_minuta_template.py, regenerate_cs056_docs.py y
+analyze_payments.py, y también scripts/build_unspsc_index.py; luego borra la carpeta
+scripts/ si queda vacía, para tener una sola carpeta de utilidades. Si alguno importa
+módulos con rutas relativas, ajusta solo su sys.path para que siga funcionando desde
+tools/.
+- Mueve backend/test_cs056_validation.py a tests/ y ajusta su sys.path. Si escribe en la
+base real o en archivos generados, márcalo con @pytest.mark.skip(reason="usa datos reales;
+se reactiva en el prompt 1").
+- Borra únicamente los archivos .db que pesen 0 bytes (app.db, contratacion.db,
+contratacion_espy.db y los espy_contracts.db). Verifica el tamaño antes de borrar. Nunca
+borres backend/espy_contratacion.db.
+6. Línea base de pruebas: ejecuta python -m pytest test_regression_suite.py
+tests/test_cdp_limpieza.py -q y guarda la salida completa en auditoria_linea_base.txt en la
+raíz. NO ejecutes validate_all.py todavía (escribe en la base real). No corrijas nada de lo
+que falle; solo regístralo.
+7. git add . y git commit -m "Auditoría 0: respaldo, gitignore y línea base".
+CRITERIOS DE ACEPTACIÓN
+- Existe respaldos_auditoria/ con la base y la matriz Excel.
+- git log muestra el commit.
+- auditoria_linea_base.txt dice cuántas pruebas pasan y cuáles fallan.
+INFORME FINAL
+--- PAGE 3 ---
+Dame en español: archivos movidos y borrados, resultado de la línea base (pasan / fallan,
+con nombres) y cualquier problema encontrado.
+--- PAGE 4 ---
+Prompt 1 – Pruebas aisladas de la base real
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- No cambies la lógica de negocio. Esta tarea solo toca pruebas y configuración de pruebas.
+- Antes de empezar, anota el tamaño y la fecha de modificación de
+backend/espy_contratacion.db y de backend/master_excel/Matriz_Contratacion_Maestra.xlsx.
+CONTEXTO
+Hoy validate_all.py y varias pruebas usan la base de datos y la matriz Excel reales, y
+algunas pruebas llaman a Gemini de verdad. Otras (por ejemplo
+tests/test_contract_deletion.py) usan requests contra http://127.0.0.1:8000, que ya no
+funcionan porque el middleware exige token.
+PASOS
+1. backend/app/config.py lee DATABASE_URL, STORAGE_DIR, TEMPLATES_DIR y MASTER_EXCEL_PATH
+desde variables de entorno al importarse. Crea conftest.py en la raíz del proyecto que,
+ANTES de importar cualquier módulo de app, fije con os.environ:
+- DATABASE_URL a una base SQLite en una carpeta temporal de sesión,
+- STORAGE_DIR y MASTER_EXCEL_PATH a esa carpeta temporal,
+- GEMINI_API_KEY vacía y SECRET_KEY de prueba de 48 caracteres.
+Agrega backend/ al sys.path desde conftest.py.
+2. Verifica que backend/.env no sobrescriba esas variables durante las pruebas. Si
+config.py carga GEMINI_API_KEY desde backend/.env, agrega una variable ESPY_TESTING=1 en
+conftest.py y haz que config.py no lea backend/.env cuando ESPY_TESTING=1.
+3. Fixtures en conftest.py:
+- client: TestClient de app.main.app, con la base creada desde cero.
+- admin_token: crea un usuario ADMIN de prueba directamente en la base temporal e inicia
+sesión por /api/auth/login; devuelve el token.
+- auth_client: client con el encabezado Authorization: Bearer <admin_token> por defecto.
+- gemini_falso (autouse para las pruebas fuera de test_regression_suite.py): reemplaza
+con monkeypatch gemini_service._get_client para que devuelva None, de modo que se usen
+siempre los generadores locales.
+4. Convierte validate_all.py en tests/test_validate_all.py con funciones test_ que usen
+auth_client. Deja validate_all.py en la raíz como envoltura que ejecute pytest sobre ese
+archivo.
+5. Mueve los test_*.py sueltos de backend/ a tests/ y convierte todas las pruebas que usan
+requests contra 127.0.0.1:8000 para que usen auth_client.
+6. En test_regression_suite.py no cambies las aserciones. Solo asegúrate de que use la
+configuración de conftest.py.
+7. Agrega pytest.ini en la raíz con testpaths = tests y test_regression_suite.py.
+8. Ejecuta python -m pytest -q. Compara con auditoria_linea_base.txt: ninguna prueba que
+pasaba antes puede fallar ahora. Si alguna falla por la nueva configuración, corrígela. Si
+falla por un error real del programa, no lo arregles: anótalo en el informe.
+9. Verifica que el tamaño y la fecha de la base y de la matriz Excel reales NO cambiaron.
+10. Actualiza en README.md la sección de pruebas: el comando python -m pytest -q y el
+número real de pruebas.
+11. git add . y git commit -m "Auditoría 1: pruebas aisladas con base temporal".
+--- PAGE 5 ---
+CRITERIOS DE ACEPTACIÓN
+- python -m pytest -q corre todas las pruebas sin tocar la base ni el Excel reales.
+- Ninguna prueba llama a Gemini, salvo las de regresión cuando haya clave configurada a
+propósito.
+INFORME FINAL
+En español: número de pruebas antes y después, las que fallan y por qué, y la confirmación
+de que la base real no cambió.
+--- PAGE 6 ---
+Prompt 2 – Contraseñas y clave secreta fuera del código
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- Al terminar, python -m pytest -q debe dar el mismo resultado que en el último commit.
+CONTEXTO
+En backend/app/routers/auth.py (función seed_master_admin) la contraseña del administrador
+maestro está escrita en el código, y la cuenta invitada de Carolina usa esa misma
+contraseña. En backend/app/config.py, SECRET_KEY tiene un valor por defecto en el código:
+con él cualquiera puede fabricar tokens de administrador. backend/app/config.py carga
+backend/.env.
+PASOS
+1. En config.py, haz que el cargador de backend/.env lea TODAS las variables (no solo
+GEMINI_API_KEY) y las ponga en os.environ si no existen ya; después construye settings.
+Respeta ESPY_TESTING=1 si existe (no leer .env en pruebas).
+2. Quita el valor por defecto de SECRET_KEY. Al arrancar la app (lifespan de main.py), si
+SECRET_KEY falta o tiene menos de 32 caracteres, detén el arranque con un mensaje en
+español que explique cómo generarla.
+3. Si backend/.env no existe, créalo copiando .env.example. Si no tiene SECRET_KEY, genera
+una con secrets.token_urlsafe(48) y escríbela. Agrega también ADMIN_INITIAL_PASSWORD y
+GUEST_INITIAL_PASSWORD con contraseñas aleatorias de 16 caracteres generadas con secrets.
+Muéstrame esas dos contraseñas en el informe final, una sola vez.
+4. Actualiza .env.example con SECRET_KEY=, ADMIN_INITIAL_PASSWORD=, GUEST_INITIAL_PASSWORD=
+vacías y un comentario sobre cómo generar la clave.
+5. En seed_master_admin usa ADMIN_INITIAL_PASSWORD y GUEST_INITIAL_PASSWORD. Nunca la misma
+para ambos. Si la cuenta ya existe, no toques su contraseña.
+6. Agrega al modelo Usuario la columna debe_cambiar_password (Boolean, default False).
+Agrégala a la base existente con el mismo patrón de ALTER TABLE que usa el lifespan de
+main.py (será reemplazado por Alembic en el prompt 6). Las cuentas sembradas nuevas nacen
+con True.
+7. Agrega el endpoint POST /api/auth/change-password (usuario autenticado; pide contraseña
+actual y nueva de mínimo 10 caracteres) que pone debe_cambiar_password en False. Devuelve
+debe_cambiar_password en la respuesta de login y en /api/auth/me.
+8. En el frontend, si el usuario tiene debe_cambiar_password = true, muestra al iniciar
+sesión una ventana obligatoria para cambiarla, con el mismo estilo visual de los modales
+existentes.
+9. Busca en todo el repositorio (backend, tests, tools, frontend, scratch) el texto de la
+contraseña antigua del administrador y el valor antiguo de SECRET_KEY. Elimínalos del
+código y de las pruebas; las pruebas deben leer credenciales de variables de entorno o de
+los fixtures de conftest.py.
+10. Ejecuta python -m pytest -q y verifica que el resultado coincide con el del commit
+anterior.
+11. Comprueba que backend/.env está en .gitignore y que git status no lo muestra.
+12. git add . y git commit -m "Auditoría 2: secretos fuera del código".
+PRUEBA MANUAL (para mí)
+Iniciar el sistema, entrar como administrador con mi contraseña actual (no debe cambiar) y
+--- PAGE 7 ---
+comprobar que todo funciona.
+INFORME FINAL
+En español: archivos cambiados, las dos contraseñas iniciales nuevas (solo aplican a
+cuentas que se creen desde cero) y el resultado de las pruebas.
+--- PAGE 8 ---
+Prompt 3 – Veriﬁcar el usuario en todas las rutas y permisos por rol
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- Al terminar, python -m pytest -q debe pasar igual que en el último commit (ajusta solo
+las pruebas que dependían de entrar sin token).
+CONTEXTO
+- backend/app/main.py, función guest_mutation_guard_middleware, deja pasar sin token las
+peticiones cuyo cliente se llame "testclient" o venga vacío. Es una puerta trasera.
+- Solo auth.py y main.py usan get_current_user o require_admin. El resto de routers confía
+en el middleware, que valida la firma del token pero no consulta la base: un usuario
+desactivado o borrado sigue entrando hasta que vence el token (7 días), y un EDITOR puede
+borrar contratos, contratistas, pagos y plantillas.
+- En frontend/js/app.js hay unas 18 llamadas fetch directas sin el encabezado Authorization
+(aprox. líneas 3260, 3317, 3471, 3599, 3690, 3783, 3915, 8486, 8654, 8712, 8745, 8865,
+8952, 8993, 9033, 9078, 9337, 9467). Con el middleware, el servidor les responde 401.
+PASOS
+1. Elimina por completo la excepción del cliente de pruebas en el middleware.
+2. En backend/app/routers/auth.py agrega require_editor (ADMIN o EDITOR) junto a
+require_admin.
+3. Aplica get_current_user a todos los routers de app.include_router en main.py con
+dependencies=[Depends(get_current_user)], excepto el router de auth (en él, login queda
+público y el resto de sus rutas ya usa sus dependencias). Los endpoints /api/system/* de
+main.py también deben exigir usuario.
+4. Exige require_admin en: todos los DELETE (contratos, contratistas, documentos, pagos de
+ejecución, adiciones, estudio de mercado), POST /api/templates/upload/{tipo} y
+/api/templates/reset/{tipo}, PATCH /api/contracts/{id}/numero, PATCH
+/api/contracts/vigencias/{year}/activate, POST /api/contracts/vigencias, POST
+/api/excel/sync-all, POST /api/contracts/batch-refresh-necesidades e importaciones masivas
+de pagos (/api/execution/import y /import-pdf-packets).
+5. Exige require_editor en el resto de endpoints POST, PUT y PATCH. El rol INVITADO queda
+en solo lectura (puedes mantener el bloqueo del middleware como segunda barrera).
+6. Baja la duración del token en backend/app/utils/security.py de 7 días a 12 horas.
+7. En frontend/js/app.js cambia cada fetch directo a /api para que use
+window.api.request(endpoint, opciones) de frontend/js/api.js (sin el prefijo /api, porque
+request ya lo agrega). Para FormData usa isFormData: true y no pongas Content-Type. Si una
+llamada necesita leer la respuesta como texto o blob, agrega el encabezado Authorization:
+Bearer window.api.getToken(). Revisa con una búsqueda que no quede ningún fetch('/api o
+fetch(`/api sin token.
+8. Cuando el servidor responda 401, la interfaz debe cerrar la sesión y volver a la
+pantalla de inicio con el mensaje "Su sesión expiró. Inicie sesión de nuevo."
+9. Agrega en tests/ una prueba test_permisos.py que verifique: sin token → 401 en
+/api/contracts; usuario desactivado con token válido → 403; INVITADO no puede hacer POST;
+EDITOR no puede hacer DELETE de un contrato; ADMIN sí.
+10. Ejecuta python -m pytest -q.
+11. git add . y git commit -m "Auditoría 3: autenticación y permisos en todas las rutas".
+--- PAGE 9 ---
+PRUEBA MANUAL (para mí)
+Entrar como administrador y probar: registrar una adición, editar el objeto, cambiar el
+número de contrato, refrescar la descripción de la necesidad y cargar un CDP. Entrar como
+Carolina (invitada) y comprobar que solo puede ver.
+INFORME FINAL
+En español: tabla de endpoints con el permiso que quedó (Admin / Editor / cualquier
+usuario), las llamadas del frontend corregidas y el resultado de las pruebas.
+--- PAGE 10 ---
+Prompt 4 – Trazabilidad: anular en vez de borrar, autor y estados
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- No borres ningún dato existente de la base. Haz respaldo de backend/espy_contratacion.db
+en respaldos_auditoria/ antes de cambiar el esquema.
+CONTEXTO
+- DELETE /api/contracts/{id} (backend/app/routers/contracts.py, delete_contract) borra para
+siempre contratos en cualquier estado, incluidos EN_EJECUCION y LIQUIDADO, y por cascade
+borra su auditoría, documentos, adiciones y pagos. El README dice que solo se permite en
+BORRADOR.
+- Contratista.contratos tiene cascade="all, delete-orphan"
+(backend/app/models/contractor.py): borrar un contratista borra sus contratos.
+- La auditoría guarda usuario="Sistema" o usuario="Administrador" fijo, sin saber quién
+hizo el cambio.
+- update_contract_status permite cualquier cambio de estado, por ejemplo LIQUIDADO →
+BORRADOR.
+- En backend/app/services/contract_lifecycle.py la marca manual_status_override nunca se
+borra.
+PASOS
+1. Agrega ANULADO a EstadoContrato y las columnas motivo_anulacion, anulado_por y
+fecha_anulacion a Contrato.
+2. Cambia DELETE /api/contracts/{id}: recibe un motivo obligatorio (cuerpo JSON {"motivo":
+"..."} de al menos 15 caracteres), pasa el contrato a ANULADO, llena las columnas nuevas y
+registra auditoría. Solo se permite borrar físicamente si el contrato está en BORRADOR, no
+tiene pagos ni adiciones, y lo hace un ADMIN; en ese caso la auditoría del borrado se
+guarda con contrato_id nulo y el número del contrato en el detalle.
+3. En la matriz Excel (services/excel_engine.py) un contrato anulado no se elimina: se
+actualiza con estado ANULADO.
+4. Quita cascade="all, delete-orphan" de Contrato.auditorias y de Contratista.contratos.
+Haz que Auditoria.contrato_id acepte nulos. Un contratista con contratos no se puede
+borrar: agrega la columna activo a Contratista y un endpoint para desactivarlo. Ajusta el
+endpoint DELETE de contratistas y quita la opción de borrar en cascada.
+5. Agrega a Auditoria las columnas usuario_documento y usuario_nombre. En todos los routers
+que crean registros de Auditoria, recibe el usuario autenticado (Depends(get_current_user))
+y guarda su documento y nombre. Busca con grep "usuario=\"Sistema\"" y
+"usuario=\"Administrador\"" y cámbialos todos. Mantén "Sistema (Regla Automática por
+Fecha)" solo en contract_lifecycle.py.
+6. En update_contract_status aplica estas transiciones permitidas:
+BORRADOR → EN_REVISION; EN_REVISION → APROBADO o BORRADOR; APROBADO → EN_EJECUCION;
+EN_EJECUCION → SUSPENDIDO o TERMINADO; SUSPENDIDO → EN_EJECUCION; TERMINADO → LIQUIDADO;
+cualquiera → ANULADO (por el endpoint de anulación).
+Una transición fuera de la lista solo la puede hacer un ADMIN y con observación
+obligatoria; la auditoría debe decir "transición excepcional".
+7. En contract_lifecycle.py, cuando un contrato vuelva a EN_EJECUCION por un cambio manual,
+borra manual_status_override para que la regla de vencimiento vuelva a aplicarse.
+8. Agrega todas las columnas nuevas a la base existente con el mismo patrón de ALTER TABLE
+--- PAGE 11 ---
+Prompt 5 – Interfaz e inicio de sesión más seguros
+del lifespan de main.py.
+9. Frontend: cambia "Eliminar contrato" por "Anular contrato" con un campo de motivo
+obligatorio; muestra los contratos anulados con una etiqueta gris y un filtro para
+ocultarlos; en el historial de auditoría muestra el nombre del usuario. Cambia "Eliminar
+contratista" por "Desactivar contratista" cuando tenga contratos. Si el estado elegido no
+está permitido, muestra el mensaje del servidor.
+10. Actualiza tests/test_contract_deletion.py a la nueva regla y agrega pruebas para:
+anular un contrato en ejecución conserva su auditoría; LIQUIDADO → BORRADOR es rechazado
+para EDITOR; la auditoría guarda el autor.
+11. Actualiza README.md (sección de contratos y estados).
+12. Ejecuta python -m pytest -q.
+13. git add . y git commit -m "Auditoría 4: anulación, autor en auditoría y reglas de
+estado".
+PRUEBA MANUAL (para mí)
+Anular un contrato de prueba con motivo, verificar que sigue apareciendo como ANULADO en la
+lista y en el Excel, y que su historial muestra mi nombre.
+INFORME FINAL
+En español: cambios de esquema, endpoints modificados, cambios de la interfaz y resultado
+de las pruebas.
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- No cambies el aspecto visual de la interfaz.
+CONTEXTO
+- frontend/js/app.js tiene unas 289 asignaciones innerHTML y solo 7 usos de escapeHtml
+(función definida cerca de la línea 6140). Datos extraídos de PDFs, como el nombre del
+contratista, se pintan sin escapar (por ejemplo cerca de las líneas 4328 y 4861). Un
+documento malicioso podría ejecutar código en el navegador y robar el token.
+- La clave de Gemini se guarda en localStorage ('gemini_api_key') y se envía como
+override_api_key.
+- Las descargas ponen el token en la URL (?token=) en frontend/js/api.js.
+- El token se guarda en localStorage y sessionStorage.
+- El login (backend/app/routers/auth.py) acepta alias como "admin", "root", "gerente" o
+"carolina", da mensajes distintos si el usuario no existe, no limita intentos y acepta
+contraseñas de 4 caracteres.
+- main.py tiene CORS con allow_origins=["*"] y allow_credentials=True, y /docs es público.
+run_server.py usa reload=True siempre.
+PASOS
+1. Mueve escapeHtml al inicio de app.js para que esté disponible en todo el archivo.
+--- PAGE 12 ---
+Recorre cada innerHTML (y insertAdjacentHTML) y aplica escapeHtml a cada valor dinámico
+dentro de plantillas: datos de contratistas, contratos, documentos, pagos, adiciones,
+observaciones, nombres de archivos, mensajes de error y cualquier valor que venga del
+servidor o del usuario. No escapes HTML fijo escrito en el código ni íconos. Donde solo se
+asigna texto, usa textContent. Para valores dentro de atributos (value="", title="",
+onclick con parámetros), escápalos también. Trabaja por secciones y deja comentarios //
+SEGURIDAD solo donde el cambio no sea obvio.
+2. Haz lo mismo en las partes de index.html que tengan scripts en línea con innerHTML.
+3. Quita del frontend todo uso de 'gemini_api_key' en localStorage y de override_api_key.
+En el backend, ignora override_api_key en los routers (usa siempre la clave del servidor) y
+deja la configuración solo en Configuración → /api/system/config-api-key (solo ADMIN).
+4. Descargas: reemplaza en api.js las funciones que construyen URLs con ?token= por
+funciones que descarguen con fetch y encabezado Authorization y guarden el archivo con un
+Blob (como ya hace downloadRiskMatrixDocx). Actualiza los botones de app.js que usaban esas
+URLs. Después, quita del middleware de main.py la lectura del token desde query params.
+5. Guarda el token solo en sessionStorage.
+6. Login: quita los alias; busca solo por documento exacto; usa un único mensaje "Documento
+o contraseña incorrectos." para usuario inexistente y contraseña errada; bloquea por 15
+minutos un documento tras 5 intentos fallidos (guárdalo en memoria o en una tabla, como
+prefieras); exige mínimo 10 caracteres al crear o cambiar contraseñas.
+7. main.py: limita CORS a http://127.0.0.1:8000, http://localhost:8000 y a la IP de red que
+detecta get_network_info; oculta /docs, /redoc y /openapi.json cuando APP_ENV no sea
+development (pasa docs_url=None). run_server.py: reload=True solo si APP_ENV=development.
+Deja APP_ENV=production en backend/.env.
+8. Agrega pruebas: login con alias "admin" falla; el sexto intento fallido queda bloqueado;
+descargar sin token da 401.
+9. Ejecuta python -m pytest -q.
+10. git add . y git commit -m "Auditoría 5: XSS, descargas sin token en URL y login
+endurecido".
+PRUEBA MANUAL (para mí)
+Recorrer las 12 pestañas, descargar un Estudio Previo, una Minuta, la Matriz Excel y un
+reporte, y crear un contratista cuyo nombre sea <b>PRUEBA</b>: debe verse literal, sin
+negrita.
+INFORME FINAL
+En español: cuántos innerHTML se corrigieron, funciones de descarga cambiadas, cambios del
+login y resultado de las pruebas.
+--- PAGE 13 ---
+Prompt 6 – Respaldos automáticos y migraciones con Alembic
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- No cambies la lógica de negocio ni borres datos.
+PASOS
+1. Crea tools/respaldo_diario.py que:
+- haga una copia consistente de backend/espy_contratacion.db con sqlite3
+(conexion.backup(destino)), aunque el servidor esté corriendo;
+- copie también backend/master_excel/Matriz_Contratacion_Maestra.xlsx y comprima en un
+.zip backend/storage/uploads y backend/storage/generated;
+- guarde todo en la carpeta definida por BACKUP_DIR en backend/.env (por defecto
+respaldos/ en la raíz), con la fecha y hora en el nombre;
+- conserve solo los últimos 30 respaldos;
+- escriba un registro en respaldos/respaldo.log.
+2. Crea PROGRAMAR_RESPALDO_DIARIO.bat que registre una tarea del Programador de tareas de
+Windows (schtasks) para ejecutar el respaldo todos los días a las 6:00 p. m. con el Python
+del proyecto, y QUITAR_RESPALDO_DIARIO.bat que la elimine. Usa el mismo estilo de los .bat
+existentes.
+3. Agrega BACKUP_DIR= a .env.example con un comentario que sugiera una carpeta de Google
+Drive o de un disco externo para tener copia fuera del PC.
+4. Instala alembic, agrégalo a backend/requirements.txt e inicialízalo en backend/ (alembic
+init migrations). Configura env.py para usar settings.DATABASE_URL y Base.metadata de
+app.models, con render_as_batch=True (necesario para SQLite).
+5. Crea una migración inicial que represente el esquema actual completo. Para la base
+existente, márcala como aplicada con alembic stamp head, sin recrear tablas.
+6. Elimina del lifespan de main.py todos los bloques ALTER TABLE manuales (incluidos los
+que agregaron los prompts 2 y 4). En su lugar, al arrancar ejecuta las migraciones
+pendientes con la API de Alembic (command.upgrade(config, "head")). Mantén
+Base.metadata.create_all solo para una base nueva vacía y luego stamp.
+7. Ejecuta python tools/respaldo_diario.py una vez y comprueba que el respaldo se puede
+abrir con sqlite3 y tiene las mismas tablas y cantidad de contratos que la base original.
+8. Prueba en una copia temporal de la base que el arranque con Alembic funciona, sin tocar
+la base real.
+9. Agrega al README una sección "Respaldos" y otra "Cambios de base de datos (Alembic)" con
+los comandos.
+10. Ejecuta python -m pytest -q.
+11. git add . y git commit -m "Auditoría 6: respaldos diarios y Alembic".
+INFORME FINAL
+En español: ubicación del primer respaldo, número de contratos verificados en la copia,
+estado de Alembic y resultado de las pruebas.
+--- PAGE 14 ---
+Prompt 7 – Valores en pesos, matriz Excel e IA más conﬁable
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones. Ejecuta python -m pytest -q antes y
+después; el resultado no puede empeorar.
+- Haz respaldo con python tools/respaldo_diario.py antes de migrar datos.
+PASOS
+1. Valores monetarios: valor_total, valor_inicial, adicion_1 de Contrato y los montos de
+los modelos de pagos y adiciones (busca todos los Column(Float) que guarden pesos) deben
+pasar a Numeric(18, 2). Crea la migración con Alembic (batch mode) que convierta los datos
+existentes sin perder valores. Ajusta los esquemas Pydantic para usar Decimal y serializar
+como número. Verifica que numero_a_letras_cop y la matriz Excel siguen dando el mismo
+resultado para los contratos existentes (compara antes y después en un script temporal).
+2. Matriz Excel (backend/app/services/excel_engine.py):
+- get_or_create_master_workbook no debe reescribir encabezados ni guardar en cada
+sincronización; solo al crear el archivo.
+- sync_contract_to_master_excel debe guardar una sola vez.
+- sync_all_contracts_to_master_excel debe abrir el libro una vez, escribir todos los
+contratos y guardar una vez.
+- Si guardar falla con PermissionError (el archivo está abierto en Excel), devuelve un
+error claro "La Matriz Excel está abierta en otro programa; ciérrela y pulse Sincronizar" y
+muéstralo en la interfaz, en vez de solo escribir un aviso en el registro.
+3. Gemini (backend/app/services/gemini_client.py):
+- Crea un método privado que llame a client.models.generate_content con hasta 3 intentos
+y espera de 2, 4 y 8 segundos cuando el error sea de cuota (429), servidor (500, 503) o
+tiempo de espera. Úsalo en todas las llamadas del archivo.
+- Reutiliza el cliente de genai en vez de crearlo en cada llamada (guárdalo por clave).
+- En generate_agent_structured_draft, cuando se use el generador local, marca el
+resultado con origen_redaccion = "PLANTILLA_LOCAL" (y "IA_GEMINI" cuando responda la IA).
+Agrega ese campo opcional a los esquemas de resultado que correspondan sin romper los
+existentes.
+- En la interfaz, muestra un aviso amarillo "Este texto se generó con la plantilla local
+porque la IA no respondió" cuando origen_redaccion sea PLANTILLA_LOCAL.
+4. En backend/app/models/contractor.py cambia los valores por defecto de municipio y
+departamento a "Yolombó" y "Antioquia".
+5. Agrega pruebas: un contrato de $50.076.264 conserva el valor exacto y su valor en
+letras; el reintento de Gemini se ejecuta 3 veces con un cliente simulado que falla con
+503; la sincronización masiva guarda el Excel una sola vez.
+6. Ejecuta python -m pytest -q.
+7. git add . y git commit -m "Auditoría 7: Numeric, Excel en una pasada y reintentos de
+IA".
+INFORME FINAL
+En español: columnas migradas, verificación de valores antes y después, cambios en Excel y
+Gemini, y resultado de las pruebas.
+--- PAGE 15 ---
+Prompt 8 – Protección de datos personales (Ley 1581 de 2012)
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- Haz respaldo con python tools/respaldo_diario.py antes de migrar datos.
+CONTEXTO
+El sistema guarda cédulas, RUT y cuentas bancarias de contratistas, y envía documentos de
+identidad y RUT a Gemini para extraer datos.
+PASOS
+1. Cifra banco_numero_cuenta de Contratista en reposo con cryptography (Fernet). La clave
+va en backend/.env como DATA_ENCRYPTION_KEY; si no existe, genérala y escríbela en
+backend/.env. Crea un tipo de columna SQLAlchemy que cifre al guardar y descifre al leer.
+Migra con Alembic los valores existentes. Agrega cryptography a requirements.txt.
+2. En las respuestas de la API, muestra la cuenta bancaria enmascarada (solo los últimos 4
+dígitos) salvo para ADMIN y EDITOR en el detalle del contratista. Los documentos generados
+(minuta, etc.) deben seguir mostrando la cuenta completa si hoy la muestran.
+3. Antes de la primera extracción con IA de cada sesión, muestra en la interfaz un aviso:
+"Los documentos se enviarán a Google Gemini para extraer datos. Use solo documentos de
+contratistas que autorizaron el tratamiento de sus datos personales." con botón Aceptar;
+guarda la aceptación en la sesión.
+4. En la pestaña Configuración, agrega una nota de que la clave de Gemini debe ser de un
+proyecto con facturación activa (el nivel gratuito puede usar los datos para mejorar los
+modelos de Google), con enlace a https://ai.google.dev/gemini-api/terms.
+5. Registra en Auditoria cada extracción con IA (qué documento, qué usuario), sin guardar
+el contenido del documento.
+6. Agrega pruebas: la cuenta queda cifrada en la base (consulta SQL directa) y se lee bien
+por la API; un INVITADO ve la cuenta enmascarada.
+7. Ejecuta python -m pytest -q.
+8. git add . y git commit -m "Auditoría 8: cifrado de cuentas y aviso de tratamiento de
+datos".
+INFORME FINAL
+En español: qué se cifró, dónde quedó la clave (recuérdame incluir backend/.env en mis
+respaldos, porque sin esa clave las cuentas no se pueden leer) y resultado de las pruebas.
+--- PAGE 16 ---
+Prompt 9 – Dividir la interfaz por pestañas
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle. Es una reorganización: el
+comportamiento visible NO debe cambiar en nada.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- Haz commits intermedios después de cada módulo extraído para poder revertir por partes.
+CONTEXTO
+frontend/js/app.js tiene unas 15.900 líneas y frontend/index.html unas 13.300, con 12
+pestañas (dashboard, contracts, execution, reports, contractors, wizard, excel, templates,
+risks, apu, unspsc, settings). index.html carga Tailwind desde cdn.tailwindcss.com y
+Chart.js sin versión fija.
+PASOS
+1. Antes de mover nada, crea tests/test_frontend_smoke.py con Playwright (si no está
+instalado, instálalo con pip install playwright y python -m playwright install chromium)
+que: inicie el servidor de pruebas con la base temporal de conftest.py, inicie sesión, abra
+cada una de las 12 pestañas y verifique que no hay errores en la consola del navegador.
+Ejecútala y guarda el resultado como referencia.
+2. Divide app.js en archivos dentro de frontend/js/: core.js (utilidades comunes,
+escapeHtml, navegación, sesión), y un archivo por pestaña (dashboard.js, contracts.js,
+execution.js, reports.js, contractors.js, wizard.js, excel.js, templates.js, risks.js,
+apu.js, unspsc.js, settings.js). Mantén las funciones globales que usan los onclick del
+HTML (asígnalas a window si hace falta). Cárgalos en index.html en orden: api.js, core.js y
+luego los de pestañas.
+3. Divide index.html: mueve el HTML de cada <section id="tab-..."> a
+frontend/partials/<pestaña>.html y cárgalo desde core.js al iniciar (fetch del parcial e
+inserción en su contenedor) antes de inicializar cada pestaña. Si esto complica el
+arranque, deja el HTML en index.html y divide solo el JavaScript; dímelo en el informe.
+4. Fija versiones: Chart.js a la versión exacta que funciona hoy (por ejemplo
+chart.js@4.4.1, descárgala a frontend/vendor/). Para Tailwind, genera un CSS compilado con
+la CLI de Tailwind (standalone, sin Node si es posible) que incluya todas las clases usadas
+y la configuración tailwind.config actual; guárdalo en frontend/css/tailwind.css y quita el
+script del CDN. Así la interfaz funciona sin Internet.
+5. Ejecuta la prueba de humo después de cada módulo y al final; debe dar el mismo resultado
+que la referencia.
+6. Ejecuta python -m pytest -q.
+7. git commit final "Auditoría 9: interfaz dividida por pestañas y dependencias locales".
+PRUEBA MANUAL (para mí)
+Desconectar el Wi-Fi del PC, abrir http://127.0.0.1:8000/app/ y recorrer las pestañas:
+deben verse igual que antes.
+INFORME FINAL
+En español: archivos nuevos con su número de líneas, qué quedó pendiente y resultado de las
+pruebas.
+--- PAGE 17 ---
+Prompt 10 – Ordenar las reglas de redacción de los agentes
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle. Es una reorganización: los
+textos que generan los agentes NO deben cambiar ni una palabra.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- No toques backend/app/services/agents/unspsc_agent.py: tiene su propio plan de mejora en
+unspsc/prompt_antigravity_unspsc.md.
+CONTEXTO
+Las reglas de redacción están en AGENTS.md y además repetidas como texto dentro de archivos
+grandes: apu_agent.py (~121 KB), risk_agent.py (~101 KB), necesidad_builder.py (~77 KB),
+objetivos_builder.py, obligaciones_builder.py, objeto_builder.py y justification_agent.py.
+PASOS
+1. Antes de cambiar nada, crea tests/test_salidas_agentes.py que, con Gemini desactivado
+(generadores locales), genere para los 15 casos de test_regression_suite.py (A a O) la
+necesidad, objeto, objetivos, obligaciones del contratista, obligaciones de la empresa y
+matriz de riesgos, y guarde las salidas en tests/golden/ como archivos JSON. La prueba
+compara la salida actual con esos archivos.
+2. Crea la carpeta backend/app/prompts/ y mueve ahí, a archivos .md o .txt, las
+instrucciones de sistema y las plantillas de texto largas de los agentes (una por archivo,
+con nombres claros como necesidad_escenario_b.md). En el código, cárgalas con una función
+común cargar_prompt(nombre) con caché.
+3. Mueve las listas largas de frases fijas (verbos, cláusulas, obligaciones estándar) a
+archivos JSON en backend/app/prompts/data/.
+4. Divide los archivos de más de 2.000 líneas en módulos por responsabilidad dentro de la
+misma carpeta, sin cambiar nombres públicos que importen otros archivos.
+5. Ejecuta tests/test_salidas_agentes.py: las salidas deben ser idénticas a las de
+tests/golden/. Si alguna difiere, revierte ese cambio.
+6. Ejecuta python -m pytest -q.
+7. git commit "Auditoría 10: reglas de agentes en archivos de instrucciones".
+INFORME FINAL
+En español: archivos de instrucciones creados, tamaño de los archivos antes y después y
+resultado de las pruebas de salidas.
+--- PAGE 18 ---
+Prompt 11 – Terminar y conectar el motor UNSPSC nuevo
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle. Haz este prompt después del
+prompt 3 (permisos).
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- No borres ni cambies la lógica de backend/app/services/agents/unspsc_agent.py (el motor
+actual). El motor nuevo se conecta al lado, detrás de un interruptor, y el motor actual
+sigue siendo el predeterminado.
+- Usa los fixtures de tests/conftest.py (base temporal y Gemini simulado). Ninguna prueba
+puede llamar a Gemini de verdad ni escribir en backend/espy_contratacion.db.
+CONTEXTO
+- Existe un motor UNSPSC nuevo en backend/app/services/agents/unspsc/ (extractor.py,
+hybrid_search.py, selector.py, schemas.py) y un índice
+backend/app/resources/unspsc_bm25_index.pickle construido con tools/build_unspsc_index.py
+(antes en scripts/). Nadie lo usa: backend/app/routers/unspsc.py importa unspsc_agent desde
+unspsc_agent.py.
+- requirements.txt no incluye rank_bm25. Sin esa librería el índice no carga, el error solo
+queda en el log y la búsqueda devuelve cero candidatos.
+- Los endpoints de routers/unspsc.py no piden usuario. POST /unspsc/contracts/{id}/save
+cambia codigos_unspsc y puede cambiar el objeto del contrato, y la auditoría guarda
+usuario="SISTEMA_AGENTE_UNSPSC". tests/test_unspsc_study_only.py llama sin token.
+- /unspsc/analyze y /unspsc/analyze-files reciben api_key por la URL y devuelven str(e) en
+los errores 500.
+- selector.py: el respaldo sin Gemini pone estado "aprobado" cuando la cita aparece en el
+documento; verify_citation_in_document da True a citas de menos de 4 letras; solo se
+verifica que el código exista en el catálogo, no que esté entre los candidatos.
+- hybrid_search.py: en cada ítem consulta TODO UnspscHistoricalFeedback
+(db.query(...).all()) y no cierra la sesión si hay error. save_contract_unspsc guarda en el
+historial todos los códigos, aunque sean sugerencias sin revisar.
+- Los embeddings no existen: build_unspsc_index.py tiene un comentario en lugar del
+cálculo, y no hay fusión de rankings. Hay un diccionario universal_lexicon escrito a mano
+dentro de hybrid_search.py.
+- normalize_text y tokenize están copiados en build_unspsc_index.py, hybrid_search.py y
+selector.py, con listas de palabras vacías distintas.
+PASOS
+1. Agrega rank-bm25 (y numpy) a requirements.txt e instálalos. En GET /unspsc/status agrega
+"indice_bm25_cargado" y "embeddings_cargados" (true/false). Si el índice no carga, registra
+el error con nivel ERROR.
+2. Crea backend/app/services/agents/unspsc/texto.py con una sola normalize_text y una sola
+tokenize, y úsalas en hybrid_search.py, selector.py y tools/build_unspsc_index.py. Regenera
+el índice con python tools/build_unspsc_index.py.
+3. Seguridad de routers/unspsc.py: todas las rutas exigen get_current_user;
+/contracts/{id}/save y /export-docx exigen require_editor. En la auditoría guarda el nombre
+del usuario real. Quita el parámetro api_key de la URL: usa solo la clave del servidor
+(settings.GEMINI_API_KEY). En los errores 500 responde "Error en el análisis UNSPSC. Revise
+el registro del servidor." y deja el detalle solo en el log. Agrega un límite de 20 MB por
+archivo subido. Ajusta tests/test_unspsc_study_only.py para usar el cliente autenticado.
+--- PAGE 19 ---
+4. Correcciones de selector.py:
+- El respaldo sin Gemini siempre devuelve estado "sugerencia_sin_validar" y confianza
+"baja" o "media", nunca "aprobado".
+- Una cita vacía o de menos de 4 letras no cuenta como verificada.
+- Descarta cualquier código que Gemini devuelva y no esté en la lista de candidatos que
+se le envió.
+- Gemini con timeout de 30 segundos y hasta 2 reintentos con espera de 2 y 4 segundos;
+si falla, respaldo.
+5. Historial (Paso 6):
+- save_contract_unspsc solo guarda en UnspscHistoricalFeedback los códigos con estado
+"aprobado" y cita verificada.
+- En hybrid_search.py no leas toda la tabla en cada ítem: carga el historial una vez en
+memoria (con sus tokens ya calculados) y recárgalo solo cuando se guarde una clasificación
+nueva. Abre y cierra la sesión con try/finally.
+6. Embeddings y fusión:
+- En tools/build_unspsc_index.py calcula los embeddings de los textos jerárquicos con
+gemini-embedding-001 (task_type RETRIEVAL_DOCUMENT), en lotes de 100, con reintentos y un
+archivo de avance para reanudar si se corta. Guarda
+backend/app/resources/unspsc_embeddings.npy y el orden de códigos.
+- En hybrid_search.py, si existe el archivo de embeddings y hay clave de Gemini, calcula
+el embedding del ítem (RETRIEVAL_QUERY), toma los 30 más parecidos por coseno y fusiónalos
+con el ranking BM25 usando Reciprocal Rank Fusion (k=60). Si no hay embeddings o falla, usa
+solo BM25.
+- Mueve universal_lexicon a backend/app/resources/unspsc_sinonimos.json para que se
+pueda editar sin tocar código.
+7. Conexión con interruptor:
+- Agrega UNSPSC_MOTOR a config.py y .env.example, con valores "clasico" (predeterminado)
+o "nuevo".
+- En routers/unspsc.py, /analyze y /analyze-files usan unspsc_selector_agent cuando
+UNSPSC_MOTOR=nuevo. Crea el selector la primera vez que se use, no al importar el módulo.
+- El motor nuevo debe llenar objeto_detectado y fuente_cita ("propuesta" o
+"estudio_previo") igual que el motor actual (busca cómo lo hace unspsc_agent.py cerca de
+"Asignar fuente_cita según origen real"), y conservar el limpiado
+clean_and_reconstruct_document_text de los archivos.
+8. Comparación (solo lectura): crea tools/comparar_motores_unspsc.py que corra los dos
+motores sobre los casos de tests/test_unspsc_agent_flow.py y sobre los últimos 20 contratos
+que ya tengan codigos_unspsc guardados, sin escribir nada en la base, y genere
+auditoria_unspsc_comparacion.md en la raíz con: contrato, códigos del motor clásico,
+códigos del motor nuevo, códigos en común y tiempo de cada motor. No cambies el valor
+predeterminado del interruptor: esa decisión es mía.
+9. Pruebas nuevas en tests/test_unspsc_motor_nuevo.py: respaldo sin Gemini →
+"sugerencia_sin_validar"; código fuera de candidatos descartado; el historial no guarda
+sugerencias sin revisar; endpoint sin token → 401; INVITADO no puede guardar; con
+UNSPSC_MOTOR=nuevo la respuesta trae objeto_detectado y fuente_cita.
+10. Ejecuta python -m pytest -q.
+11. git add . y git commit -m "Auditoría 11: motor UNSPSC nuevo conectado detrás de
+interruptor".
+PRUEBA MANUAL (para mí)
+Con UNSPSC_MOTOR=clasico, clasificar un contrato real y comprobar que todo funciona igual
+que antes. Luego poner UNSPSC_MOTOR=nuevo en backend/.env, reiniciar el sistema, clasificar
+el mismo contrato y comparar. Revisar auditoria_unspsc_comparacion.md.
+--- PAGE 20 ---
+INFORME FINAL
+En español: cambios por archivo, si los embeddings quedaron calculados (cuántos códigos y
+cuánto tardó), el resumen de auditoria_unspsc_comparacion.md, el resultado de las pruebas y
+tu recomendación sobre cuál motor dejar como predeterminado.
+--- PAGE 21 ---
+Prompt 12 – Una sola regla para el texto del CDP
+Eres el desarrollador del sistema ESPY Contratación Automatizada. Ejecuta esta tarea
+completa sin pedirme confirmación, salvo que un paso falle.
+REGLAS GENERALES
+- Lee AGENTS.md y respeta la Regla de Cero Regresiones.
+- tests/test_cdp_limpieza.py debe seguir pasando sin cambiar sus resultados esperados.
+- No modifiques la base de datos real ni documentos ya generados sin el parámetro --aplicar
+o --regenerar.
+CONTEXTO
+- La limpieza del texto {{CDP}} está en backend/app/utils/cdp_cleaner.py
+(MARCAS_DE_CORTE_CDP) y copiada en frontend/js/app.js (función limpiarTextoCdp, al inicio
+del archivo). Si se cambia una lista y no la otra, la pantalla y el Word muestran textos
+distintos.
+- La marca \bClasificador\b sola es muy amplia: cortaría un nombre de rubro que contenga
+esa palabra.
+- tools/limpiar_cdp_existentes.py saca la copia de la base con shutil.copy2 mientras SQLite
+usa modo WAL (puede quedar incompleta) y solo corrige metadatos_agente: los estudios
+previos, minutas y actas ya generados conservan el texto largo.
+PASOS
+1. Mueve las marcas de corte a backend/app/resources/cdp_marcas_corte.json. cdp_cleaner.py
+las lee de ahí (con caché).
+2. Agrega GET /api/cdp/marcas-corte (exige usuario) que devuelva esa lista. En app.js,
+limpiarTextoCdp usa la lista que llega del servidor al iniciar sesión; deja la lista actual
+solo como respaldo si la petición falla, con un comentario que diga que la fuente oficial
+es el JSON.
+3. Garantía en el servidor: aplica limpiar_texto_cdp cada vez que se guarde
+cdp_texto_completo (creación desde el asistente, edición del CDP en el modal y
+actualización del contrato) y justo antes de reemplazar {{CDP}} en docx_engine.py (verifica
+si ya lo hace). Así el Word queda limpio aunque el navegador mande otra cosa.
+4. Revisa la marca de "Clasificador": cámbiala para que corte en "Clasificador Valor",
+"Valor Clasificador" o "CCPET", no en la palabra sola. Agrega una prueba con un rubro
+inventado que contenga la palabra "clasificador" en su nombre y verifica que no se corte.
+5. Prueba con datos reales en solo lectura: crea tools/revisar_cdp_ocr.py que pase
+limpiar_texto_cdp por todos los archivos *CDP*.ocr.txt y cdp*_ocr.txt de backend/storage y
+escriba auditoria_cdp_ocr.md con el antes y el después de cada uno, marcando los casos
+donde el resultado quedó sin código de rubro o sin nombre de rubro.
+6. tools/limpiar_cdp_existentes.py:
+- Cambia la copia de seguridad a sqlite3 con origen.backup(destino).
+- Agrega un reporte de los contratos cuyos documentos generados (estudio previo, minuta,
+acta de inicio) todavía contienen "CCPET" o "clasificadores presupuestales".
+- Agrega el parámetro --regenerar que vuelva a generar esos documentos con las funciones
+de generación que ya usa el sistema, guardando antes una copia de cada archivo viejo en
+backups/documentos_<fecha>/. Sin el parámetro, solo muestra el reporte.
+7. Prueba nueva tests/test_cdp_reglas.py: el endpoint devuelve las mismas marcas que usa
+cdp_cleaner.py, y un texto con CCPET enviado al guardar el contrato queda limpio en la base
+temporal.
+8. Ejecuta python -m pytest -q.
+9. git add . y git commit -m "Auditoría 12: una sola regla para el texto del CDP".
+--- PAGE 22 ---
+PRUEBA MANUAL (para mí)
+Ejecutar python tools/limpiar_cdp_existentes.py (sin parámetros) y leer el reporte. Si está
+bien, ejecutarlo con --aplicar y después con --regenerar. Abrir el estudio previo de un
+contrato con CDP y comprobar que solo dice número, fecha, valor y rubro.
+INFORME FINAL
+En español: cambios por archivo, resumen de auditoria_cdp_ocr.md (cuántos CDP quedaron bien
+y cuáles hay que revisar), cuántos contratos y documentos tienen texto largo y el resultado
+de las pruebas.

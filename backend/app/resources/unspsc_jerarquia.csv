@@ -1,0 +1,57 @@
+codigo,tipo,nombre
+10,Segmento,Material Vivo Vegetal y Animal
+11,Segmento,Material de Minerales y Tejidos Vegetales y Animales no Comestibles
+12,Segmento,Material Quimico Incluyendo Bioquimicos y Materiales de Gas
+13,Segmento,Resinas y Colas y Selladores y Compuestos de Aislacion
+14,Segmento,Materiales y Productos de Papel
+15,Segmento,Combustibles y Lubricantes y Materiales Anticorrosivos
+20,Segmento,Maquinaria y Accesorios de Mineria y Perforacion de Pozos
+21,Segmento,Maquinaria y Accesorios para Agricultura y Silvicultura
+22,Segmento,Maquinaria y Accesorios para Construccion y Edificacion
+23,Segmento,Maquinaria y Accesorios para Manufactura y Procesamiento Industrial
+24,Segmento,Maquinaria y Accesorios de Embalaje y Contenedores y Almacenamiento
+25,Segmento,Vehiculos y Equipos de Transporte
+26,Segmento,Maquinaria y Accesorios para Generacion y Distribucion de Energia
+27,Segmento,Herramientas y Maquinaria General
+30,Segmento,Estructuras y Materiales y Accesorios de Edificacion y Construccion
+31,Segmento,Componentes y Suministros de Manufactura
+32,Segmento,Componentes y Suministros Electronicos
+39,Segmento,Suministros y Equipos de Iluminacion y Electricos
+40,Segmento,Sistemas de Distribucion y Acondicionamiento de Fluidos y Gas
+41,Segmento,Equipos y Accesorios de Laboratorio y de Medida y Observacion
+42,Segmento,Equipo Medico y Accesorios y Suministros
+43,Segmento,Difusion de Tecnologias de Informacion y Telecomunicaciones
+44,Segmento,Equipos de Oficina y Accesorios y Suministros
+45,Segmento,Equipos e Instrumentos de Imprenta y Publicacion
+46,Segmento,Equipos y Suministros de Defensa y Seguridad y Proteccion
+47,Segmento,Equipos y Suministros de Limpieza y Eliminacion de Residuos
+48,Segmento,Maquinaria y Equipos para Servicios de Alimentos
+49,Segmento,Equipos y Suministros Deportivos y Recreativos
+50,Segmento,Alimentos y Bebidas y Tabaco
+51,Segmento,Medicamentos y Productos Farmaceuticos
+52,Segmento,Articulos Domesticos y Suministros para el Consumidor
+53,Segmento,Ropa y Maletas y Productos de Aseo Personal
+54,Segmento,Productos de Relojeria y Joyeria y Piedras Preciosas
+55,Segmento,Medios Impresos y Publicaciones y Articulos de Propaganda
+56,Segmento,Muebles y Mobiliario y Decoracion del Hogar
+60,Segmento,Instrumentos Musicales y Artesanias
+70,Segmento,Servicios de Limpieza y Descontaminacion y Conservacion
+71,Segmento,Servicios de Mineria y Petroleo y Gas
+72,Segmento,Servicios de Edificacion y Construccion de Obras Civiles e Instalaciones
+73,Segmento,Servicios de Mantenimiento y Reparacion de Instalaciones y Equipos
+76,Segmento,Servicios de Limpieza Industrial y Residuos y Aseo
+77,Segmento,Servicios de Gestion y Proteccion Ambiental
+78,Segmento,Servicios de Transporte y Almacenaje y Logistica
+80,Segmento,Servicios de Gestion y Servicios Profesionales de Empresa y Administrativos
+81,Segmento,Servicios Basados en Ingenieria y Servicios Tecnologicos y de TI
+82,Segmento,Servicios Editoriales y de Diseno y de Artes Graficas
+83,Segmento,Servicios Publicos y Servicios Relacionados con el Sector Publico
+84,Segmento,Servicios Financieros y Seguros
+85,Segmento,Servicios de Salud y Cuidado Personal
+86,Segmento,Servicios Educativos y de Formacion
+90,Segmento,Servicios de Viajes y Facilitacion y Restaurantes y Catering
+91,Segmento,Servicios Personales y Domesticos
+92,Segmento,Servicios de Seguridad y Vigilancia
+93,Segmento,Servicios Politicos y Asuntos Civicos y Comunitarios
+94,Segmento,Organizaciones y Clubes
+95,Segmento,Servicios de Terrenos y Bienes Inmuebles

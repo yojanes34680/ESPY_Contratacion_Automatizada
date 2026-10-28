@@ -1,0 +1,28 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.7, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\Usuario\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Usuario\Documents\ESPY_Contratacion_Automatizada
+plugins: anyio-4.15.1
+collecting ... collected 19 items
+
+test_regression_suite.py::test_a_mantenimiento_herramientas_cps055 PASSED [  5%]
+test_regression_suite.py::test_b_suministro_pgirs_asocomunal PASSED      [ 10%]
+test_regression_suite.py::test_c_obra_valvula_las_camelias PASSED        [ 15%]
+test_regression_suite.py::test_d_servicios_apoyo_pgirs_mauricio_carmona PASSED [ 21%]
+test_regression_suite.py::test_e_examenes_ocupacionales_asistymed PASSED [ 26%]
+test_regression_suite.py::test_f_bienestar_laboral_salida_recreativa_asocomunal PASSED [ 31%]
+test_regression_suite.py::test_g_transporte_volqueta_residuos_wilson_munoz PASSED [ 36%]
+test_regression_suite.py::test_h_marketing_digital_comunicaciones PASSED [ 42%]
+test_regression_suite.py::test_i_suministro_catering_almuerzos_asocomunal PASSED [ 47%]
+test_regression_suite.py::test_j_suministro_vehiculo_camion_pequeno PASSED [ 52%]
+test_regression_suite.py::test_k_suministro_tecnologia_impresion_toner PASSED [ 57%]
+test_regression_suite.py::test_l_obra_acueducto_la_espiga PASSED         [ 63%]
+test_regression_suite.py::test_m_obra_estabilizacion_talud_ptap PASSED   [ 68%]
+test_regression_suite.py::test_n_extraccion_persona_juridica_con_cedula PASSED [ 73%]
+test_regression_suite.py::test_o_suministro_gps_camaras_vehiculares_cs056 PASSED [ 78%]
+tests/test_cdp_limpieza.py::test_limpiar_texto_cdp_ejemplo_real PASSED   [ 84%]
+tests/test_cdp_limpieza.py::test_texto_ya_limpio_no_cambia PASSED        [ 89%]
+tests/test_cdp_limpieza.py::test_construir_texto_cdp_dos_rubros PASSED   [ 94%]
+tests/test_cdp_limpieza.py::test_construir_texto_cdp_00047 PASSED        [100%]
+
+============================= 19 passed in 14.42s =============================

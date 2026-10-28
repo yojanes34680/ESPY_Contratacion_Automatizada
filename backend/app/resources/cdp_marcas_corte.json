@@ -1,0 +1,16 @@
+[
+  ",?\\s*y\\s+respaldado\\s+en\\s+los\\s+clasificadores",
+  "clasificadores\\s+presupuestales",
+  "\\bCCPET\\b",
+  "\\bCCPET\\d+\\b",
+  "\\bClasificador\\s+Valor\\b",
+  "\\bValor\\s+Clasificador\\b",
+  "\\bValor\\s+en\\s+letras\\b",
+  "\\bValoren\\s*letras\\b",
+  "\\bObjeto\\s+de\\s+la\\s+Disponibilidad\\b",
+  "\\bObjetado\\s+la\\s+Disponibilidad\\b",
+  "\\bDesarrollado\\s+por\\s+Sistemas\\s+Aries\\b",
+  "\\bDesarrollado\\s+por\\b",
+  "\\bImpreso\\s+por\\b",
+  "\\bVersi[oó]n\\s+AriesNet\\b"
+]
