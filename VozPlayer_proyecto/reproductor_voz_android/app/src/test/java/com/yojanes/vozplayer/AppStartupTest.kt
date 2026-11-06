@@ -6,7 +6,9 @@ import android.widget.FrameLayout
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.content.ComponentName
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -20,6 +22,17 @@ import org.robolectric.annotation.Config
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
 class AppStartupTest {
+
+    /**
+     * Robolectric no sabe conectar un MediaController con un MediaSessionService real
+     * (entrega un ComponentName nulo). Se declara el servicio como no enlazable para
+     * que la conexión falle de forma limpia, como ocurre si el servicio no responde.
+     */
+    @Before
+    fun servicioNoEnlazable() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        shadowOf(app).declareComponentUnbindable(ComponentName(app, PlaybackService::class.java))
+    }
 
     @Test
     fun abreSinPermisos() {

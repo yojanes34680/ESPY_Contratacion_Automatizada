@@ -23,9 +23,6 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Pruebas del buscador por voz
-        run: bash ./gradlew --no-daemon testDebugUnitTest
-
       - name: Compilar APK
         run: bash ./gradlew --no-daemon assembleDebug
 
@@ -33,3 +30,6 @@ jobs:
         with:
           name: VozPlayer-apk
           path: VozPlayer_proyecto/reproductor_voz_android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Pruebas (buscador por voz y arranque de la app)
+        run: bash ./gradlew --no-daemon testDebugUnitTest
