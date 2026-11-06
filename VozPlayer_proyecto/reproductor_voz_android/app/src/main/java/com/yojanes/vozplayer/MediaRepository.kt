@@ -91,8 +91,9 @@ class MediaRepository(private val resolver: ContentResolver) {
                     )
                 }
             }
-        } catch (_: SecurityException) {
-            // Sin permiso para este tipo de medio (p. ej. el usuario sólo autorizó audio).
+        } catch (_: Exception) {
+            // Sin permiso para este tipo de medio (p. ej. sólo se autorizó audio)
+            // o columna no disponible en esta versión de Android: se omite sin cerrar la app.
         }
         return result
     }

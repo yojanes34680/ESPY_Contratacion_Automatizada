@@ -18,4 +18,5 @@
     <string name="choose_result">Encontré %1$d coincidencias, elige una.</string>
     <string name="no_voice_engine">Este teléfono no tiene un servicio de reconocimiento de voz. Instala o activa la app de Google.</string>
     <string name="player_connecting">El reproductor se está iniciando, intenta de nuevo.</string>
+    <string name="crash_report_header">VozPlayer se cerró la última vez por este error. Toma una captura de pantalla y envíala para corregirlo. Cierra y vuelve a abrir la app para usarla normalmente.</string>
 </resources>

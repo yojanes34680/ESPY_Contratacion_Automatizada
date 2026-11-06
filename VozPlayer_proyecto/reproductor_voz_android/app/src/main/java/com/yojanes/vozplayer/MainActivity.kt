@@ -10,6 +10,8 @@ import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.view.View
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (showPreviousCrashIfAny()) return
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -105,11 +108,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (showingCrash) return
         handleExternalIntent(intent)
+    }
+
+    /** true si se mostró el error del cierre anterior (en ese caso no se carga la pantalla normal). */
+    private var showingCrash = false
+
+    private fun showPreviousCrashIfAny(): Boolean {
+        val file = VozPlayerApp.crashFile(application)
+        if (!file.exists()) return false
+        val report = runCatching { file.readText() }.getOrDefault("")
+        file.delete()
+        showingCrash = true
+        val pad = (16 * resources.displayMetrics.density).toInt()
+        val text = TextView(this).apply {
+            setTextIsSelectable(true)
+            setPadding(pad, pad, pad, pad)
+            textSize = 12f
+            this.text = getString(R.string.crash_report_header) + "\n\n" + report
+        }
+        setContentView(ScrollView(this).apply { addView(text) })
+        return true
     }
 
     override fun onStart() {
         super.onStart()
+        if (showingCrash) return
         val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
         val future = MediaController.Builder(this, token).buildAsync()
         controllerFuture = future
@@ -124,6 +149,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
+        if (showingCrash) return super.onStop()
         controller?.removeListener(playerListener)
         binding.playerView.player = null
         controllerFuture?.let { MediaController.releaseFuture(it) }
