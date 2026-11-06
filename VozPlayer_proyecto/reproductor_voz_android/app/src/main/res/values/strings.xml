@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VozPlayer</string>
+    <string name="search_hint">Buscar canción, artista o video</string>
+    <string name="voice_search">Buscar por voz</string>
+    <string name="voice_prompt">Di el nombre de la canción o del video</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_audio">Audio</string>
+    <string name="filter_video">Video</string>
+    <plurals name="files_count">
+        <item quantity="one">%d archivo</item>
+        <item quantity="other">%d archivos</item>
+    </plurals>
+    <string name="permission_needed">Para mostrar tu música y tus videos, permite el acceso a los archivos multimedia. Desliza hacia abajo para volver a intentarlo.</string>
+    <string name="no_media">No se encontraron archivos de audio ni de video en el teléfono.</string>
+    <string name="no_results">No encontré nada parecido a «%1$s».</string>
+    <string name="now_playing">Reproduciendo: %1$s</string>
+    <string name="choose_result">Encontré %1$d coincidencias, elige una.</string>
+    <string name="no_voice_engine">Este teléfono no tiene un servicio de reconocimiento de voz. Instala o activa la app de Google.</string>
+    <string name="player_connecting">El reproductor se está iniciando, intenta de nuevo.</string>
+</resources>
