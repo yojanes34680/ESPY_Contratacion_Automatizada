@@ -47,9 +47,11 @@ class LyricsOnlineTest {
             "Juanes - La Camisa Negra.mp3",
             "Vicente Fernandez - El Rey (Pista).mp3",
             "Como la flor - Selena.mp3",
+            "Amor indio.mp3",
+            "Amor Indio (Pista).mp3",
         )
         val found = files.count { check(it) }
         println("LETRA total encontradas: $found de ${files.size}")
-        assertTrue("Se esperaban al menos 4 letras encontradas", found >= 4)
+        assertTrue("Se esperaban al menos 4 letras encontradas", found >= 5)
     }
 }
