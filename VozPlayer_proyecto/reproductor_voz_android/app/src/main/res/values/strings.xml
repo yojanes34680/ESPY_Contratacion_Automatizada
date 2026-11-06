@@ -19,4 +19,52 @@
     <string name="no_voice_engine">Este teléfono no tiene un servicio de reconocimiento de voz. Instala o activa la app de Google.</string>
     <string name="player_connecting">El reproductor se está iniciando, intenta de nuevo.</string>
     <string name="crash_report_header">VozPlayer se cerró la última vez por este error. Toma una captura de pantalla y envíala para corregirlo. Cierra y vuelve a abrir la app para usarla normalmente.</string>
+
+    <string name="close">Cerrar</string>
+    <string name="no_media_in_folder">No encontré pistas de audio ni video en esta carpeta. Toca el botón de la carpeta para elegir otra.</string>
+
+    <!-- Carpetas -->
+    <string name="folder_whole_phone">Todo el teléfono</string>
+    <string name="folder_dialog_title">¿De dónde cargo las pistas?</string>
+    <string name="folder_add">➕ Agregar carpeta…</string>
+    <string name="folder_remove">Quitar carpeta</string>
+    <string name="folder_drive_help">☁️ ¿Pistas en Google Drive?</string>
+    <string name="folder_not_allowed">Android no permitió usar esa carpeta. Elige otra.</string>
+    <string name="folder_picker_missing">Este teléfono no tiene el selector de carpetas de Android.</string>
+    <string name="drive_help_title">Pistas desde Google Drive</string>
+    <string name="drive_help_message">1. Abre la app de Google Drive.\n2. Entra a tu carpeta de pistas, toca los tres puntos (⋮) y elige «Descargar». Drive la guarda en la carpeta «Descargas» del teléfono.\n3. Vuelve aquí, toca «Agregar carpeta» y elige esa carpeta dentro de «Descargas».\n\nAsí las pistas suenan sin internet y sin cortes durante tus presentaciones.</string>
+
+    <!-- Letras -->
+    <string name="lyrics_button">Letra</string>
+    <string name="lyrics_title">Letra</string>
+    <string name="lyrics_waiting">Conectando con el reproductor…</string>
+    <string name="lyrics_nothing_playing">Reproduce una canción para ver su letra.</string>
+    <string name="lyrics_loading">Buscando la letra…</string>
+    <string name="lyrics_searching">Buscando la letra en internet…</string>
+    <string name="lyrics_none_offline">No hay letra guardada para esta canción y no hay internet.\n\nPuedes poner un archivo .lrc o .txt con el mismo nombre de la pista en su carpeta, o buscarla cuando tengas conexión (se guardará para usarla sin internet).</string>
+    <string name="lyrics_not_found">No encontré la letra.\n\nToca la lupa para corregir el nombre de la canción o del cantante y buscar de nuevo.</string>
+    <string name="lyrics_no_internet">No hay conexión a internet en este momento.</string>
+    <string name="lyrics_source_file">archivo de la carpeta</string>
+    <string name="lyrics_source_saved">guardada en el teléfono</string>
+    <string name="lyrics_source_internet">de internet (guardada)</string>
+    <string name="lyrics_search_title">Buscar letra en internet</string>
+    <string name="lyrics_search_message">Corrige el nombre si hace falta. Si no sabes el cantante, déjalo vacío y la app intentará identificarlo.</string>
+    <string name="lyrics_song_hint">Canción</string>
+    <string name="lyrics_artist_hint">Cantante (opcional)</string>
+    <string name="lyrics_search_go">Buscar</string>
+
+    <!-- Master -->
+    <string name="mixer_button">Master</string>
+    <string name="mixer_title">Master de sonido</string>
+    <string name="mixer_volume">Volumen master</string>
+    <string name="mixer_gain">Ganancia extra (para pistas grabadas bajas)</string>
+    <string name="mixer_eq">Ecualizador</string>
+    <string name="mixer_eq_unavailable">El ecualizador se activa cuando hay una canción cargada. Reproduce una pista y vuelve a abrir este panel.</string>
+    <string name="mixer_bass">Refuerzo de graves</string>
+    <string name="mixer_pitch">Tono (semitonos)</string>
+    <string name="mixer_pitch_reset">Original</string>
+    <string name="mixer_pitch_for">Se guarda para «%1$s».</string>
+    <string name="mixer_pitch_need_song">Reproduce una canción para cambiarle el tono.</string>
+    <string name="mixer_speed">Velocidad (sin cambiar el tono)</string>
+    <string name="mixer_reset_all">Restablecer todo</string>
 </resources>

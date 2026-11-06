@@ -13,6 +13,16 @@ Proyecto independiente del sistema ESPY: no comparte código con el backend ni c
 - Reproducción en segundo plano con la pantalla apagada, notificación con controles, pausa al desconectar audífonos.
 - Aparece en "Abrir con…" para cualquier archivo de audio o video.
 
+### Versión 1.1 (para cantantes)
+- **Carpeta de pistas**: se eligen una o varias carpetas y la app trabaja solo con ellas (incluye subcarpetas).
+  Artista y título se deducen del nombre del archivo ("Artista - Canción.mp3") y de sus etiquetas.
+- **Google Drive**: descargar la carpeta con la app de Drive y elegirla en "Agregar carpeta" (guía dentro de la app).
+- **Panel Master**: volumen, ganancia extra (+12 dB), ecualizador con barras deslizables y presets,
+  refuerzo de graves, tono en semitonos (se recuerda por canción) y velocidad sin cambiar el tono.
+- **Panel de letras**: primero busca `Canción.lrc` o `Canción.txt` junto a la pista; si no hay y hay internet,
+  la busca en LRCLIB identificando al cantante y la guarda para usarla sin conexión. Las letras `.lrc`
+  avanzan solas con la música; tocar una línea salta a esa parte; la pantalla no se apaga.
+
 ## Obtener el APK
 Cada push que toque `reproductor_voz_android/` ejecuta el flujo **VozPlayer Android (APK)** en GitHub Actions.
 Al terminar, descargar el artefacto `VozPlayer-apk` (pestaña *Actions* del repositorio), descomprimirlo y
@@ -35,6 +45,10 @@ cd reproductor_voz_android
 | Archivo | Función |
 |---|---|
 | `VoiceSearchMatcher.kt` | Motor de búsqueda difusa (Kotlin puro, con pruebas JUnit) |
+| `FolderScanner.kt` / `FolderRepository.kt` | Carpetas de pistas elegidas por el usuario |
+| `TrackNameParser.kt` / `MetadataEnricher.kt` | Artista y título desde el nombre del archivo y sus etiquetas |
+| `LyricsRepository.kt` / `LrcParser.kt` / `LyricsActivity.kt` | Panel de letras (archivo local, guardadas e internet) |
+| `AudioFx.kt` / `MixerActivity.kt` / `VerticalFader.kt` | Panel master: ecualizador, ganancia, tono y velocidad |
 | `MediaRepository.kt` | Lectura de audios y videos desde MediaStore |
 | `PlaybackService.kt` | Servicio de reproducción (Media3/ExoPlayer) en segundo plano |
 | `MainActivity.kt` | Lista, filtros, micrófono y reproductor |

@@ -28,6 +28,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.common.util.concurrent.ListenableFuture
 import com.yojanes.vozplayer.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,24 @@ class MainActivity : AppCompatActivity() {
     private var controllerFuture: ListenableFuture<MediaController>? = null
     private val controller: MediaController?
         get() = controllerFuture?.takeIf { it.isDone }?.let { runCatching { it.get() }.getOrNull() }
+
+    private lateinit var folders: FolderRepository
+    private var loadJob: kotlinx.coroutines.Job? = null
+
+    /** Selector de carpeta de pistas (Storage Access Framework). */
+    private val folderPicker =
+        registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            if (uri == null) return@registerForActivityResult
+            try {
+                contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (_: SecurityException) {
+                toast(getString(R.string.folder_not_allowed))
+                return@registerForActivityResult
+            }
+            folders.add(uri)
+            folders.active = FolderRepository.Folder(uri, FolderRepository.nameOf(uri))
+            loadLibrary()
+        }
 
     /** Archivo recibido con "Abrir con..." mientras el reproductor se conecta. */
     private var pendingExternalUri: Uri? = null
@@ -84,13 +103,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        folders = FolderRepository(this)
+        binding.folderButton.setOnClickListener { showFolderDialog() }
+        binding.lyricsButton.setOnClickListener { startActivity(Intent(this, LyricsActivity::class.java)) }
+        binding.mixerButton.setOnClickListener { startActivity(Intent(this, MixerActivity::class.java)) }
+
         binding.list.layoutManager = LinearLayoutManager(this)
         binding.list.adapter = adapter
 
         binding.searchInput.doAfterTextChanged { applyFilter() }
         binding.micButton.setOnClickListener { startVoiceSearch() }
         binding.swipeRefresh.setOnRefreshListener {
-            if (hasMediaPermission()) loadLibrary() else requestMediaPermissions()
+            if (folders.active != null || hasMediaPermission()) loadLibrary() else requestMediaPermissions()
         }
         binding.typeChips.setOnCheckedStateChangeListener { _, checkedIds ->
             typeFilter = when (checkedIds.firstOrNull()) {
@@ -103,7 +127,7 @@ class MainActivity : AppCompatActivity() {
 
         handleExternalIntent(intent)
 
-        if (hasMediaPermission()) loadLibrary() else requestMediaPermissions()
+        if (folders.active != null || hasMediaPermission()) loadLibrary() else requestMediaPermissions()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -188,12 +212,94 @@ class MainActivity : AppCompatActivity() {
     // ---------------------------------------------------------------- Biblioteca
 
     private fun loadLibrary() {
+        val folder = folders.active
+        binding.folderButton.text = folder?.name ?: getString(R.string.folder_whole_phone)
         binding.swipeRefresh.isRefreshing = true
-        lifecycleScope.launch {
-            allEntries = withContext(Dispatchers.IO) { MediaRepository(contentResolver).loadAll() }
+        loadJob?.cancel()
+        loadJob = lifecycleScope.launch {
+            allEntries = withContext(Dispatchers.IO) {
+                if (folder != null) {
+                    runCatching { FolderScanner(contentResolver).scan(folder.uri) }.getOrDefault(emptyList())
+                } else {
+                    MediaRepository(contentResolver).loadAll()
+                }
+            }
+            Library.entries = allEntries
             binding.swipeRefresh.isRefreshing = false
             applyFilter()
+            if (folder != null && allEntries.isNotEmpty()) {
+                // Completa duración y artista leyendo las etiquetas, sin bloquear la pantalla.
+                val enriched = withContext(Dispatchers.IO) {
+                    runCatching { MetadataEnricher(this@MainActivity).enrich(allEntries) }.getOrNull()
+                }
+                if (enriched != null && enriched != allEntries) {
+                    allEntries = enriched
+                    Library.entries = enriched
+                    applyFilter()
+                }
+            }
         }
+    }
+
+    // ---------------------------------------------------------------- Carpetas
+
+    private fun showFolderDialog() {
+        val saved = folders.folders()
+        val active = folders.active
+        val labels = mutableListOf<String>()
+        labels += (if (active == null) "✔ " else "") + getString(R.string.folder_whole_phone)
+        saved.forEach { labels += (if (it.uri == active?.uri) "✔ " else "") + "📁 " + it.name }
+        labels += getString(R.string.folder_add)
+        labels += getString(R.string.folder_drive_help)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.folder_dialog_title)
+            .setItems(labels.toTypedArray()) { _, which ->
+                when {
+                    which == 0 -> {
+                        folders.active = null
+                        if (hasMediaPermission()) loadLibrary() else requestMediaPermissions()
+                    }
+                    which <= saved.size -> {
+                        folders.active = saved[which - 1]
+                        loadLibrary()
+                    }
+                    which == saved.size + 1 -> openFolderPicker()
+                    else -> showDriveHelp()
+                }
+            }
+            .apply {
+                if (saved.isNotEmpty()) setNeutralButton(R.string.folder_remove) { _, _ -> showRemoveFolderDialog() }
+            }
+            .show()
+    }
+
+    private fun openFolderPicker() {
+        try {
+            folderPicker.launch(null)
+        } catch (_: ActivityNotFoundException) {
+            toast(getString(R.string.folder_picker_missing))
+        }
+    }
+
+    private fun showRemoveFolderDialog() {
+        val saved = folders.folders()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.folder_remove)
+            .setItems(saved.map { "📁 " + it.name }.toTypedArray()) { _, which ->
+                folders.remove(saved[which].uri)
+                if (folders.active == null && !hasMediaPermission()) requestMediaPermissions() else loadLibrary()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showDriveHelp() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.drive_help_title)
+            .setMessage(R.string.drive_help_message)
+            .setPositiveButton(R.string.folder_add) { _, _ -> openFolderPicker() }
+            .setNegativeButton(android.R.string.ok, null)
+            .show()
     }
 
     private fun applyFilter() {
@@ -211,6 +317,7 @@ class MainActivity : AppCompatActivity() {
             R.plurals.files_count, visibleEntries.size, visibleEntries.size,
         )
         when {
+            allEntries.isEmpty() && folders.active != null -> showEmpty(getString(R.string.no_media_in_folder))
             allEntries.isEmpty() && hasMediaPermission() -> showEmpty(getString(R.string.no_media))
             allEntries.isEmpty() -> showEmpty(getString(R.string.permission_needed))
             visibleEntries.isEmpty() -> showEmpty(getString(R.string.no_results, query))

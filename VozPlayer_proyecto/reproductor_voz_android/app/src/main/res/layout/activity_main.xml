@@ -16,6 +16,18 @@
         android:textAppearance="?attr/textAppearanceHeadlineSmall"
         android:textStyle="bold" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/folderButton"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/folder_whole_phone"
+        app:icon="@drawable/ic_folder" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -125,6 +137,35 @@
             android:textAppearance="?attr/textAppearanceBodyLarge"
             android:visibility="gone" />
     </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="4dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/lyricsButton"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:text="@string/lyrics_button"
+            app:icon="@drawable/ic_lyrics" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/mixerButton"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
+            android:text="@string/mixer_button"
+            app:icon="@drawable/ic_tune" />
+    </LinearLayout>
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"

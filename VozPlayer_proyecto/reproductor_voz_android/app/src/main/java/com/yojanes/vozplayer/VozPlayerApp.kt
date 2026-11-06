@@ -14,6 +14,7 @@ class VozPlayerApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AudioFx.init(this)
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, error ->
             runCatching {

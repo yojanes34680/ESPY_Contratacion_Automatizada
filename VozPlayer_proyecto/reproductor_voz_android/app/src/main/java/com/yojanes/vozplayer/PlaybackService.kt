@@ -5,7 +5,10 @@ import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 
@@ -29,6 +32,20 @@ class PlaybackService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true) // pausa si se desconectan los audífonos
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
+        AudioFx.init(this)
+        player.volume = AudioFx.masterVolume
+        AudioFx.attach(player.audioSessionId)
+        player.addAnalyticsListener(object : AnalyticsListener {
+            override fun onAudioSessionIdChanged(eventTime: AnalyticsListener.EventTime, audioSessionId: Int) {
+                AudioFx.attach(audioSessionId)
+            }
+        })
+        // El tono se recuerda por canción: se aplica cada vez que cambia la pista.
+        player.addListener(object : Player.Listener {
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                player.playbackParameters = AudioFx.playbackParametersFor(mediaItem?.mediaId)
+            }
+        })
         session = MediaSession.Builder(this, player).build()
     }
 
@@ -42,6 +59,7 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        AudioFx.releaseEffects()
         session?.run {
             player.release()
             release()

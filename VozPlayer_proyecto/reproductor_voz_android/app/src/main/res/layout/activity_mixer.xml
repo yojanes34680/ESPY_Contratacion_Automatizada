@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/closeButton"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/close"
+            app:icon="@drawable/ic_close" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/mixer_title"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="32dp">
+
+            <!-- Volumen -->
+            <TextView
+                style="@style/MixerSection"
+                android:text="@string/mixer_volume" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/volumeSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="100" />
+
+            <TextView
+                style="@style/MixerLabel"
+                android:text="@string/mixer_gain" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/gainSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="12" />
+
+            <!-- Ecualizador -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/MixerSection"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/mixer_eq" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/eqSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/eqUnavailable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="@string/mixer_eq_unavailable"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:visibility="gone" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/presetChips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleLine="true" />
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:id="@+id/bandsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp" />
+
+            <TextView
+                style="@style/MixerLabel"
+                android:text="@string/mixer_bass" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/bassSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stepSize="1"
+                android:valueFrom="0"
+                android:valueTo="100" />
+
+            <!-- Tono y velocidad -->
+            <TextView
+                style="@style/MixerSection"
+                android:text="@string/mixer_pitch" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/pitchDown"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:text="♭" />
+
+                <TextView
+                    android:id="@+id/pitchValue"
+                    android:layout_width="96dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textAppearance="?attr/textAppearanceHeadlineMedium"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/pitchUp"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="64dp"
+                    android:layout_height="wrap_content"
+                    android:text="♯" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/pitchReset"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mixer_pitch_reset" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/pitchHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="?attr/textAppearanceBodySmall" />
+
+            <TextView
+                style="@style/MixerLabel"
+                android:text="@string/mixer_speed" />
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/speedSlider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stepSize="5"
+                android:valueFrom="50"
+                android:valueTo="150" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/resetAllButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/mixer_reset_all" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

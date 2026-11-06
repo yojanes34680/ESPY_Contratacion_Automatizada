@@ -12,6 +12,10 @@ data class MediaEntry(
     val displayName: String,
     val durationMs: Long,
     val isVideo: Boolean,
+    /** Archivo de letra (.lrc o .txt) con el mismo nombre, en la misma carpeta, si existe. */
+    val lyricsUri: String? = null,
+    /** Fecha de modificación del archivo (para refrescar la caché de metadatos). */
+    val modified: Long = 0L,
 ) {
     /** Nombre del archivo sin extensión (muchas grabaciones de músicos no tienen etiquetas). */
     val fileNameWithoutExtension: String

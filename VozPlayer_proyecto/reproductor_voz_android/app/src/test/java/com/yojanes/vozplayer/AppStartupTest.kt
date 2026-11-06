@@ -76,6 +76,30 @@ class AppStartupTest {
     }
 
     @Test
+    fun abrePanelMaster() {
+        ActivityScenario.launch(MixerActivity::class.java).use { s ->
+            s.onActivity { assertEquals(false, it.isFinishing) }
+        }
+    }
+
+    @Test
+    fun abrePanelDeLetras() {
+        ActivityScenario.launch(LyricsActivity::class.java).use { s ->
+            s.onActivity { assertEquals(false, it.isFinishing) }
+        }
+    }
+
+    @Test
+    fun faderDelEcualizador() {
+        ActivityScenario.launch(MainActivity::class.java).use { s ->
+            s.onActivity { activity ->
+                val fader = VerticalFader(activity).apply { min = -1500; max = 1500; value = 2000 }
+                assertEquals(1500, fader.value)
+            }
+        }
+    }
+
+    @Test
     fun iniciaServicioDeReproduccion() {
         val controller = Robolectric.buildService(PlaybackService::class.java).create()
         controller.destroy()
