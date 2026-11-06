@@ -28,7 +28,8 @@ class LyricsOnlineTest {
         val r = repo.searchOnline(e, e.artist, e.title)
         val desc = when (r) {
             is LyricsRepository.OnlineResult.Found ->
-                "ENCONTRADA: ${r.lyrics.artist} – ${r.lyrics.title} (sincronizada=${r.lyrics.synced.isNotEmpty()}) " +
+                "ENCONTRADA" + (r.lyrics.otherVersionOf?.let { " (otra versión; pedida: $it)" } ?: "") +
+                    ": ${r.lyrics.artist} – ${r.lyrics.title} (sincronizada=${r.lyrics.synced.isNotEmpty()}) " +
                     r.lyrics.plain.lines().firstOrNull { it.isNotBlank() }.orEmpty()
             is LyricsRepository.OnlineResult.NotFound -> "NO ENCONTRADA. Buscó: ${r.searched}"
             is LyricsRepository.OnlineResult.NoConnection -> "SIN CONEXIÓN: ${r.detail}"
@@ -49,9 +50,11 @@ class LyricsOnlineTest {
             "Como la flor - Selena.mp3",
             "Amor indio.mp3",
             "Amor Indio (Pista).mp3",
+            "Caballero Gaucho - Amor indio (Pista).mp3",
+            "Amor indio - Caballero Gaucho.mp3",
         )
         val found = files.count { check(it) }
         println("LETRA total encontradas: $found de ${files.size}")
-        assertTrue("Se esperaban al menos 4 letras encontradas", found >= 5)
+        assertTrue("Se esperaban al menos 4 letras encontradas", found >= 7)
     }
 }

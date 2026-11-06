@@ -176,7 +176,11 @@ class LyricsActivity : AppCompatActivity() {
             LyricsRepository.Source.INTERNET -> getString(R.string.lyrics_source_internet)
         }
         val who = listOf(lyrics.artist, lyrics.title).filter { it.isNotBlank() }.joinToString(" – ")
-        binding.songInfo.text = listOf(who, sourceText).filter { it.isNotBlank() }.joinToString("  ·  ")
+        val warning = lyrics.otherVersionOf?.let { getString(R.string.lyrics_other_version, it, lyrics.artist) }
+        binding.songInfo.text = listOfNotNull(
+            warning,
+            listOf(who, sourceText).filter { it.isNotBlank() }.joinToString("  ·  "),
+        ).joinToString("\n")
         synced = lyrics.synced
         if (synced.isNotEmpty()) {
             adapter.submit(synced, isSynced = true)

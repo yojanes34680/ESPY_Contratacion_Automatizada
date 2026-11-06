@@ -28,6 +28,8 @@ class LyricsRepository(private val context: Context) {
         val synced: List<LyricLine>,
         val plain: String,
         val source: Source,
+        /** Cantante pedido cuando la letra encontrada es de otra versión de la canción. */
+        val otherVersionOf: String? = null,
     )
 
     private val dir = File(context.filesDir, "letras").apply { mkdirs() }
@@ -50,6 +52,7 @@ class LyricsRepository(private val context: Context) {
                     o.optString("artista"), o.optString("titulo"),
                     LrcParser.parse(lrc), o.optString("texto").ifBlank { LrcParser.toPlain(lrc) },
                     Source.SAVED,
+                    o.optString("otra_version_de").ifBlank { null },
                 )
             }
         }
@@ -137,6 +140,29 @@ class LyricsRepository(private val context: Context) {
                 val text = o?.optString("lyrics").orEmpty().replace("\r\n", "\n").trim()
                 if (text.isNotBlank()) return OnlineResult.Found(save(entry, a, t, "", text))
             }
+
+            // Última opción: la misma canción interpretada por otro cantante.
+            if (artist.isNotBlank()) {
+                val others = mutableListOf<JSONObject>()
+                for (t in listOf(title, artist).filter { it.isNotBlank() }) {
+                    searched += "«$t» (cualquier cantante)"
+                    others += array(getJson("https://lrclib.net/api/search?" + q("track_name", t)))
+                    val match = usable(others).filter { o ->
+                        VoiceSearchMatcher.similarity(
+                            VoiceSearchMatcher.normalize(t), VoiceSearchMatcher.normalize(o.optString("trackName")),
+                        ) >= 0.85
+                    }.maxByOrNull { score(it, "", t, durationSec) + popularity(it, others) }
+                    if (match != null) {
+                        val lrc = match.optString("syncedLyrics").takeUnless { it == "null" }.orEmpty()
+                        val plain = match.optString("plainLyrics").takeUnless { it == "null" }.orEmpty()
+                            .ifBlank { LrcParser.toPlain(lrc) }
+                        val requested = if (t == title) artist else title
+                        return OnlineResult.Found(
+                            save(entry, match.optString("artistName"), match.optString("trackName"), lrc, plain, requested),
+                        )
+                    }
+                }
+            }
         } catch (e: NetworkFailure) {
             return OnlineResult.NoConnection(e.message.orEmpty())
         }
@@ -149,8 +175,21 @@ class LyricsRepository(private val context: Context) {
                 it.optString("plainLyrics").let { s -> s.isNotBlank() && s != "null" })
     }
 
-    private fun save(entry: MediaEntry, artist: String, title: String, lrc: String, plain: String): Lyrics {
-        val result = Lyrics(artist, title, LrcParser.parse(lrc), plain, Source.INTERNET)
+    /** Cuántas veces aparece el mismo cantante entre los resultados (versión más conocida). */
+    private fun popularity(o: JSONObject, all: List<JSONObject>): Double {
+        val a = VoiceSearchMatcher.normalize(o.optString("artistName"))
+        return 0.1 * all.count { VoiceSearchMatcher.normalize(it.optString("artistName")) == a }
+    }
+
+    private fun save(
+        entry: MediaEntry,
+        artist: String,
+        title: String,
+        lrc: String,
+        plain: String,
+        otherVersionOf: String? = null,
+    ): Lyrics {
+        val result = Lyrics(artist, title, LrcParser.parse(lrc), plain, Source.INTERNET, otherVersionOf)
         runCatching {
             cacheFile(entry.uri).writeText(
                 JSONObject()
@@ -158,6 +197,7 @@ class LyricsRepository(private val context: Context) {
                     .put("titulo", title)
                     .put("lrc", lrc)
                     .put("texto", plain)
+                    .put("otra_version_de", otherVersionOf.orEmpty())
                     .toString(),
             )
         }
