@@ -3,38 +3,65 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_app"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <TextView
+    <!-- Encabezado -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="16dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="16dp"
-        android:text="@string/app_name"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-        android:textStyle="bold" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="16dp">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/folderButton"
-        style="@style/Widget.Material3.Button.TonalButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:text="@string/folder_whole_phone"
-        app:icon="@drawable/ic_folder" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/appTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@android:color/white"
+                android:textSize="30sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_tagline"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/folderButton"
+            style="@style/GlassButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxWidth="170dp"
+            android:maxLines="1"
+            android:text="@string/folder_whole_phone"
+            android:textSize="13sp"
+            app:icon="@drawable/ic_folder"
+            app:iconSize="18dp" />
+    </LinearLayout>
+
+    <!-- Buscador + micrófono -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingTop="8dp"
+        android:paddingTop="14dp"
         android:paddingEnd="16dp">
 
         <com.google.android.material.textfield.TextInputLayout
@@ -43,7 +70,18 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="@string/search_hint"
-            app:endIconMode="clear_text">
+            android:textColorHint="@color/text_tertiary"
+            app:boxBackgroundColor="@color/glass"
+            app:boxCornerRadiusBottomEnd="28dp"
+            app:boxCornerRadiusBottomStart="28dp"
+            app:boxCornerRadiusTopEnd="28dp"
+            app:boxCornerRadiusTopStart="28dp"
+            app:boxStrokeColor="@color/box_stroke"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/text_secondary"
+            app:hintTextColor="@color/neon_cyan"
+            app:startIconDrawable="@drawable/ic_search"
+            app:startIconTint="@color/text_secondary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/searchInput"
@@ -51,25 +89,33 @@
                 android:layout_height="wrap_content"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
-                android:maxLines="1" />
+                android:maxLines="1"
+                android:textColor="@android:color/white" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <ImageButton
             android:id="@+id/micButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_mic_button"
             android:contentDescription="@string/voice_search"
-            app:srcCompat="@drawable/ic_mic" />
+            android:elevation="10dp"
+            android:padding="16dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_mic" />
     </LinearLayout>
 
+    <!-- Filtros -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp">
+        android:paddingTop="6dp"
+        android:paddingEnd="20dp">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/typeChips"
@@ -82,21 +128,21 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAll"
-                style="@style/Widget.Material3.Chip.Filter"
+                style="@style/NeonChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filter_all" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAudio"
-                style="@style/Widget.Material3.Chip.Filter"
+                style="@style/NeonChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filter_audio" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipVideo"
-                style="@style/Widget.Material3.Chip.Filter"
+                style="@style/NeonChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/filter_video" />
@@ -106,9 +152,12 @@
             android:id="@+id/countText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceLabelMedium" />
+            android:textColor="@color/neon_cyan"
+            android:textSize="13sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- Lista de pistas -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -124,7 +173,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingBottom="8dp" />
+                android:paddingTop="4dp"
+                android:paddingBottom="12dp" />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <TextView
@@ -132,23 +182,39 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_margin="24dp"
+            android:background="@drawable/bg_glass"
             android:gravity="center"
-            android:padding="32dp"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:padding="24dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
             android:visibility="gone" />
     </FrameLayout>
 
+    <!-- Video (solo cuando la pista es un video) -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="210dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:background="@android:color/black"
+        android:visibility="gone"
+        app:use_controller="false" />
+
+    <!-- Letra y Master -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingBottom="4dp">
+        android:paddingBottom="8dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/lyricsButton"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/GlassButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
@@ -158,21 +224,22 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/mixerButton"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/GlassButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:layout_weight="1"
             android:text="@string/mixer_button"
-            app:icon="@drawable/ic_tune" />
+            app:icon="@drawable/ic_tune"
+            app:iconTint="@color/neon_orange" />
     </LinearLayout>
 
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/playerView"
+    <!-- Sonando ahora -->
+    <com.yojanes.vozplayer.NowPlayingView
+        android:id="@+id/nowPlaying"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:background="@android:color/black"
-        android:visibility="gone"
-        app:show_buffering="when_playing"
-        app:show_shuffle_button="true" />
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp" />
 </LinearLayout>

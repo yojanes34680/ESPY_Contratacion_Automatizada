@@ -165,6 +165,7 @@ class MainActivity : AppCompatActivity() {
         future.addListener({
             val c = controller ?: return@addListener
             binding.playerView.player = c
+            binding.nowPlaying.player = c
             c.addListener(playerListener)
             adapter.setPlaying(c.currentMediaItem?.mediaId)
             updatePlayerMode()
@@ -176,6 +177,7 @@ class MainActivity : AppCompatActivity() {
         if (showingCrash) return super.onStop()
         controller?.removeListener(playerListener)
         binding.playerView.player = null
+        binding.nowPlaying.player = null
         controllerFuture?.let { MediaController.releaseFuture(it) }
         controllerFuture = null
         super.onStop()
@@ -416,29 +418,11 @@ class MainActivity : AppCompatActivity() {
         updatePlayerMode()
     }
 
-    /** Pantalla grande para video; barra compacta de controles para audio. */
+    /** El video se muestra solo cuando la pista es un video; los controles están en "Sonando ahora". */
     private fun updatePlayerMode() {
         val c = controller
-        val pv = binding.playerView
-        if (c == null || c.mediaItemCount == 0) {
-            pv.visibility = View.GONE
-            return
-        }
-        pv.visibility = View.VISIBLE
-        val isVideo = c.currentTracks.isTypeSupported(C.TRACK_TYPE_VIDEO)
-        val heightDp = if (isVideo) 240 else 150
-        val heightPx = (heightDp * resources.displayMetrics.density).toInt()
-        if (pv.layoutParams.height != heightPx) {
-            pv.layoutParams = pv.layoutParams.also { it.height = heightPx }
-        }
-        if (isVideo) {
-            pv.setControllerShowTimeoutMs(3000)
-            pv.setControllerHideOnTouch(true)
-        } else {
-            pv.setControllerShowTimeoutMs(0)
-            pv.setControllerHideOnTouch(false)
-            pv.showController()
-        }
+        val isVideo = c != null && c.mediaItemCount > 0 && c.currentTracks.isTypeSupported(C.TRACK_TYPE_VIDEO)
+        binding.playerView.visibility = if (isVideo) View.VISIBLE else View.GONE
     }
 
     private fun toast(message: String) {

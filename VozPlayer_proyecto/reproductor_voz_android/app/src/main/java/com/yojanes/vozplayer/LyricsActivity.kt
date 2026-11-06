@@ -97,8 +97,7 @@ class LyricsActivity : AppCompatActivity() {
         controllerFuture = future
         future.addListener({
             val c = controller ?: return@addListener
-            binding.controls.player = c
-            binding.controls.show()
+            binding.nowPlaying.player = c
             c.addListener(playerListener)
             loadForCurrent()
         }, ContextCompat.getMainExecutor(this))
@@ -108,7 +107,7 @@ class LyricsActivity : AppCompatActivity() {
     override fun onStop() {
         handler.removeCallbacks(ticker)
         controller?.removeListener(playerListener)
-        binding.controls.player = null
+        binding.nowPlaying.player = null
         controllerFuture?.let { MediaController.releaseFuture(it) }
         controllerFuture = null
         super.onStop()

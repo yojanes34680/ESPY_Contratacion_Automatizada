@@ -134,6 +134,8 @@ class MixerActivity : AppCompatActivity() {
             val db = TextView(this).apply {
                 gravity = Gravity.CENTER
                 textSize = 12f
+                setTextColor(ContextCompat.getColor(this@MixerActivity, R.color.neon_cyan))
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
             }
             val fader = VerticalFader(this).apply {
                 min = range.first
@@ -148,7 +150,8 @@ class MixerActivity : AppCompatActivity() {
             db.text = formatDb(fader.value)
             val freq = TextView(this).apply {
                 gravity = Gravity.CENTER
-                textSize = 12f
+                textSize = 11f
+                setTextColor(ContextCompat.getColor(this@MixerActivity, R.color.text_secondary))
                 text = AudioFx.bandFrequencyLabel(band)
             }
             column.addView(db)
@@ -159,8 +162,9 @@ class MixerActivity : AppCompatActivity() {
         }
         AudioFx.presetNames().forEachIndexed { index, name ->
             binding.presetChips.addView(
-                Chip(this).apply {
+                Chip(this, null, R.attr.neonChipStyle).apply {
                     text = name
+                    isCheckable = false
                     setOnClickListener {
                         AudioFx.usePreset(index)
                         faders.forEachIndexed { band, (f, t) ->

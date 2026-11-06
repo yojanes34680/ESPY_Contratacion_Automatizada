@@ -2,12 +2,13 @@ package com.yojanes.vozplayer
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import com.google.android.material.color.MaterialColors
 
 /** Barra deslizante vertical, como el fader de una consola de sonido. */
 class VerticalFader @JvmOverloads constructor(
@@ -26,14 +27,27 @@ class VerticalFader @JvmOverloads constructor(
     var onValueChange: ((Int) -> Unit)? = null
 
     private val density = resources.displayMetrics.density
-    private val primary = MaterialColors.getColor(this, androidx.appcompat.R.attr.colorPrimary)
-    private val onSurface = MaterialColors.getColor(this, com.google.android.material.R.attr.colorOnSurface)
+    private val pink = 0xFFFF3D9A.toInt()
+    private val cyan = 0xFF22D3EE.toInt()
+    private val purple = 0xFF8B5CF6.toInt()
 
-    private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = onSurface; alpha = 50 }
-    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primary }
-    private val zeroPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = onSurface; alpha = 120; strokeWidth = 1.5f * density }
-    private val thumbPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = primary }
-    private val thumbLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); strokeWidth = 2 * density }
+    private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x26FFFFFF }
+    private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { alpha = 90 }
+    private val zeroPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x80FFFFFF.toInt(); strokeWidth = 1.5f * density }
+    private val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x33FFFFFF; strokeWidth = 1f * density }
+    private val thumbPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFFFFFFF.toInt()
+        setShadowLayer(10 * density, 0f, 0f, pink)
+    }
+    private val thumbLine = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = pink; strokeWidth = 2.5f * density }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        val shader = LinearGradient(0f, pad, 0f, h - pad, intArrayOf(pink, purple, cyan), null, Shader.TileMode.CLAMP)
+        fillPaint.shader = shader
+        glowPaint.shader = LinearGradient(0f, pad, 0f, h - pad, intArrayOf(pink, purple, cyan), null, Shader.TileMode.CLAMP)
+    }
 
     private val pad = 14 * density
     private val rect = RectF()
@@ -51,15 +65,23 @@ class VerticalFader @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         val cx = width / 2f
-        val trackW = 6 * density
+        val trackW = 8 * density
+        // Marcas de la escala, como en una consola.
+        for (i in 0..10) {
+            val y = pad + i * (height - 2 * pad) / 10
+            canvas.drawLine(cx - 14 * density, y, cx - 9 * density, y, tickPaint)
+            canvas.drawLine(cx + 9 * density, y, cx + 14 * density, y, tickPaint)
+        }
         rect.set(cx - trackW / 2, pad, cx + trackW / 2, height - pad)
         canvas.drawRoundRect(rect, trackW, trackW, trackPaint)
 
         val zero = (if (min < 0 && max > 0) 0 else min)
         val yZero = yFor(zero)
         val yVal = yFor(value)
+        rect.set(cx - trackW * 1.6f, minOf(yZero, yVal), cx + trackW * 1.6f, maxOf(yZero, yVal))
+        canvas.drawRoundRect(rect, trackW, trackW, glowPaint)
         rect.set(cx - trackW / 2, minOf(yZero, yVal), cx + trackW / 2, maxOf(yZero, yVal))
-        canvas.drawRect(rect, fillPaint)
+        canvas.drawRoundRect(rect, trackW / 2, trackW / 2, fillPaint)
         canvas.drawLine(cx - 12 * density, yZero, cx + 12 * density, yZero, zeroPaint)
 
         val tw = 18 * density

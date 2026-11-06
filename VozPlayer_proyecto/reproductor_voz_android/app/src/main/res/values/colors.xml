@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand">#5E35B1</color>
-    <color name="brand_dark">#B39DDB</color>
-    <color name="playing_highlight">#335E35B1</color>
-    <color name="icon_circle">#1A5E35B1</color>
+    <!-- Escenario nocturno -->
+    <color name="bg_top">#0B0620</color>
+    <color name="bg_mid">#1B0A3C</color>
+    <color name="bg_bottom">#3A0E4F</color>
+    <color name="surface">#160B33</color>
+    <color name="surface_variant">#24124A</color>
+
+    <!-- Luces de neón -->
+    <color name="neon_pink">#FF3D9A</color>
+    <color name="neon_purple">#8B5CF6</color>
+    <color name="neon_cyan">#22D3EE</color>
+    <color name="neon_orange">#FF8A3D</color>
+    <color name="neon_yellow">#FACC15</color>
+
+    <!-- Cristal -->
+    <color name="glass">#1AFFFFFF</color>
+    <color name="glass_strong">#26FFFFFF</color>
+    <color name="glass_stroke">#33FFFFFF</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_tertiary">#80FFFFFF</color>
+
+    <!-- Compatibilidad con nombres anteriores -->
+    <color name="brand">#8B5CF6</color>
+    <color name="brand_dark">#FF3D9A</color>
+    <color name="playing_highlight">#33FF3D9A</color>
+    <color name="icon_circle">#1AFFFFFF</color>
 </resources>

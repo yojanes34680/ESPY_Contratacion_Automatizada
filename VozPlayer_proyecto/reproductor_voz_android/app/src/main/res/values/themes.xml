@@ -1,20 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.VozPlayer" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/brand</item>
-        <item name="colorSecondary">@color/brand</item>
-        <item name="colorSecondaryContainer">@color/brand</item>
-        <item name="colorOnSecondaryContainer">@android:color/white</item>
-        <item name="colorPrimaryContainer">@color/brand</item>
+    <!-- Tema de escenario: siempre oscuro con acentos de neón -->
+    <style name="Theme.VozPlayer" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/neon_pink</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorPrimaryContainer">@color/neon_purple</item>
         <item name="colorOnPrimaryContainer">@android:color/white</item>
+        <item name="colorSecondary">@color/neon_cyan</item>
+        <item name="colorOnSecondary">@color/bg_top</item>
+        <item name="colorSecondaryContainer">@color/surface_variant</item>
+        <item name="colorOnSecondaryContainer">@android:color/white</item>
+        <item name="colorTertiary">@color/neon_orange</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@android:color/white</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorSurfaceContainerHigh">@color/surface_variant</item>
+        <item name="colorSurfaceContainer">@color/surface</item>
+        <item name="android:colorBackground">@color/bg_top</item>
+        <item name="android:windowBackground">@drawable/bg_app</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/bg_bottom</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="neonChipStyle">@style/NeonChip</item>
+    </style>
+
+    <!-- Botón de cristal (Letra, Master, Carpeta) -->
+    <style name="GlassButton" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/glass_strong</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="iconTint">@color/neon_cyan</item>
+        <item name="strokeColor">@color/glass_stroke</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cornerRadius">22dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">52dp</item>
+    </style>
+
+    <style name="NeonChip" parent="Widget.Material3.Chip.Filter">
+        <item name="chipBackgroundColor">@color/chip_bg</item>
+        <item name="chipStrokeColor">@color/glass_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="checkedIconTint">@android:color/white</item>
+        <item name="chipCornerRadius">18dp</item>
+    </style>
+
+    <style name="NeonSlider" parent="Widget.Material3.Slider">
+        <item name="trackColorActive">@color/neon_pink</item>
+        <item name="trackColorInactive">@color/glass_strong</item>
+        <item name="thumbColor">@android:color/white</item>
+        <item name="haloColor">#40FF3D9A</item>
+        <item name="tickVisible">false</item>
+        <item name="labelBehavior">floating</item>
+    </style>
+
+    <style name="GlassCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">14dp</item>
+        <item name="android:background">@drawable/bg_glass</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:padding">16dp</item>
     </style>
 
     <style name="MixerSection">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingTop">20dp</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:textAppearance">?attr/textAppearanceTitleMedium</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:textColor">@color/neon_cyan</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.12</item>
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -22,6 +82,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingTop">8dp</item>
-        <item name="android:textAppearance">?attr/textAppearanceBodyMedium</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">14sp</item>
     </style>
 </resources>

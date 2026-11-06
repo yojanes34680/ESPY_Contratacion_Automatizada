@@ -38,8 +38,12 @@ class MediaAdapter(
             formatDuration(item.durationMs),
             item.extension,
         ).filter { it.isNotBlank() }.joinToString("  ·  ")
+        val playing = item.uri == playingUri
+        val density = b.root.resources.displayMetrics.density
+        b.artwork.background = Artwork.background(item.uri, 14 * density)
+        b.artwork.text = if (playing) "▶" else Artwork.initial(item.title)
         b.icon.setImageResource(if (item.isVideo) R.drawable.ic_video else R.drawable.ic_music)
-        b.root.isActivated = item.uri == playingUri
+        b.root.isActivated = playing
         b.root.setOnClickListener {
             val pos = holder.bindingAdapterPosition
             if (pos != RecyclerView.NO_POSITION) onClick(pos)

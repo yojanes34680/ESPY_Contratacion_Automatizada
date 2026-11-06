@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_now_playing"
+    android:elevation="12dp"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="64dp"
+            android:layout_height="64dp">
+
+            <TextView
+                android:id="@+id/npArtwork"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="♪"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/npArtImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_art_rounded"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/npTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/npArtist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#E6FFFFFF"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/npSeek"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:progressBackgroundTint="#66FFFFFF"
+        android:progressTint="@android:color/white"
+        android:thumbTint="@android:color/white" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
+
+        <TextView
+            android:id="@+id/npPosition"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/npDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/npShuffle"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_round_ripple"
+            android:contentDescription="@string/np_shuffle"
+            android:src="@drawable/ic_shuffle" />
+
+        <ImageButton
+            android:id="@+id/npPrev"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_round_ripple"
+            android:contentDescription="@string/np_previous"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_skip_previous" />
+
+        <ImageButton
+            android:id="@+id/npPlay"
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_play_button"
+            android:contentDescription="@string/np_play_pause"
+            android:elevation="6dp"
+            android:padding="18dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_play" />
+
+        <ImageButton
+            android:id="@+id/npNext"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_round_ripple"
+            android:contentDescription="@string/np_next"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_skip_next" />
+
+        <ImageButton
+            android:id="@+id/npRepeat"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_round_ripple"
+            android:contentDescription="@string/np_repeat"
+            android:src="@drawable/ic_repeat" />
+    </LinearLayout>
+</LinearLayout>

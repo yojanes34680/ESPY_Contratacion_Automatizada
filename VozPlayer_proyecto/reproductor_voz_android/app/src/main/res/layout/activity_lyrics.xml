@@ -3,17 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_lyrics"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="@drawable/bg_glass"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="8dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="8dp">
+        android:padding="6dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/closeButton"
@@ -21,7 +22,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/close"
-            app:icon="@drawable/ic_close" />
+            app:icon="@drawable/ic_close"
+            app:iconTint="@android:color/white" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -36,7 +38,8 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="@string/lyrics_title"
-                android:textAppearance="?attr/textAppearanceTitleMedium"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -44,8 +47,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:maxLines="2"
-                android:textAppearance="?attr/textAppearanceBodySmall" />
+                android:maxLines="3"
+                android:textColor="@color/neon_cyan"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -54,7 +58,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
-            android:text="A−" />
+            android:text="A−"
+            android:textColor="@android:color/white" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/biggerButton"
@@ -62,15 +67,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:minWidth="0dp"
-            android:text="A+" />
+            android:text="A+"
+            android:textColor="@android:color/white"
+            android:textSize="17sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/searchButton"
-            style="@style/Widget.Material3.Button.IconButton"
+            style="@style/Widget.Material3.Button.IconButton.Filled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/lyrics_search_title"
-            app:icon="@drawable/ic_search" />
+            app:backgroundTint="@color/neon_pink"
+            app:icon="@drawable/ic_search"
+            app:iconTint="@android:color/white" />
     </LinearLayout>
 
     <FrameLayout
@@ -83,23 +92,27 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
+            android:fadingEdgeLength="80dp"
             android:paddingTop="24dp"
-            android:paddingBottom="240dp" />
+            android:paddingBottom="240dp"
+            android:requiresFadingEdge="vertical" />
 
         <TextView
             android:id="@+id/messageText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_margin="24dp"
+            android:background="@drawable/bg_glass"
             android:gravity="center"
-            android:padding="32dp"
-            android:textAppearance="?attr/textAppearanceBodyLarge" />
+            android:padding="24dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp" />
     </FrameLayout>
 
-    <androidx.media3.ui.PlayerControlView
-        android:id="@+id/controls"
+    <com.yojanes.vozplayer.NowPlayingView
+        android:id="@+id/nowPlaying"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/black"
-        app:show_timeout="0" />
+        android:layout_margin="10dp" />
 </LinearLayout>
