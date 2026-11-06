@@ -137,7 +137,7 @@ class NowPlayingView @JvmOverloads constructor(
         val artKey = key + "|" + (artwork?.size ?: 0)
         if (artKey == lastArtKey) return
         lastArtKey = artKey
-        b.npArtwork.background = Artwork.background(key, 18 * density)
+        b.npArtwork.background = Artwork.background(key, 16 * density)
         b.npArtwork.text = initial
         val bmp = artwork?.let { runCatching { BitmapFactory.decodeByteArray(it, 0, it.size) }.getOrNull() }
         if (bmp != null) {

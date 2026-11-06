@@ -72,7 +72,7 @@
     <string name="mixer_reset_all">Restablecer todo</string>
 
     <!-- Sonando ahora -->
-    <string name="app_tagline">Tu escenario · tus pistas 🎤</string>
+    <string name="app_tagline">Tu escenario, tus pistas</string>
     <string name="np_idle_title">Elige una pista para empezar</string>
     <string name="np_idle_subtitle">Toca una canción o di su nombre con el micrófono</string>
     <string name="np_unknown_artist">Artista desconocido</string>

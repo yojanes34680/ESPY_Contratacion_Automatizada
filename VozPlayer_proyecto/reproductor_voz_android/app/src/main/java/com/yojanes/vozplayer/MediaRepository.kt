@@ -66,7 +66,13 @@ class MediaRepository(private val resolver: ContentResolver) {
         isVideo: Boolean,
     ): List<MediaEntry> {
         val result = mutableListOf<MediaEntry>()
-        val projection = arrayOf(idCol, titleCol, artistCol, albumCol, nameCol, durationCol)
+        val pathCol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.MediaColumns.RELATIVE_PATH
+        } else {
+            @Suppress("DEPRECATION")
+            MediaStore.MediaColumns.DATA
+        }
+        val projection = arrayOf(idCol, titleCol, artistCol, albumCol, nameCol, durationCol, pathCol)
         try {
             resolver.query(collection, projection, selection, null, null)?.use { c ->
                 val iId = c.getColumnIndexOrThrow(idCol)
@@ -75,9 +81,12 @@ class MediaRepository(private val resolver: ContentResolver) {
                 val iAlbum = c.getColumnIndexOrThrow(albumCol)
                 val iName = c.getColumnIndexOrThrow(nameCol)
                 val iDuration = c.getColumnIndexOrThrow(durationCol)
+                val iPath = c.getColumnIndex(pathCol)
                 while (c.moveToNext()) {
                     val id = c.getLong(iId)
                     val name = c.getString(iName).orEmpty()
+                    val path = if (iPath >= 0) c.getString(iPath).orEmpty() else ""
+                    if (isChatAudio(path, name)) continue
                     val title = c.getString(iTitle).clean()
                         .ifBlank { name.substringBeforeLast('.', name) }
                     result += MediaEntry(
@@ -96,6 +105,13 @@ class MediaRepository(private val resolver: ContentResolver) {
             // o columna no disponible en esta versión de Android: se omite sin cerrar la app.
         }
         return result
+    }
+
+    /** Notas de voz y audios de WhatsApp/Telegram: no son pistas. */
+    private fun isChatAudio(path: String, name: String): Boolean {
+        val p = path.lowercase()
+        return "whatsapp" in p || "telegram" in p ||
+            Regex("^(aud|ptt)-\\d{8}-wa\\d+", RegexOption.IGNORE_CASE).containsMatchIn(name)
     }
 
     private fun String?.clean(): String =
