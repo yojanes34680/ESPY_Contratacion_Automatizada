@@ -40,7 +40,9 @@ android {
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
                 showStackTraces = true
                 showCauses = true
+                showStandardStreams = true
             }
+            it.environment("LETRAS_EN_LINEA", System.getenv("LETRAS_EN_LINEA") ?: "0")
         }
     }
 }

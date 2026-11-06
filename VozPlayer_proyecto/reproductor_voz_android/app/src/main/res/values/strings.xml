@@ -43,6 +43,8 @@
     <string name="lyrics_searching">Buscando la letra en internet…</string>
     <string name="lyrics_none_offline">No hay letra guardada para esta canción y no hay internet.\n\nPuedes poner un archivo .lrc o .txt con el mismo nombre de la pista en su carpeta, o buscarla cuando tengas conexión (se guardará para usarla sin internet).</string>
     <string name="lyrics_not_found">No encontré la letra.\n\nToca la lupa para corregir el nombre de la canción o del cantante y buscar de nuevo.</string>
+    <string name="lyrics_not_found_detail">No encontré la letra en internet.\n\nBusqué:\n%1$s\n\nToca la lupa 🔍 (arriba) para escribir el nombre exacto de la canción y del cantante, y buscar de nuevo.</string>
+    <string name="lyrics_connection_error">No pude conectarme con el servicio de letras.\n\nRevisa el internet o el ahorro de datos e inténtalo de nuevo con la lupa 🔍.\n\nDetalle: %1$s</string>
     <string name="lyrics_no_internet">No hay conexión a internet en este momento.</string>
     <string name="lyrics_source_file">archivo de la carpeta</string>
     <string name="lyrics_source_saved">guardada en el teléfono</string>

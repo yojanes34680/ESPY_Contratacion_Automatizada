@@ -33,3 +33,9 @@ jobs:
 
       - name: Pruebas (buscador por voz y arranque de la app)
         run: bash ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Diagnóstico de letras en internet
+        continue-on-error: true
+        env:
+          LETRAS_EN_LINEA: "1"
+        run: bash ./gradlew --no-daemon testDebugUnitTest --tests "*LyricsOnlineTest*" --rerun-tasks

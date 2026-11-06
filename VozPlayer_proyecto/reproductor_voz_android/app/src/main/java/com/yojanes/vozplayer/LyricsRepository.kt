@@ -62,47 +62,100 @@ class LyricsRepository(private val context: Context) {
         return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
     }
 
-    /** Busca en internet y, si encuentra, guarda la letra para usarla sin conexión. */
-    fun searchOnline(entry: MediaEntry, artistHint: String, titleHint: String): Lyrics? {
+    /** Resultado de una búsqueda en internet, con el detalle de lo que pasó. */
+    sealed class OnlineResult {
+        data class Found(val lyrics: Lyrics) : OnlineResult()
+        data class NotFound(val searched: List<String>) : OnlineResult()
+        data class NoConnection(val detail: String) : OnlineResult()
+    }
+
+    private class NetworkFailure(message: String) : Exception(message)
+
+    /**
+     * Busca en internet y, si encuentra, guarda la letra para usarla sin conexión.
+     * Prueba el nombre en los dos órdenes ("Cantante - Canción" y "Canción - Cantante"),
+     * identifica al cantante si no se conoce y usa una segunda fuente si la primera no tiene la letra.
+     */
+    fun searchOnline(entry: MediaEntry, artistHint: String, titleHint: String): OnlineResult {
         val title = TrackNameParser.cleanForLyrics(titleHint)
         val artist = TrackNameParser.cleanForLyrics(artistHint)
-        if (title.isBlank()) return null
+        if (title.isBlank() && artist.isBlank()) return OnlineResult.NotFound(emptyList())
         val durationSec = (entry.durationMs / 1000).toInt()
 
-        var best: JSONObject? = null
-        if (artist.isNotBlank()) {
-            best = getJson(
-                "https://lrclib.net/api/get?" + q("artist_name", artist) + "&" + q("track_name", title) +
-                    (if (durationSec > 0) "&duration=$durationSec" else ""),
-            ) as? JSONObject
-            if (best != null && best.optBoolean("instrumental")) best = null
-        }
-        if (best == null) {
-            val candidates = mutableListOf<JSONObject>()
-            if (artist.isNotBlank()) {
-                candidates += array(getJson("https://lrclib.net/api/search?" + q("track_name", title) + "&" + q("artist_name", artist)))
-                if (candidates.isEmpty()) candidates += array(getJson("https://lrclib.net/api/search?" + q("q", "$artist $title")))
-            }
-            if (candidates.isEmpty()) candidates += array(getJson("https://lrclib.net/api/search?" + q("track_name", title)))
-            if (candidates.isEmpty()) candidates += array(getJson("https://lrclib.net/api/search?" + q("q", title)))
-            best = candidates
-                .filter { !it.optBoolean("instrumental") && (it.optString("syncedLyrics").isNotBlank() || it.optString("plainLyrics").isNotBlank()) }
-                .maxByOrNull { score(it, artist, title, durationSec) }
-        }
-        val found = best ?: return null
-        val lrc = found.optString("syncedLyrics").takeUnless { it == "null" }.orEmpty()
-        val plain = found.optString("plainLyrics").takeUnless { it == "null" }.orEmpty().ifBlank { LrcParser.toPlain(lrc) }
-        if (lrc.isBlank() && plain.isBlank()) return null
-        val result = Lyrics(
-            found.optString("artistName").ifBlank { artist },
-            found.optString("trackName").ifBlank { title },
-            LrcParser.parse(lrc), plain, Source.INTERNET,
+        // Combinaciones (cantante, canción) a probar, de la más probable a la menos.
+        val pairs = linkedSetOf<Pair<String, String>>()
+        if (title.isNotBlank()) pairs += artist to title
+        if (artist.isNotBlank() && title.isNotBlank()) pairs += title to artist
+        if (artist.isNotBlank() && title.isBlank()) pairs += "" to artist
+        val fileName = TrackNameParser.cleanForLyrics(
+            entry.fileNameWithoutExtension.replace('_', ' ').replace(Regex("^\\s*\\d{1,3}\\s*[-._)]\\s*"), ""),
         )
+        val searched = pairs.map { (a, t) -> if (a.isBlank()) "«$t»" else "«$t» de «$a»" }.toMutableList()
+
+        try {
+            val candidates = mutableListOf<JSONObject>()
+            for ((a, t) in pairs) {
+                if (a.isNotBlank()) {
+                    (getJson(
+                        "https://lrclib.net/api/get?" + q("artist_name", a) + "&" + q("track_name", t) +
+                            (if (durationSec > 0) "&duration=$durationSec" else ""),
+                    ) as? JSONObject)?.let { candidates += it }
+                    candidates += array(getJson("https://lrclib.net/api/search?" + q("track_name", t) + "&" + q("artist_name", a)))
+                    if (usable(candidates).isEmpty()) {
+                        candidates += array(getJson("https://lrclib.net/api/search?" + q("q", "$a $t")))
+                    }
+                } else {
+                    candidates += array(getJson("https://lrclib.net/api/search?" + q("track_name", t)))
+                    if (usable(candidates).isEmpty()) candidates += array(getJson("https://lrclib.net/api/search?" + q("q", t)))
+                }
+                if (usable(candidates).isNotEmpty()) break
+            }
+            if (usable(candidates).isEmpty() && fileName.isNotBlank()) {
+                searched += "«$fileName»"
+                candidates += array(getJson("https://lrclib.net/api/search?" + q("q", fileName)))
+            }
+
+            val best = usable(candidates).maxByOrNull { o ->
+                maxOf(score(o, artist, title, durationSec), score(o, title, artist, durationSec))
+            }
+            if (best != null) {
+                val lrc = best.optString("syncedLyrics").takeUnless { it == "null" }.orEmpty()
+                val plain = best.optString("plainLyrics").takeUnless { it == "null" }.orEmpty()
+                    .ifBlank { LrcParser.toPlain(lrc) }
+                return OnlineResult.Found(
+                    save(entry, best.optString("artistName").ifBlank { artist }, best.optString("trackName").ifBlank { title }, lrc, plain),
+                )
+            }
+
+            // Segunda fuente (letra sin sincronizar): necesita cantante y canción.
+            for ((a, t) in pairs) {
+                if (a.isBlank() || t.isBlank()) continue
+                val o = getJson(
+                    "https://api.lyrics.ovh/v1/" + URLEncoder.encode(a, "UTF-8").replace("+", "%20") +
+                        "/" + URLEncoder.encode(t, "UTF-8").replace("+", "%20"),
+                ) as? JSONObject
+                val text = o?.optString("lyrics").orEmpty().replace("\r\n", "\n").trim()
+                if (text.isNotBlank()) return OnlineResult.Found(save(entry, a, t, "", text))
+            }
+        } catch (e: NetworkFailure) {
+            return OnlineResult.NoConnection(e.message.orEmpty())
+        }
+        return OnlineResult.NotFound(searched)
+    }
+
+    private fun usable(list: List<JSONObject>) = list.filter {
+        !it.optBoolean("instrumental") &&
+            (it.optString("syncedLyrics").let { s -> s.isNotBlank() && s != "null" } ||
+                it.optString("plainLyrics").let { s -> s.isNotBlank() && s != "null" })
+    }
+
+    private fun save(entry: MediaEntry, artist: String, title: String, lrc: String, plain: String): Lyrics {
+        val result = Lyrics(artist, title, LrcParser.parse(lrc), plain, Source.INTERNET)
         runCatching {
             cacheFile(entry.uri).writeText(
                 JSONObject()
-                    .put("artista", result.artist)
-                    .put("titulo", result.title)
+                    .put("artista", artist)
+                    .put("titulo", title)
                     .put("lrc", lrc)
                     .put("texto", plain)
                     .toString(),
@@ -138,19 +191,31 @@ class LyricsRepository(private val context: Context) {
 
     private fun q(name: String, value: String) = name + "=" + URLEncoder.encode(value, "UTF-8")
 
+    /** null si no hay resultado (404, respuesta vacía); NetworkFailure si no se pudo conectar. */
     private fun getJson(url: String): Any? {
         val conn = (URL(url).openConnection() as HttpURLConnection).apply {
-            connectTimeout = 8000
-            readTimeout = 10000
+            connectTimeout = 10000
+            readTimeout = 15000
             setRequestProperty("User-Agent", USER_AGENT)
             setRequestProperty("Accept", "application/json")
         }
-        return try {
-            if (conn.responseCode != 200) return null
+        try {
+            val code = try {
+                conn.responseCode
+            } catch (e: java.io.IOException) {
+                throw NetworkFailure(e.javaClass.simpleName + ": " + e.message.orEmpty())
+            }
+            if (code != 200) return null
             val body = conn.inputStream.use { it.readBytes().toString(Charsets.UTF_8) }.trim()
-            if (body.startsWith("[")) JSONArray(body) else JSONObject(body)
+            return when {
+                body.startsWith("[") -> JSONArray(body)
+                body.startsWith("{") -> JSONObject(body)
+                else -> null
+            }
+        } catch (e: NetworkFailure) {
+            throw e
         } catch (_: Exception) {
-            null
+            return null
         } finally {
             conn.disconnect()
         }

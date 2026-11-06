@@ -146,10 +146,26 @@ class LyricsActivity : AppCompatActivity() {
             if (local != null) return@launch show(local)
             if (!repo.hasInternet()) return@launch showMessage(getString(R.string.lyrics_none_offline))
             showMessage(getString(R.string.lyrics_searching))
-            val online = withContext(Dispatchers.IO) {
-                runCatching { repo.searchOnline(entry, entry.artist, entry.title) }.getOrNull()
-            }
-            if (online != null) show(online) else showMessage(getString(R.string.lyrics_not_found))
+            showOnline(withContext(Dispatchers.IO) { search(entry, entry.artist, entry.title) })
+        }
+    }
+
+    private fun search(entry: MediaEntry, artist: String, title: String): LyricsRepository.OnlineResult =
+        try {
+            repo.searchOnline(entry, artist, title)
+        } catch (e: Exception) {
+            LyricsRepository.OnlineResult.NoConnection(e.javaClass.simpleName + ": " + e.message.orEmpty())
+        }
+
+    private fun showOnline(result: LyricsRepository.OnlineResult) {
+        when (result) {
+            is LyricsRepository.OnlineResult.Found -> show(result.lyrics)
+            is LyricsRepository.OnlineResult.NotFound -> showMessage(
+                getString(R.string.lyrics_not_found_detail, result.searched.joinToString("\n")),
+            )
+            is LyricsRepository.OnlineResult.NoConnection -> showMessage(
+                getString(R.string.lyrics_connection_error, result.detail),
+            )
         }
     }
 
@@ -210,12 +226,11 @@ class LyricsActivity : AppCompatActivity() {
                 loadJob?.cancel()
                 loadJob = lifecycleScope.launch {
                     showMessage(getString(R.string.lyrics_searching))
-                    val result = withContext(Dispatchers.IO) {
-                        runCatching {
-                            repo.searchOnline(entry, artistInput.text.toString(), titleInput.text.toString())
-                        }.getOrNull()
-                    }
-                    if (result != null) show(result) else showMessage(getString(R.string.lyrics_not_found))
+                    showOnline(
+                        withContext(Dispatchers.IO) {
+                            search(entry, artistInput.text.toString(), titleInput.text.toString())
+                        },
+                    )
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)
