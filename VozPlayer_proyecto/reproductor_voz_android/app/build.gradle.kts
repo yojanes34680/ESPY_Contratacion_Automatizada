@@ -11,8 +11,8 @@ android {
         applicationId = "com.yojanes.vozplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "2.4"
+        versionCode = 16
+        versionName = "2.5"
     }
 
     // Firma fija para que cada actualización se instale encima de la anterior y conserve
