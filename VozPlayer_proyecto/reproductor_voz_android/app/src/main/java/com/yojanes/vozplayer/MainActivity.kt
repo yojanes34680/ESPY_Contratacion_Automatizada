@@ -107,9 +107,16 @@ class MainActivity : AppCompatActivity() {
         folders = FolderRepository(this)
         binding.folderButton.setOnClickListener { showFolderDialog() }
         binding.themeButton.setOnClickListener { ThemePicker.show(this) }
+        binding.videoFullscreen.setOnClickListener { startActivity(Intent(this, VideoActivity::class.java)) }
+        binding.videoHide.setOnClickListener {
+            videoHiddenFor = controller?.currentMediaItem?.mediaId
+            updatePlayerMode()
+            toast(getString(R.string.video_hidden))
+        }
         binding.lyricsButton.setOnClickListener { startActivity(Intent(this, LyricsActivity::class.java)) }
         binding.mixerButton.setOnClickListener { startActivity(Intent(this, MixerActivity::class.java)) }
 
+        binding.videoFrame.clipToOutline = true
         binding.list.layoutManager = LinearLayoutManager(this)
         binding.list.adapter = adapter
         binding.list.setHasFixedSize(true)
@@ -309,6 +316,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var filterJob: kotlinx.coroutines.Job? = null
+
+    /** Video que el usuario ocultó (vuelve a mostrarse al cambiar de pista). */
+    private var videoHiddenFor: String? = null
     private var searchIndex: Pair<List<MediaEntry>, List<VoiceSearchMatcher.Prepared>>? = null
 
     private fun matchesType(e: MediaEntry) = when (typeFilter) {
@@ -464,7 +474,9 @@ class MainActivity : AppCompatActivity() {
     private fun updatePlayerMode() {
         val c = controller
         val isVideo = c != null && c.mediaItemCount > 0 && c.currentTracks.isTypeSupported(C.TRACK_TYPE_VIDEO)
-        binding.playerView.visibility = if (isVideo) View.VISIBLE else View.GONE
+        val currentId = c?.currentMediaItem?.mediaId
+        val hidden = currentId != null && currentId == videoHiddenFor
+        binding.videoFrame.visibility = if (isVideo && !hidden) View.VISIBLE else View.GONE
     }
 
     private fun toast(message: String) {

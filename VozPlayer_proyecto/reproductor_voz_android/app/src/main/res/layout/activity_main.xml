@@ -14,7 +14,7 @@
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="20dp"
-        android:paddingTop="14dp"
+        android:paddingTop="8dp"
         android:paddingEnd="16dp">
 
         <ImageView
@@ -77,7 +77,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="6dp"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:gravity="start|center_vertical"
@@ -232,16 +232,52 @@
     </FrameLayout>
 
     <!-- Video (solo cuando la pista es un video) -->
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/playerView"
+    <FrameLayout
+        android:id="@+id/videoFrame"
         android:layout_width="match_parent"
-        android:layout_height="210dp"
+        android:layout_height="190dp"
         android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
-        android:background="@android:color/black"
-        android:visibility="gone"
-        app:use_controller="false" />
+        android:layout_marginBottom="6dp"
+        android:background="@drawable/bg_video_frame"
+        android:visibility="gone">
+
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:use_controller="false" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/videoFullscreen"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_overlay_button"
+                android:contentDescription="@string/video_fullscreen"
+                android:padding="9dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_fullscreen" />
+
+            <ImageButton
+                android:id="@+id/videoHide"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_overlay_button"
+                android:contentDescription="@string/video_hide"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_close" />
+        </LinearLayout>
+    </FrameLayout>
 
     <!-- Letra y Master -->
     <LinearLayout

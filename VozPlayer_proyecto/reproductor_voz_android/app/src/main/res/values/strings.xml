@@ -87,4 +87,8 @@
     <string name="theme_title">Elige el aspecto</string>
     <string name="theme_message">Toca una plantilla para aplicarla al instante. Puedes cambiarla cuando quieras.</string>
     <string name="brand_name">Yojanes Producciones</string>
+    <string name="video_fullscreen">Ver en pantalla completa</string>
+    <string name="video_exit_fullscreen">Salir de pantalla completa</string>
+    <string name="video_hide">Ocultar video</string>
+    <string name="video_hidden">Video oculto: el audio sigue sonando</string>
 </resources>

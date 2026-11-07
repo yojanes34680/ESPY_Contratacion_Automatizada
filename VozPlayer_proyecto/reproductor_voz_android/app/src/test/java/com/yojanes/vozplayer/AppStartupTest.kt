@@ -83,6 +83,13 @@ class AppStartupTest {
     }
 
     @Test
+    fun abreVideoEnPantallaCompleta() {
+        ActivityScenario.launch(VideoActivity::class.java).use { s ->
+            s.onActivity { assertEquals(false, it.isFinishing) }
+        }
+    }
+
+    @Test
     fun abrePanelDeLetras() {
         ActivityScenario.launch(LyricsActivity::class.java).use { s ->
             s.onActivity { assertEquals(false, it.isFinishing) }

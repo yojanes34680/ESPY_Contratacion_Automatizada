@@ -69,6 +69,12 @@
             android:exported="false"
             android:label="@string/mixer_title" />
 
+        <activity
+            android:name=".VideoActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:exported="false"
+            android:screenOrientation="fullSensor" />
+
         <service
             android:name=".PlaybackService"
             android:exported="true"
