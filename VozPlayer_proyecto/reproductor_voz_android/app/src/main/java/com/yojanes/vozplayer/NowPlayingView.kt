@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.SeekBar
+import android.transition.TransitionManager
+import android.view.ViewGroup
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import com.yojanes.vozplayer.databinding.ViewNowPlayingBinding
@@ -30,11 +32,17 @@ class NowPlayingView @JvmOverloads constructor(
         override fun onEvents(player: Player, events: Player.Events) = refresh()
     }
 
+    private val prefs = context.getSharedPreferences("vista", Context.MODE_PRIVATE)
+
+    /** Panel desplegado (controles completos, Letra y Master) o barra compacta. Se recuerda. */
+    private var expanded = prefs.getBoolean("panel_expandido", false)
+
     /** Oculta el botón "Letra" (por ejemplo, dentro de la propia pantalla de letra). */
     var showLyricsButton: Boolean = true
         set(value) {
             field = value
             b.npLyrics.visibility = if (value) View.VISIBLE else View.GONE
+            applyMode()
         }
 
     var player: Player? = null
@@ -69,6 +77,10 @@ class NowPlayingView @JvmOverloads constructor(
                 p.play()
             }
         }
+        b.npMiniPlay.setOnClickListener { b.npPlay.performClick() }
+        b.npToggle.setOnClickListener { toggle() }
+        b.npTitle.setOnClickListener { if (!expanded) toggle() }
+        b.npArtFrame.setOnClickListener { if (!expanded) toggle() }
         b.npPrev.setOnClickListener { player?.seekToPrevious() }
         b.npNext.setOnClickListener { player?.seekToNext() }
         b.npShuffle.setOnClickListener { player?.let { it.shuffleModeEnabled = !it.shuffleModeEnabled } }
@@ -96,7 +108,27 @@ class NowPlayingView @JvmOverloads constructor(
                 userSeeking = false
             }
         })
+        applyMode()
         refresh()
+    }
+
+    private fun toggle() {
+        expanded = !expanded
+        prefs.edit().putBoolean("panel_expandido", expanded).apply()
+        (parent as? ViewGroup)?.let { TransitionManager.beginDelayedTransition(it) }
+        applyMode()
+    }
+
+    private fun applyMode() {
+        b.npFull.visibility = if (expanded) View.VISIBLE else View.GONE
+        b.npChips.visibility = if (expanded) View.VISIBLE else View.GONE
+        b.npMiniPlay.visibility = if (expanded) View.GONE else View.VISIBLE
+        b.npToggle.setImageResource(if (expanded) R.drawable.ic_expand_more else R.drawable.ic_expand_less)
+        b.npToggle.contentDescription = context.getString(if (expanded) R.string.np_collapse else R.string.np_expand)
+        val art = ((if (expanded) 52 else 40) * density).toInt()
+        b.npArtFrame.layoutParams = b.npArtFrame.layoutParams.also { it.width = art; it.height = art }
+        val v = ((if (expanded) 12 else 8) * density).toInt()
+        b.root.setPadding(b.root.paddingLeft, v, b.root.paddingRight, if (expanded) (10 * density).toInt() else v)
     }
 
     override fun onAttachedToWindow() {
@@ -120,6 +152,8 @@ class NowPlayingView @JvmOverloads constructor(
             b.npArtist.text = context.getString(R.string.np_idle_subtitle)
             setArtwork("YJ", null, "vozplayer")
             b.npPlay.setImageResource(R.drawable.ic_play)
+            b.npMiniPlay.setImageResource(R.drawable.ic_play)
+            b.npMiniPlay.isEnabled = false
             controls.forEach { it.isEnabled = p != null && item != null }
             b.npPosition.text = format(0)
             b.npDuration.text = format(0)
@@ -127,6 +161,7 @@ class NowPlayingView @JvmOverloads constructor(
             return
         }
         controls.forEach { it.isEnabled = true }
+        b.npMiniPlay.isEnabled = true
         val md = p.mediaMetadata
         val title = (md.title ?: item.mediaMetadata.title)?.toString().orEmpty()
             .ifBlank { Library.find(item.mediaId)?.title.orEmpty() }
@@ -139,6 +174,7 @@ class NowPlayingView @JvmOverloads constructor(
         b.npArtist.text = artist.ifBlank { context.getString(R.string.np_unknown_artist) }
         setArtwork(Artwork.initial(title), md.artworkData, item.mediaId)
         b.npPlay.setImageResource(if (p.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        b.npMiniPlay.setImageResource(if (p.isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         b.npShuffle.alpha = if (p.shuffleModeEnabled) 1f else 0.45f
         b.npRepeat.alpha = if (p.repeatMode == Player.REPEAT_MODE_OFF) 0.45f else 1f
         b.npRepeat.setImageResource(

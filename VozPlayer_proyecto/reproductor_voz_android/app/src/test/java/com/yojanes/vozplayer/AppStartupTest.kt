@@ -76,6 +76,21 @@ class AppStartupTest {
     }
 
     @Test
+    fun panelDeReproduccionSeAbreYSeEsconde() {
+        ActivityScenario.launch(MainActivity::class.java).use { s ->
+            s.onActivity { a ->
+                val full = a.findViewById<android.view.View>(R.id.npFull)
+                val toggle = a.findViewById<android.view.View>(R.id.npToggle)
+                val inicial = full.visibility
+                toggle.performClick()
+                assertEquals(false, full.visibility == inicial)
+                toggle.performClick()
+                assertEquals(inicial, full.visibility)
+            }
+        }
+    }
+
+    @Test
     fun abrePanelMaster() {
         ActivityScenario.launch(MixerActivity::class.java).use { s ->
             s.onActivity { assertEquals(false, it.isFinishing) }

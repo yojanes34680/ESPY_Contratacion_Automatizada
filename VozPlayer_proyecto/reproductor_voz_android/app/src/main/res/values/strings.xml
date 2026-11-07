@@ -135,4 +135,7 @@
     <string name="setlist_move_up">Subir una posición</string>
     <string name="setlist_move_down">Bajar una posición</string>
     <string name="setlist_view_lyrics">Ver letra</string>
+    <string name="np_toggle">Abrir o esconder el panel</string>
+    <string name="np_expand">Abrir panel</string>
+    <string name="np_collapse">Esconder panel</string>
 </resources>
