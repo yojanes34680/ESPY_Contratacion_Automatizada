@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lector Ilustrado</title>
+<link rel="stylesheet" href="/web/estilos.css">
+</head>
+<body>
+
+<!-- ===================== BIBLIOTECA ===================== -->
+<section id="vista-biblioteca" class="vista">
+  <header class="barra">
+    <h1>Lector Ilustrado</h1>
+    <div class="acciones">
+      <button id="btn-config" class="secundario">Configuración</button>
+      <button id="btn-nueva">+ Nueva obra</button>
+    </div>
+  </header>
+
+  <div id="aviso-claves" class="aviso" hidden></div>
+
+  <div id="lista-obras" class="rejilla"></div>
+  <p id="sin-obras" class="vacio" hidden>Todavía no hay obras. Suba un PDF con <b>+ Nueva obra</b>.</p>
+</section>
+
+<!-- ===================== PROGRESO ===================== -->
+<section id="vista-progreso" class="vista" hidden>
+  <header class="barra">
+    <button class="volver secundario">← Biblioteca</button>
+    <h2 id="prog-titulo">Preparando la obra</h2>
+    <span></span>
+  </header>
+  <div class="tarjeta progreso">
+    <p id="prog-paso">En cola…</p>
+    <div class="barra-progreso"><div id="prog-barra"></div></div>
+    <p id="prog-detalle" class="tenue"></p>
+    <div id="prog-error" class="error" hidden></div>
+    <button id="prog-leer" hidden>Empezar a leer lo que ya está listo</button>
+  </div>
+</section>
+
+<!-- ===================== LECTOR ===================== -->
+<section id="vista-lector" class="vista" hidden>
+  <header class="barra lector-barra">
+    <button class="volver secundario">← Biblioteca</button>
+    <div class="titulo-obra">
+      <h2 id="lec-titulo"></h2>
+      <span id="lec-autor" class="tenue"></span>
+    </div>
+    <div class="acciones">
+      <button id="btn-ficha" class="secundario">Sobre la obra</button>
+    </div>
+  </header>
+
+  <main class="lector">
+    <figure class="lamina">
+      <img id="lec-imagen" alt="">
+      <figcaption>
+        <span id="lec-escena-num"></span>
+        <button id="btn-regenerar" class="mini secundario" title="Pedir otra imagen para esta escena">Otra imagen</button>
+      </figcaption>
+    </figure>
+
+    <article class="pagina">
+      <h3 id="lec-escena-titulo"></h3>
+      <div id="lec-texto" class="texto"></div>
+      <div id="lec-reparto" class="reparto"></div>
+    </article>
+  </main>
+
+  <footer class="controles">
+    <button id="btn-anterior" class="redondo" title="Escena anterior (←)">⏮</button>
+    <button id="btn-play" class="redondo grande" title="Leer / pausar (espacio)">▶</button>
+    <button id="btn-siguiente" class="redondo" title="Escena siguiente (→)">⏭</button>
+    <label class="velocidad">Velocidad
+      <select id="sel-velocidad">
+        <option value="0.85">0.85×</option>
+        <option value="1" selected>1×</option>
+        <option value="1.15">1.15×</option>
+        <option value="1.3">1.3×</option>
+      </select>
+    </label>
+    <label class="velocidad"><input type="checkbox" id="chk-continuo" checked> Pasar de escena solo</label>
+    <span id="lec-modo-voz" class="tenue"></span>
+  </footer>
+</section>
+
+<!-- ===================== DIÁLOGOS ===================== -->
+<dialog id="dlg-nueva">
+  <form method="dialog" id="form-nueva">
+    <h2>Nueva obra</h2>
+    <label class="archivo">
+      <span>Archivo PDF o TXT (con texto, no escaneado)</span>
+      <input type="file" id="in-archivo" accept=".pdf,.txt" required>
+    </label>
+    <div class="fila">
+      <label>Desde la página <input type="number" id="in-desde" min="1" placeholder="1"></label>
+      <label>Hasta la página <input type="number" id="in-hasta" min="1" placeholder="última"></label>
+      <label>Máximo de escenas <input type="number" id="in-max" min="1" value="12"></label>
+    </div>
+    <fieldset>
+      <legend>Análisis del texto</legend>
+      <label><input type="radio" name="analisis" value="claude" checked> Inteligente con Claude (época, personajes, voces)</label>
+      <label><input type="radio" name="analisis" value="basico"> Básico, sin IA (gratis)</label>
+    </fieldset>
+    <fieldset>
+      <legend>Imágenes</legend>
+      <label><input type="radio" name="imagenes" value="openai" checked> Generadas con IA (OpenAI)</label>
+      <label><input type="radio" name="imagenes" value="provisional"> Láminas provisionales (gratis)</label>
+    </fieldset>
+    <fieldset>
+      <legend>Voces</legend>
+      <label><input type="radio" name="voces" value="openai" checked> Voces naturales con IA (OpenAI)</label>
+      <label><input type="radio" name="voces" value="navegador"> Voces del computador (gratis, más robóticas)</label>
+    </fieldset>
+    <p class="tenue">Consejo: para la primera prueba use pocas páginas o un máximo de 5–10 escenas para controlar el costo.</p>
+    <div class="botones">
+      <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
+      <button id="btn-crear" value="crear">Procesar obra</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-config">
+  <form method="dialog" id="form-config">
+    <h2>Configuración</h2>
+    <p class="tenue">Las claves se guardan solo en este computador, en el archivo <code>lector_ilustrado/.env</code>. Deje un campo vacío para no cambiarlo.</p>
+    <label>Clave de Anthropic (Claude) — análisis del texto
+      <input type="password" id="in-anthropic" autocomplete="off" placeholder="sk-ant-…">
+      <small id="est-anthropic"></small>
+    </label>
+    <label>Clave de OpenAI — imágenes y voces
+      <input type="password" id="in-openai" autocomplete="off" placeholder="sk-…">
+      <small id="est-openai"></small>
+    </label>
+    <div class="botones">
+      <button value="cancelar" class="secundario" formnovalidate>Cerrar</button>
+      <button id="btn-guardar-claves" value="guardar">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-ficha">
+  <div class="ficha">
+    <h2 id="ficha-titulo"></h2>
+    <dl id="ficha-datos"></dl>
+    <h3>Personajes</h3>
+    <div id="ficha-personajes" class="personajes"></div>
+    <div id="ficha-advertencias"></div>
+    <form method="dialog" class="botones"><button>Cerrar</button></form>
+  </div>
+</dialog>
+
+<dialog id="dlg-regenerar">
+  <form method="dialog">
+    <h2>Otra imagen para esta escena</h2>
+    <label>Descripción de la imagen (puede corregirla)
+      <textarea id="in-descripcion" rows="7"></textarea>
+    </label>
+    <div class="botones">
+      <button value="cancelar" class="secundario" formnovalidate>Cancelar</button>
+      <button value="ok">Generar</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/web/app.js"></script>
+</body>
+</html>
