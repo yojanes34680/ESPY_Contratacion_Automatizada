@@ -40,7 +40,8 @@ class LyricsAdapter(
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             gravity = Gravity.CENTER_HORIZONTAL
             val pad = (8 * resources.displayMetrics.density).toInt()
-            setPadding(pad * 2, pad, pad * 2, pad)
+            // Margen extra arriba y abajo para que el brillo neón no se corte.
+            setPadding(pad * 2, (pad * 1.6f).toInt(), pad * 2, (pad * 1.6f).toInt())
         }
         return Holder(tv)
     }

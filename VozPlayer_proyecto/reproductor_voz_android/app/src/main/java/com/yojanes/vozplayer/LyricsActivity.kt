@@ -77,6 +77,8 @@ class LyricsActivity : AppCompatActivity() {
         adapter.textSizeSp = prefs.getFloat("tamano", 26f)
         binding.lyricsList.layoutManager = layoutManager
         binding.lyricsList.adapter = adapter
+        // Sin animación de cambio: evitaba que la línea nueva se dibujara encima de la anterior.
+        binding.lyricsList.itemAnimator = null
 
         binding.smallerButton.setOnClickListener {
             adapter.textSizeSp = (adapter.textSizeSp - 2f).coerceAtLeast(14f)
