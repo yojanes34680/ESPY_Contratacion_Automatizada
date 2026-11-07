@@ -104,7 +104,7 @@ class NowPlayingView @JvmOverloads constructor(
         if (p == null || item == null) {
             b.npTitle.text = context.getString(R.string.np_idle_title)
             b.npArtist.text = context.getString(R.string.np_idle_subtitle)
-            setArtwork("♪", null, "vozplayer")
+            setArtwork("YJ", null, "vozplayer")
             b.npPlay.setImageResource(R.drawable.ic_play)
             controls.forEach { it.isEnabled = p != null && item != null }
             b.npPosition.text = format(0)
