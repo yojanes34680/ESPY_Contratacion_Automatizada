@@ -57,6 +57,11 @@ class SetlistActivity : AppCompatActivity() {
     private var index: List<VoiceSearchMatcher.Prepared>? = null
     private var indexSource: List<MediaEntry>? = null
 
+    /** Modo del micrófono: agregar canciones (de la carpeta) o reproducir canciones (del repertorio). */
+    private enum class VoiceMode { ADD, PLAY }
+    private var voiceMode = VoiceMode.ADD
+    private var listeningFor = VoiceMode.ADD
+
     /** Dictado continuo: tras agregar, el micrófono se vuelve a abrir solo. */
     private var continuous = false
     private val pendingParts = ArrayDeque<String>()
@@ -73,7 +78,7 @@ class SetlistActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             val alternatives = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).orEmpty()
             if (result.resultCode == RESULT_OK && alternatives.isNotEmpty()) {
-                handleDictation(alternatives)
+                if (listeningFor == VoiceMode.PLAY) handlePlayRequest(alternatives) else handleDictation(alternatives)
             } else {
                 continuous = false
             }
@@ -108,9 +113,27 @@ class SetlistActivity : AppCompatActivity() {
         binding.closeButton.setOnClickListener { finish() }
         binding.setlistName.setOnClickListener { rename() }
         binding.playAllButton.setOnClickListener { playFrom(0) }
+        val prefs = getSharedPreferences("vista", MODE_PRIVATE)
+        voiceMode = when {
+            items.isEmpty() -> VoiceMode.ADD
+            prefs.getString("modo_voz", "reproducir") == "agregar" -> VoiceMode.ADD
+            else -> VoiceMode.PLAY
+        }
+        binding.voiceMode.check(if (voiceMode == VoiceMode.ADD) R.id.modeAdd else R.id.modePlay)
+        binding.voiceMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            voiceMode = if (checkedId == R.id.modePlay) VoiceMode.PLAY else VoiceMode.ADD
+            prefs.edit().putString("modo_voz", if (voiceMode == VoiceMode.PLAY) "reproducir" else "agregar").apply()
+            updateModeHint()
+        }
+        updateModeHint()
         binding.dictateButton.setOnClickListener {
-            continuous = true
-            startDictation()
+            if (voiceMode == VoiceMode.PLAY) {
+                startPlayDictation()
+            } else {
+                continuous = true
+                startDictation()
+            }
         }
         binding.searchAddButton.setOnClickListener { searchByText() }
         binding.shareButton.setOnClickListener { setlist?.let { SetlistsActivity.share(this, current()) } }
@@ -199,23 +222,103 @@ class SetlistActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- Dictado
 
+    private fun updateModeHint() {
+        binding.modeHint.text = getString(
+            if (voiceMode == VoiceMode.PLAY) R.string.voice_mode_play_hint else R.string.voice_mode_add_hint,
+        )
+        binding.dictateButton.contentDescription = getString(
+            if (voiceMode == VoiceMode.PLAY) R.string.voice_mode_play else R.string.voice_mode_add,
+        )
+    }
+
+    private fun launchRecognizer(mode: VoiceMode, prompt: String): Boolean {
+        listeningFor = mode
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+        }
+        return try {
+            speechLauncher.launch(intent)
+            true
+        } catch (_: ActivityNotFoundException) {
+            toast(getString(R.string.no_voice_engine))
+            false
+        }
+    }
+
+    // ---------------------------------------------------------------- Reproducir por voz
+
+    private fun startPlayDictation() {
+        if (items.isEmpty()) {
+            toast(getString(R.string.setlist_empty_play))
+            return
+        }
+        launchRecognizer(VoiceMode.PLAY, getString(R.string.voice_play_prompt))
+    }
+
+    /** Busca lo dicho SOLO dentro del repertorio y lo reproduce (por nombre o por número). */
+    private fun handlePlayRequest(alternatives: List<String>) {
+        val number = alternatives.firstNotNullOfOrNull { SetlistVoice.parseNumber(it) }
+        if (number != null) {
+            if (number in 1..items.size) {
+                playFrom(number - 1)
+                toast(getString(R.string.voice_play_now, number, items[number - 1].title))
+            } else {
+                toast(getString(R.string.voice_play_number_missing, number, items.size))
+            }
+            return
+        }
+        lifecycleScope.launch {
+            val snapshot = items.toList()
+            val (spoken, ranked) = withContext(Dispatchers.Default) {
+                val idx = VoiceSearchMatcher.prepare(snapshot)
+                val best = VoiceSearchMatcher.bestVoiceMatchPrepared(alternatives, idx)
+                val said = best?.spokenText ?: alternatives.first()
+                said to VoiceSearchMatcher.rankPrepared(said, idx, threshold = 0.5)
+            }
+            if (ranked.isEmpty()) {
+                toast(getString(R.string.voice_play_not_found, spoken))
+                return@launch
+            }
+            val top = ranked[0]
+            val clear = top.score >= 0.75 && (ranked.size == 1 || ranked[1].score < top.score - 0.08)
+            if (clear) {
+                playEntry(top.entry)
+            } else {
+                val options = ranked.take(6).map { it.entry }
+                val labels = options.map { e ->
+                    val n = items.indexOfFirst { it.uri == e.uri } + 1
+                    "#$n   " + e.title + (if (e.artist.isNotBlank()) "  —  " + e.artist else "")
+                }
+                MaterialAlertDialogBuilder(this@SetlistActivity)
+                    .setTitle(getString(R.string.voice_play_choose, spoken))
+                    .setItems(labels.toTypedArray()) { _, which -> playEntry(options[which]) }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }
+    }
+
+    private fun playEntry(e: MediaEntry) {
+        val pos = items.indexOfFirst { it.uri == e.uri }
+        if (pos < 0) return
+        playFrom(pos)
+        binding.songsList.smoothScrollToPosition(pos)
+        toast(getString(R.string.voice_play_now, pos + 1, e.title))
+    }
+
+    // ---------------------------------------------------------------- Agregar por voz
+
     private fun startDictation() {
         if (Library.entries.isEmpty()) {
             toast(getString(R.string.setlist_library_loading))
             continuous = false
             return
         }
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5)
-            putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.setlist_dictate_prompt, items.size + 1))
-        }
-        try {
-            speechLauncher.launch(intent)
-        } catch (_: ActivityNotFoundException) {
+        if (!launchRecognizer(VoiceMode.ADD, getString(R.string.setlist_dictate_prompt, items.size + 1))) {
             continuous = false
-            toast(getString(R.string.no_voice_engine))
         }
     }
 

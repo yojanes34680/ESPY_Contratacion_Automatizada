@@ -160,4 +160,16 @@
         <item quantity="one">Se restauró %d repertorio ✅</item>
         <item quantity="other">Se restauraron %d repertorios ✅</item>
     </plurals>
+
+    <!-- Modos de voz del repertorio -->
+    <string name="voice_mode_add">Agregar canciones</string>
+    <string name="voice_mode_play">Reproducir canciones</string>
+    <string name="voice_mode_add_hint">🎤 Di el nombre de una canción para AGREGARLA (o varias: «Amor indio, luego El rey»)</string>
+    <string name="voice_mode_play_hint">🎤 Di el nombre o el número de una canción del repertorio para que SUENE («la cinco»)</string>
+    <string name="voice_play_prompt">¿Qué canción del repertorio? (nombre o número)</string>
+    <string name="voice_play_now">▶ #%1$d %2$s</string>
+    <string name="voice_play_number_missing">El repertorio no tiene la canción número %1$d (tiene %2$d).</string>
+    <string name="voice_play_not_found">«%1$s» no está en este repertorio. Cambia a «Agregar canciones» para agregarla.</string>
+    <string name="voice_play_choose">¿Cuál de tu repertorio es «%1$s»?</string>
+    <string name="setlist_empty_play">Tu repertorio está vacío: primero agrega canciones.</string>
 </resources>

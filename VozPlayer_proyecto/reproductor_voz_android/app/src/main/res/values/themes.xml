@@ -158,6 +158,20 @@
         <item name="strokeWidth">1dp</item>
     </style>
 
+    <style name="VoiceModeButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/toggle_text</item>
+        <item name="backgroundTint">@color/toggle_bg</item>
+        <item name="iconTint">@color/toggle_text</item>
+        <item name="iconSize">18dp</item>
+        <item name="strokeColor">@color/glass_stroke</item>
+    </style>
+
     <style name="NeonChip" parent="Widget.Material3.Chip.Filter">
         <item name="chipBackgroundColor">@color/chip_bg</item>
         <item name="chipStrokeColor">@color/glass_stroke</item>

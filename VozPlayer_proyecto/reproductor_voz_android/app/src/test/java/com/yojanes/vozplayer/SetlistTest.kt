@@ -117,6 +117,21 @@ class SetlistTest {
     }
 
     @Test
+    fun cambiaEntreModoAgregarYReproducir() {
+        val s = SetlistStore.create(app, "Modos")
+        (1..3).forEach { SetlistStore.add(app, s.id, song(it)) }
+        ActivityScenario.launch<SetlistActivity>(SetlistActivity.intent(app, s.id)).use { sc ->
+            sc.onActivity { a ->
+                val hint = a.findViewById<android.widget.TextView>(R.id.modeHint)
+                a.findViewById<android.view.View>(R.id.modeAdd).performClick()
+                assertTrue(hint.text.contains("AGREGAR"))
+                a.findViewById<android.view.View>(R.id.modePlay).performClick()
+                assertTrue(hint.text.contains("SUENE"))
+            }
+        }
+    }
+
+    @Test
     fun pantallasDeRepertorioAbren() {
         val s = SetlistStore.create(app, "Prueba")
         (1..3).forEach { SetlistStore.add(app, s.id, song(it)) }
