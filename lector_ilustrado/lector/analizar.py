@@ -107,7 +107,10 @@ Reglas para los segmentos (lo más importante):
 - Reproduce el texto del tramo COMPLETO, en orden y palabra por palabra, sin
   resumir, corregir ni omitir nada. Solo lo divides.
 - `hablante` es "narrador" o el `id` del personaje que pronuncia esas palabras.
-- En diálogos con raya (—), las palabras del personaje van con su `id` y los
+- Los diálogos pueden venir marcados con raya (—), semirraya (–) o guion
+  corto (-). Los pensamientos entre comillas («») los dice el personaje que
+  piensa, con emoción de voz interior.
+- En los diálogos, las palabras del personaje van con su `id` y los
   incisos del narrador ("—dijo Juan—", "preguntó sin mirarla") van como
   "narrador". Quita las rayas de diálogo del inicio y del final de cada
   segmento hablado, pero conserva la puntuación interna.
@@ -178,14 +181,16 @@ class AnalistaClaude:
 # Analista básico (sin IA)
 # --------------------------------------------------------------------------
 
-_RAYA = re.compile(r"^\s*[—–]")
+_RAYA = re.compile(r"^\s*[—–-]")
+# Separador de diálogo: raya (—), semirraya (–) o guion corto que no une dos palabras.
+_SEPARADOR = re.compile(r"\s*(?:[—–]|(?<!\w)-|-(?!\w))\s*")
 
 
 def _dividir_dialogo(parrafo: str) -> list[Segmento]:
     """Separa un párrafo con rayas de diálogo en voz de personaje y de narrador."""
     if not _RAYA.match(parrafo):
         return [Segmento(hablante="narrador", texto=parrafo, emocion="sereno")]
-    crudas = [p.strip() for p in re.split(r"\s*[—–]\s*", parrafo) if p.strip()]
+    crudas = [p.strip() for p in _SEPARADOR.split(parrafo) if p.strip()]
     partes: list[str] = []
     for parte in crudas:
         # "—dijo él—. Luego..." : la puntuación que sigue a la raya cierra el inciso
@@ -209,7 +214,7 @@ class AnalistaBasico:
         self.parrafos_por_escena = parrafos_por_escena
 
     def ficha(self, texto_completo: str) -> FichaObra:
-        hay_dialogo = bool(re.search(r"(^|\n)\s*[—–]", texto_completo))
+        hay_dialogo = bool(re.search(r"(^|\n)\s*[—–-]", texto_completo))
         personajes = []
         if hay_dialogo:
             personajes.append(Personaje(

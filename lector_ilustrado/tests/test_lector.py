@@ -234,3 +234,32 @@ def test_api_modo_gratuito(ajustes):
     assert cliente.post(f"/api/proyectos/{pid}/escenas/0/imagen", json={"descripcion": "Nueva"}).status_code == 200
     assert cliente.delete(f"/api/proyectos/{pid}").json() == {"ok": True}
     assert cliente.get("/api/proyectos").json() == []
+
+
+def test_dialogo_con_guion_corto():
+    from lector.analizar import _dividir_dialogo
+
+    segs = _dividir_dialogo("-Ahí dentro se ha caído algo- dijo el apoderado en la habitación contigua.")
+    assert [(s.hablante, s.texto) for s in segs] == [
+        ("personaje", "Ahí dentro se ha caído algo"),
+        ("narrador", "dijo el apoderado en la habitación contigua."),
+    ]
+    # un guion entre dos palabras no corta el diálogo
+    segs = _dividir_dialogo("-Es un acuerdo franco-alemán -dijo.")
+    assert segs[0].texto == "Es un acuerdo franco-alemán"
+
+
+def test_pdf_omite_portada_y_titulos(tmp_path):
+    canvas = pytest.importorskip("reportlab.pdfgen.canvas")
+    ruta = tmp_path / "libro.pdf"
+    c = canvas.Canvas(str(ruta))
+    c.drawString(50, 800, "LIBRO DESCARGADO EN WWW EJEMPLO COM")
+    c.drawString(50, 780, "LA METAMORFOSIS")
+    c.showPage()
+    c.drawString(50, 800, "CAPITULO 1")
+    c.drawString(50, 770, "Cuando Gregorio Samsa se desperto una manana despues de un sueno")
+    c.drawString(50, 754, "intranquilo, se encontro sobre su cama convertido en un insecto.")
+    c.save()
+    parrafos = leer_documento(ruta)
+    assert parrafos == ["Cuando Gregorio Samsa se desperto una manana despues de un sueno "
+                        "intranquilo, se encontro sobre su cama convertido en un insecto."]

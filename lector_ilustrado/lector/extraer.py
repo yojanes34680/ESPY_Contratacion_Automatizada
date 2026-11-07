@@ -20,8 +20,24 @@ def extraer_texto_pdf(ruta: Path, desde: int | None = None, hasta: int | None = 
         ini = max(1, desde or 1)
         fin = min(total, hasta or total)
         for numero in range(ini, fin + 1):
-            paginas.append(_texto_con_cortes(pdf.pages[numero - 1]))
+            texto = _texto_con_cortes(pdf.pages[numero - 1])
+            if not _es_pagina_de_relleno(texto):
+                paginas.append(texto)
     return paginas
+
+
+def _sin_minusculas(texto: str) -> bool:
+    letras = [c for c in texto if c.isalpha()]
+    return bool(letras) and not any(c.islower() for c in letras)
+
+
+def _es_pagina_de_relleno(texto: str) -> bool:
+    """Portadas, créditos y avisos: páginas cortas escritas casi todo en mayúsculas."""
+    letras = [c for c in texto if c.isalpha()]
+    if not letras:
+        return True
+    minusculas = sum(c.islower() for c in letras) / len(letras)
+    return minusculas < 0.5 and len(texto.split()) < 150
 
 
 def _texto_con_cortes(pagina) -> str:
@@ -36,8 +52,15 @@ def _texto_con_cortes(pagina) -> str:
     # interlineado normal = el salto vertical más frecuente (el menor si hay empate)
     saltos = Counter(round(b["top"] - a["top"]) for a, b in zip(lineas, lineas[1:]) if b["top"] > a["top"])
     interlineado = min(saltos, key=lambda s: (-saltos[s], s)) if saltos else 0
+    # Títulos al inicio de página ("CAPÍTULO 1", versalitas "C 1 / APÍTULO"): se omiten
+    # y se marca un corte de párrafo, para que no se peguen al texto que sigue.
+    titulo = 0
+    while titulo < min(3, len(lineas) - 1) and _sin_minusculas(lineas[titulo]["text"]) \
+            and len(lineas[titulo]["text"].split()) <= 6:
+        titulo += 1
+    lineas = lineas[titulo:]
     margen = min(l["x0"] for l in lineas)
-    salida = []
+    salida = [""] if titulo else []
     for i, linea in enumerate(lineas):
         if i:
             salto = linea["top"] - lineas[i - 1]["top"]
