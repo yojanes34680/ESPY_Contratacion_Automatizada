@@ -229,6 +229,7 @@ class MainActivity : AppCompatActivity() {
         binding.folderButton.text = folder?.name ?: getString(R.string.folder_whole_phone)
         binding.swipeRefresh.isRefreshing = true
         loadJob?.cancel()
+        enrichJob?.cancel()
         loadJob = lifecycleScope.launch {
             allEntries = withContext(Dispatchers.IO) {
                 if (folder != null) {
@@ -240,18 +241,71 @@ class MainActivity : AppCompatActivity() {
             Library.entries = allEntries
             binding.swipeRefresh.isRefreshing = false
             applyFilter()
-            if (folder != null && allEntries.isNotEmpty()) {
-                // Completa duración y artista leyendo las etiquetas, sin bloquear la pantalla.
-                val enriched = withContext(Dispatchers.IO) {
-                    runCatching { MetadataEnricher(this@MainActivity).enrich(allEntries) }.getOrNull()
+            if (folder != null && allEntries.isNotEmpty()) startEnrichment()
+        }
+    }
+
+    private var enrichJob: kotlinx.coroutines.Job? = null
+
+    /** Momento del último "play" pedido: mientras arranca la canción, el trabajo de fondo espera. */
+    private var lastPlayRequestAt = 0L
+
+    private fun playerBusy(): Boolean {
+        val c = controller
+        val starting = android.os.SystemClock.elapsedRealtime() - lastPlayRequestAt < 15_000
+        return starting || (c != null && c.playbackState == androidx.media3.common.Player.STATE_BUFFERING)
+    }
+
+    /**
+     * Completa duración y cantante desde las etiquetas de los archivos.
+     * 1) Aplica al instante lo ya guardado. 2) Lo nuevo se lee por tandas de 20, en baja
+     * prioridad, pausando mientras el reproductor carga una canción, y guardando cada tanda.
+     */
+    private fun startEnrichment() {
+        enrichJob?.cancel()
+        val base = allEntries
+        enrichJob = lifecycleScope.launch {
+            val enricher = withContext(Dispatchers.IO) { MetadataEnricher(this@MainActivity) }
+            var current = withContext(Dispatchers.Default) { enricher.applyCached(base) }
+            if (allEntries !== base) return@launch
+            var published = base
+            if (current != base) {
+                publishEntries(current)
+                published = current
+            }
+            val pending = current.filter { !enricher.isCached(it) }
+            if (pending.isEmpty()) return@launch
+
+            kotlinx.coroutines.delay(5_000) // deja que la app y la primera canción arranquen
+            var done = 0
+            for (batch in pending.chunked(20)) {
+                while (playerBusy()) kotlinx.coroutines.delay(1_000)
+                val updated = withContext(Dispatchers.IO) {
+                    val prio = android.os.Process.getThreadPriority(android.os.Process.myTid())
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LOWEST)
+                    try {
+                        enricher.readBatch(batch)
+                    } finally {
+                        android.os.Process.setThreadPriority(prio)
+                    }
                 }
-                if (enriched != null && enriched != allEntries) {
-                    allEntries = enriched
-                    Library.entries = enriched
-                    applyFilter()
+                if (allEntries !== published) return@launch // la biblioteca cambió (otra carpeta)
+                current = current.map { updated[it.uri] ?: it }
+                done += batch.size
+                binding.countText.text = getString(R.string.reading_tags, done, pending.size)
+                if (done % 100 == 0 || done == pending.size) {
+                    publishEntries(current)
+                    published = current
                 }
+                kotlinx.coroutines.delay(300)
             }
         }
+    }
+
+    private fun publishEntries(list: List<MediaEntry>) {
+        allEntries = list
+        Library.entries = list
+        applyFilter()
     }
 
     // ---------------------------------------------------------------- Carpetas
@@ -445,6 +499,7 @@ class MainActivity : AppCompatActivity() {
     private fun playQueue(list: List<MediaEntry>, position: Int) {
         val c = controller ?: return toast(getString(R.string.player_connecting))
         if (position !in list.indices) return
+        lastPlayRequestAt = android.os.SystemClock.elapsedRealtime()
         val from = maxOf(0, position - 50)
         val to = minOf(list.size, position + 150)
         c.setMediaItems(list.subList(from, to).map { it.toMediaItem() }, position - from, 0L)
