@@ -46,6 +46,10 @@ class PlaybackService : MediaSessionService() {
                 PlayGate.buffering = playbackState == Player.STATE_BUFFERING
             }
 
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                PlayGate.playing = isPlaying
+            }
+
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 player.playbackParameters = AudioFx.playbackParametersFor(mediaItem?.mediaId)
             }

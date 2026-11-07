@@ -26,10 +26,15 @@ fun MediaEntry.toMediaItem(): MediaItem =
 object PlayGate {
     @Volatile var lastPlayRequestAt = 0L
     @Volatile var buffering = false
+    @Volatile var playing = false
 
     fun markPlayRequested() {
         lastPlayRequestAt = SystemClock.elapsedRealtime()
     }
 
-    fun busy(): Boolean = buffering || SystemClock.elapsedRealtime() - lastPlayRequestAt < 15_000
+    /**
+     * El trabajo de fondo solo avanza con el reproductor en reposo: nada sonando, nada
+     * cargando y sin un "play" en los últimos 20 segundos. La música siempre tiene prioridad.
+     */
+    fun busy(): Boolean = playing || buffering || SystemClock.elapsedRealtime() - lastPlayRequestAt < 20_000
 }

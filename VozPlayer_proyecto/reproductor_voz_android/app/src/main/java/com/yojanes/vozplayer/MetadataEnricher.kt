@@ -25,15 +25,20 @@ class MetadataEnricher(private val context: Context) {
     fun applyCached(entries: List<MediaEntry>): List<MediaEntry> =
         entries.map { e -> cache.optJSONObject(e.uri)?.takeIf { it.optLong("m") == e.modified }?.let { merge(e, it) } ?: e }
 
-    /** Lee las etiquetas de una tanda de archivos y guarda el avance. */
-    fun readBatch(batch: List<MediaEntry>): Map<String, MediaEntry> {
+    /**
+     * Lee las etiquetas de una tanda de archivos y guarda el avance.
+     * Antes de cada archivo consulta [shouldPause]: si el reproductor necesita el
+     * almacenamiento, se detiene enseguida (lo leído hasta ahí queda guardado).
+     */
+    fun readBatch(batch: List<MediaEntry>, shouldPause: () -> Boolean = { false }): Map<String, MediaEntry> {
         val out = HashMap<String, MediaEntry>()
         for (e in batch) {
+            if (shouldPause()) break
             val info = read(e.uri, e.modified)
             cache.put(e.uri, info)
             out[e.uri] = merge(e, info)
         }
-        runCatching { cacheFile.writeText(cache.toString()) }
+        if (out.isNotEmpty()) runCatching { cacheFile.writeText(cache.toString()) }
         return out
     }
 

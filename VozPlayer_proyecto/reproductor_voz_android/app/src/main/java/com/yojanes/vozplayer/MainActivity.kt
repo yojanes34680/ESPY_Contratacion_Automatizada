@@ -271,27 +271,33 @@ class MainActivity : AppCompatActivity() {
                 publishEntries(current)
                 published = current
             }
-            val pending = current.filter { !enricher.isCached(it) }
+            // Los videos no se analizan (son lentos de leer y no hace falta su etiqueta).
+            val pending = current.filter { !it.isVideo && !enricher.isCached(it) }
             if (pending.isEmpty()) return@launch
 
-            kotlinx.coroutines.delay(5_000) // deja que la app y la primera canción arranquen
+            kotlinx.coroutines.delay(8_000) // deja que la app y la primera canción arranquen
             var done = 0
-            for (batch in pending.chunked(20)) {
-                while (playerBusy()) kotlinx.coroutines.delay(1_000)
+            var queue = pending
+            while (queue.isNotEmpty()) {
+                // Mientras suena o carga música, no se toca el almacenamiento.
+                while (playerBusy()) kotlinx.coroutines.delay(2_000)
+                val batch = queue.take(5)
                 val updated = withContext(Dispatchers.IO) {
                     val prio = android.os.Process.getThreadPriority(android.os.Process.myTid())
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_LOWEST)
                     try {
-                        enricher.readBatch(batch)
+                        enricher.readBatch(batch) { playerBusy() }
                     } finally {
                         android.os.Process.setThreadPriority(prio)
                     }
                 }
                 if (allEntries !== published) return@launch // la biblioteca cambió (otra carpeta)
+                if (updated.isEmpty()) continue // se pausó antes de leer: vuelve a esperar
+                queue = queue.filter { it.uri !in updated }
                 current = current.map { updated[it.uri] ?: it }
-                done += batch.size
+                done += updated.size
                 binding.countText.text = getString(R.string.reading_tags, done, pending.size)
-                if (done % 100 == 0 || done == pending.size) {
+                if (done % 100 < 5 || queue.isEmpty()) {
                     publishEntries(current)
                     published = current
                 }
