@@ -7,6 +7,7 @@ import com.yojanes.vozplayer.databinding.ItemMediaBinding
 import java.util.Locale
 
 class MediaAdapter(
+    private val onLongClick: ((MediaEntry) -> Unit)? = null,
     private val onClick: (position: Int) -> Unit,
 ) : RecyclerView.Adapter<MediaAdapter.Holder>() {
 
@@ -50,6 +51,15 @@ class MediaAdapter(
         b.root.setOnClickListener {
             val pos = holder.bindingAdapterPosition
             if (pos != RecyclerView.NO_POSITION) onClick(pos)
+        }
+        b.root.setOnLongClickListener {
+            val pos = holder.bindingAdapterPosition
+            if (pos != RecyclerView.NO_POSITION && onLongClick != null) {
+                onLongClick.invoke(items[pos])
+                true
+            } else {
+                false
+            }
         }
     }
 

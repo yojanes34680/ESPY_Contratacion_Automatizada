@@ -42,6 +42,10 @@ class PlaybackService : MediaSessionService() {
         })
         // El tono se recuerda por canción: se aplica cada vez que cambia la pista.
         player.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                PlayGate.buffering = playbackState == Player.STATE_BUFFERING
+            }
+
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 player.playbackParameters = AudioFx.playbackParametersFor(mediaItem?.mediaId)
             }

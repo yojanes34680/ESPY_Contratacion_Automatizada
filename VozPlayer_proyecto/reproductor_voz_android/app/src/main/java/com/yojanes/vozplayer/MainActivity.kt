@@ -42,7 +42,10 @@ class MainActivity : AppCompatActivity() {
     private enum class TypeFilter { ALL, AUDIO, VIDEO }
 
     private lateinit var binding: ActivityMainBinding
-    private val adapter = MediaAdapter { position -> playFromVisible(position) }
+    private val adapter = MediaAdapter(
+        onLongClick = { entry -> SetlistPicker.show(this, entry) },
+        onClick = { position -> playFromVisible(position) },
+    )
 
     private var allEntries: List<MediaEntry> = emptyList()
     private var visibleEntries: List<MediaEntry> = emptyList()
@@ -115,6 +118,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.lyricsButton.setOnClickListener { startActivity(Intent(this, LyricsActivity::class.java)) }
         binding.mixerButton.setOnClickListener { startActivity(Intent(this, MixerActivity::class.java)) }
+        binding.setlistsButton.setOnClickListener { startActivity(Intent(this, SetlistsActivity::class.java)) }
 
         binding.videoFrame.clipToOutline = true
         binding.list.layoutManager = LinearLayoutManager(this)
@@ -247,14 +251,8 @@ class MainActivity : AppCompatActivity() {
 
     private var enrichJob: kotlinx.coroutines.Job? = null
 
-    /** Momento del último "play" pedido: mientras arranca la canción, el trabajo de fondo espera. */
-    private var lastPlayRequestAt = 0L
-
-    private fun playerBusy(): Boolean {
-        val c = controller
-        val starting = android.os.SystemClock.elapsedRealtime() - lastPlayRequestAt < 15_000
-        return starting || (c != null && c.playbackState == androidx.media3.common.Player.STATE_BUFFERING)
-    }
+    /** Mientras el reproductor arranca o carga una canción (desde cualquier pantalla), el trabajo de fondo espera. */
+    private fun playerBusy(): Boolean = PlayGate.busy()
 
     /**
      * Completa duración y cantante desde las etiquetas de los archivos.
@@ -476,19 +474,6 @@ class MainActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- Reproducción
 
-    private fun MediaEntry.toMediaItem(): MediaItem =
-        MediaItem.Builder()
-            .setMediaId(uri)
-            .setUri(Uri.parse(uri))
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(title)
-                    .setArtist(artist.ifBlank { null })
-                    .setAlbumTitle(album.ifBlank { null })
-                    .build(),
-            )
-            .build()
-
     /** Reproduce el elemento elegido y deja como cola el resto de la lista visible. */
     private fun playFromVisible(position: Int) = playQueue(visibleEntries, position)
 
@@ -499,7 +484,7 @@ class MainActivity : AppCompatActivity() {
     private fun playQueue(list: List<MediaEntry>, position: Int) {
         val c = controller ?: return toast(getString(R.string.player_connecting))
         if (position !in list.indices) return
-        lastPlayRequestAt = android.os.SystemClock.elapsedRealtime()
+        PlayGate.markPlayRequested()
         val from = maxOf(0, position - 50)
         val to = minOf(list.size, position + 150)
         c.setMediaItems(list.subList(from, to).map { it.toMediaItem() }, position - from, 0L)

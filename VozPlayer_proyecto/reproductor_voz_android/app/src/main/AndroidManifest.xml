@@ -75,6 +75,15 @@
             android:exported="false"
             android:screenOrientation="fullSensor" />
 
+        <activity
+            android:name=".SetlistsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".SetlistActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <service
             android:name=".PlaybackService"
             android:exported="true"

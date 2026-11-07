@@ -92,4 +92,42 @@
     <string name="video_hide">Ocultar video</string>
     <string name="video_hidden">Video oculto: el audio sigue sonando</string>
     <string name="reading_tags">Leyendo datos %1$d/%2$d…</string>
+
+    <!-- Repertorios -->
+    <string name="setlists_button">Repertorios</string>
+    <string name="setlists_title">Repertorios</string>
+    <string name="setlists_subtitle">Organiza tus canciones en el orden que las vas a cantar</string>
+    <string name="setlists_empty">Aún no tienes repertorios.\n\nCrea uno y agrégale canciones dictando su nombre con el micrófono 🎤.\n\nTambién puedes mantener presionada cualquier canción de la lista principal para agregarla.</string>
+    <string name="setlist_new">Nuevo repertorio</string>
+    <string name="setlist_new_with_plus">➕  Nuevo repertorio…</string>
+    <string name="setlist_name_hint">Nombre (ej.: Serenata, Boda sábado)</string>
+    <string name="setlist_rename">Cambiar nombre</string>
+    <string name="setlist_share">Compartir lista</string>
+    <string name="setlist_delete">Eliminar repertorio</string>
+    <string name="setlist_delete_confirm">¿Eliminar el repertorio «%1$s»? Las canciones no se borran del teléfono.</string>
+    <string name="setlist_clear">Vaciar repertorio</string>
+    <string name="setlist_clear_confirm">¿Quitar todas las canciones de este repertorio?</string>
+    <string name="setlist_options">Opciones</string>
+    <string name="setlist_play">Reproducir</string>
+    <string name="setlist_dictate">Dictar</string>
+    <string name="setlist_search_add">Buscar</string>
+    <string name="setlist_search_message">Escribe una o varias canciones separadas por coma.</string>
+    <string name="setlist_hint">Arrastra ≡ para ordenar · desliza a un lado para quitar</string>
+    <string name="setlist_empty">Repertorio vacío.\n\nToca «Dictar» y di el nombre de una canción. Puedes decir varias seguidas: «Amor indio, luego La camisa negra».\n\nEl micrófono se vuelve a abrir solo para la siguiente; para terminar, toca fuera o «Terminar».</string>
+    <string name="setlist_dictate_prompt">Canción #%1$d (o varias separadas por «luego»)</string>
+    <string name="setlist_choose_for">¿Cuál es «%1$s»?</string>
+    <string name="setlist_skip">Saltar</string>
+    <string name="setlist_stop">Terminar</string>
+    <string name="setlist_added">#%1$d agregada: %2$s</string>
+    <string name="setlist_added_to">«%1$s» agregada a %2$s</string>
+    <string name="setlist_add_to">Agregar «%1$s» a…</string>
+    <string name="setlist_already">«%1$s» ya está en el repertorio</string>
+    <string name="setlist_removed">Quitada: %1$s</string>
+    <string name="setlist_undo">Deshacer</string>
+    <string name="setlist_drag">Arrastrar para ordenar</string>
+    <string name="setlist_library_loading">La biblioteca aún está cargando. Espera un momento en la pantalla principal.</string>
+    <plurals name="songs_count">
+        <item quantity="one">%d canción</item>
+        <item quantity="other">%d canciones</item>
+    </plurals>
 </resources>
