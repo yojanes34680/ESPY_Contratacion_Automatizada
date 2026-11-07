@@ -27,9 +27,9 @@ class VerticalFader @JvmOverloads constructor(
     var onValueChange: ((Int) -> Unit)? = null
 
     private val density = resources.displayMetrics.density
-    private val pink = 0xFFFF3D9A.toInt()
-    private val cyan = 0xFF22D3EE.toInt()
-    private val purple = 0xFF8B5CF6.toInt()
+    private val pink = context.themeColor(R.attr.vpAccent)
+    private val cyan = context.themeColor(R.attr.vpAccent3)
+    private val purple = context.themeColor(R.attr.vpAccent2)
 
     private val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x26FFFFFF }
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG)

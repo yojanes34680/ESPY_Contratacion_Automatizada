@@ -4,8 +4,8 @@
         <shape android:shape="oval">
             <gradient
                 android:angle="315"
-                android:endColor="@color/neon_pink"
-                android:startColor="@color/neon_orange" />
+                android:endColor="?attr/vpAccent"
+                android:startColor="?attr/vpAccent4" />
         </shape>
     </item>
 </ripple>

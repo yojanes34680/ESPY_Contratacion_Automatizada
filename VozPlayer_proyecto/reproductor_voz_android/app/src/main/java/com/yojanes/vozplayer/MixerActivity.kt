@@ -35,6 +35,7 @@ class MixerActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeManager.apply(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMixerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -134,7 +135,7 @@ class MixerActivity : AppCompatActivity() {
             val db = TextView(this).apply {
                 gravity = Gravity.CENTER
                 textSize = 12f
-                setTextColor(ContextCompat.getColor(this@MixerActivity, R.color.neon_cyan))
+                setTextColor(themeColor(R.attr.vpAccent3))
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
             }
             val fader = VerticalFader(this).apply {

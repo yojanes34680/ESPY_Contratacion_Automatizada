@@ -31,13 +31,14 @@ object VoiceSearchMatcher {
         "por", "favor", "porfa", "play",
     )
 
+    private val MARKS = Regex("\\p{Mn}+")
+    private val NON_ALNUM = Regex("[^a-z0-9ñ]+")
+    private val SPACES = Regex("\\s+")
+    private val REPEATED = Regex("(.)\\1+")
+
     fun normalize(text: String): String {
-        val noAccents = Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replace(Regex("\\p{Mn}+"), "")
-        return noAccents.lowercase()
-            .replace(Regex("[^a-z0-9ñ]+"), " ")
-            .trim()
-            .replace(Regex("\\s+"), " ")
+        val noAccents = MARKS.replace(Normalizer.normalize(text, Normalizer.Form.NFD), "")
+        return SPACES.replace(NON_ALNUM.replace(noAccents.lowercase(), " ").trim(), " ")
     }
 
     /** Aproximación fonética del español para tolerar errores del dictado. */
@@ -50,7 +51,7 @@ object VoiceSearchMatcher {
             .replace("v", "b").replace("w", "u").replace("h", "")
             .replace("ñ", "n")
         // Colapsa letras repetidas ("rr" -> "r", "ss" -> "s").
-        return s.replace(Regex("(.)\\1+"), "$1")
+        return REPEATED.replace(s, "$1")
     }
 
     fun levenshtein(a: String, b: String): Int {
@@ -73,11 +74,12 @@ object VoiceSearchMatcher {
     fun similarity(a: String, b: String): Double {
         val max = maxOf(a.length, b.length)
         if (max == 0) return 1.0
+        // Si las longitudes son muy distintas, el parecido no puede ser alto: se evita el cálculo.
+        if (kotlin.math.abs(a.length - b.length).toDouble() / max > 0.6) {
+            return 1.0 - kotlin.math.abs(a.length - b.length).toDouble() / max
+        }
         return 1.0 - levenshtein(a, b).toDouble() / max
     }
-
-    private fun bestSimilarity(a: String, b: String): Double =
-        maxOf(similarity(a, b), similarity(phonetic(a), phonetic(b)))
 
     /** Palabras relevantes de la consulta (sin palabras de orden). */
     fun queryTokens(query: String): List<String> {
@@ -86,78 +88,116 @@ object VoiceSearchMatcher {
         return useful.ifEmpty { all }
     }
 
-    /** Puntaje 0..1 de qué tan bien la consulta describe el archivo. */
-    fun score(query: String, entry: MediaEntry): Double {
-        val tokens = queryTokens(query)
-        if (tokens.isEmpty()) return 0.0
-        val cleanQuery = tokens.joinToString(" ")
+    // ------------------------------------------------------------ Índice preparado
 
-        val fields = listOf(
+    /** Campo de búsqueda ya normalizado, con su versión fonética y sus palabras. */
+    private class Field(val text: String) {
+        val phon = phonetic(text)
+        val tokens = text.split(' ').filter { it.isNotBlank() }
+        val phonTokens = tokens.map { phonetic(it) }
+    }
+
+    /** Archivo listo para buscar: se prepara una sola vez, no en cada letra escrita. */
+    class Prepared internal constructor(val entry: MediaEntry) {
+        internal val fields: List<Any> = listOf(
             entry.title,
             entry.artist,
             entry.album,
             entry.fileNameWithoutExtension,
             "${entry.artist} ${entry.title}",
-        ).map { normalize(it) }.filter { it.isNotBlank() }.distinct()
+        ).map { normalize(it) }.filter { it.isNotBlank() }.distinct().map { Field(it) }
+    }
 
+    fun prepare(entries: List<MediaEntry>): List<Prepared> = entries.map { Prepared(it) }
+
+    private class Query(raw: String) {
+        val tokens = queryTokens(raw)
+        val phonTokens = tokens.map { phonetic(it) }
+        val clean = tokens.joinToString(" ")
+        val phon = phonetic(clean)
+    }
+
+    private fun score(q: Query, p: Prepared): Double {
+        if (q.tokens.isEmpty()) return 0.0
         var best = 0.0
-        for (field in fields) {
+        for (any in p.fields) {
+            val f = any as Field
             val candidate = when {
-                field == cleanQuery -> 1.0
-                containsAsWords(field, cleanQuery) ->
-                    0.9 + 0.1 * cleanQuery.length / field.length
-                else -> maxOf(bestSimilarity(cleanQuery, field), tokenScore(tokens, field) * 0.95)
+                f.text == q.clean -> 1.0
+                " ${f.text} ".contains(" ${q.clean} ") || (q.clean.length >= 4 && f.text.contains(q.clean)) ->
+                    0.9 + 0.1 * q.clean.length / f.text.length
+                else -> maxOf(
+                    similarity(q.clean, f.text),
+                    similarity(q.phon, f.phon),
+                    tokenScore(q, f) * 0.95,
+                )
             }
             if (candidate > best) best = candidate
+            if (best >= 1.0) break
         }
         return best.coerceIn(0.0, 1.0)
     }
 
-    private fun containsAsWords(field: String, query: String): Boolean =
-        " $field ".contains(" $query ") || (query.length >= 4 && field.contains(query))
-
-    /** Promedio, por cada palabra dicha, de su mejor parecido con alguna palabra del campo. */
-    private fun tokenScore(tokens: List<String>, field: String): Double {
-        val fieldTokens = field.split(' ').filter { it.isNotBlank() }
-        if (fieldTokens.isEmpty()) return 0.0
+    private fun tokenScore(q: Query, f: Field): Double {
+        if (f.tokens.isEmpty()) return 0.0
         var total = 0.0
-        for (t in tokens) {
+        for (i in q.tokens.indices) {
+            val t = q.tokens[i]
+            val tp = q.phonTokens[i]
             var bestToken = 0.0
-            for (ft in fieldTokens) {
-                val s = if (t.length >= 3 && ft.startsWith(t)) {
-                    maxOf(0.88, bestSimilarity(t, ft))
-                } else {
-                    bestSimilarity(t, ft)
-                }
+            for (j in f.tokens.indices) {
+                val ft = f.tokens[j]
+                var s = maxOf(similarity(t, ft), similarity(tp, f.phonTokens[j]))
+                if (t.length >= 3 && ft.startsWith(t)) s = maxOf(s, 0.88)
                 if (s > bestToken) bestToken = s
+                if (bestToken >= 1.0) break
             }
             total += bestToken
         }
-        return total / tokens.size
+        return total / q.tokens.size
     }
+
+    /** Puntaje 0..1 de qué tan bien la consulta describe el archivo. */
+    fun score(query: String, entry: MediaEntry): Double = score(Query(query), Prepared(entry))
 
     /** Ordena los archivos por relevancia y descarta los que no se parecen. */
     fun rank(
         query: String,
         entries: List<MediaEntry>,
         threshold: Double = LIST_THRESHOLD,
-    ): List<Scored> =
-        entries.asSequence()
-            .map { Scored(it, score(query, it)) }
+    ): List<Scored> = rankPrepared(query, prepare(entries), threshold)
+
+    fun rankPrepared(
+        query: String,
+        prepared: List<Prepared>,
+        threshold: Double = LIST_THRESHOLD,
+    ): List<Scored> {
+        val q = Query(query)
+        return prepared.asSequence()
+            .map { Scored(it.entry, score(q, it)) }
             .filter { it.score >= threshold }
             .sortedWith(compareByDescending<Scored> { it.score }.thenBy { it.entry.title.lowercase() })
             .toList()
+    }
 
     /**
      * El reconocedor de voz devuelve varias transcripciones posibles; se elige
      * la que produzca la mejor coincidencia en la biblioteca.
      */
-    fun bestVoiceMatch(alternatives: List<String>, entries: List<MediaEntry>): VoiceMatch? {
+    fun bestVoiceMatch(alternatives: List<String>, entries: List<MediaEntry>): VoiceMatch? =
+        bestVoiceMatchPrepared(alternatives, prepare(entries))
+
+    fun bestVoiceMatchPrepared(alternatives: List<String>, prepared: List<Prepared>): VoiceMatch? {
         var result: VoiceMatch? = null
-        for (spoken in alternatives) {
+        for (spoken in alternatives.distinct()) {
             if (spoken.isBlank()) continue
-            val top = rank(spoken, entries, threshold = 0.0).firstOrNull() ?: continue
-            if (result == null || top.score > result.best.score) {
+            val q = Query(spoken)
+            var top: Scored? = null
+            for (p in prepared) {
+                val sc = score(q, p)
+                if (top == null || sc > top.score) top = Scored(p.entry, sc)
+            }
+            if (top != null && (result == null || top.score > result.best.score)) {
                 result = VoiceMatch(spoken, top)
             }
         }

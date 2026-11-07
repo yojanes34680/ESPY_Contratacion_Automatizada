@@ -54,7 +54,7 @@ class LyricsAdapter(
         tv.setTypeface(null, if (isCurrent) Typeface.BOLD else Typeface.NORMAL)
         tv.setTextColor(if (isCurrent) 0xFFFFFFFF.toInt() else 0xFFE9DDFF.toInt())
         // Brillo de neón en la línea que se está cantando.
-        if (isCurrent) tv.setShadowLayer(28f, 0f, 0f, 0xFFFF3D9A.toInt()) else tv.setShadowLayer(0f, 0f, 0f, 0)
+        if (isCurrent) tv.setShadowLayer(28f, 0f, 0f, tv.context.themeColor(R.attr.vpAccent)) else tv.setShadowLayer(0f, 0f, 0f, 0)
         tv.alpha = when {
             !synced -> 1f
             isCurrent -> 1f

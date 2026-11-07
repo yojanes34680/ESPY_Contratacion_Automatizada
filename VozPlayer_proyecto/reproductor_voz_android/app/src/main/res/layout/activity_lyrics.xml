@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="3"
-                android:textColor="@color/neon_cyan"
+                android:textColor="?attr/vpAccent3"
                 android:textSize="12sp" />
         </LinearLayout>
 
@@ -77,9 +77,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/lyrics_search_title"
-            app:backgroundTint="@color/neon_pink"
+            app:backgroundTint="?attr/vpAccent"
             app:icon="@drawable/ic_search"
-            app:iconTint="@android:color/white" />
+            app:iconTint="?attr/vpOnAccent" />
     </LinearLayout>
 
     <FrameLayout

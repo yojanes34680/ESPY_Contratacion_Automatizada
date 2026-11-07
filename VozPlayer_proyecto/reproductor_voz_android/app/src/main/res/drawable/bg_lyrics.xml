@@ -4,18 +4,18 @@
         <shape>
             <gradient
                 android:angle="270"
-                android:centerColor="#12061F"
-                android:endColor="#2A0A3A"
-                android:startColor="#1B0A3C" />
+                android:centerColor="?attr/vpBgTop"
+                android:endColor="?attr/vpBgBottom"
+                android:startColor="?attr/vpBgMid" />
         </shape>
     </item>
     <item>
         <shape>
             <gradient
                 android:centerY="0.9"
-                android:endColor="#00FF3D9A"
+                android:endColor="@android:color/transparent"
                 android:gradientRadius="600dp"
-                android:startColor="#40FF3D9A"
+                android:startColor="?attr/vpAccentSoft"
                 android:type="radial" />
         </shape>
     </item>

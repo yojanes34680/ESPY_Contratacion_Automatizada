@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeManager.apply(this)
         super.onCreate(savedInstanceState)
         if (showPreviousCrashIfAny()) return
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -105,13 +106,16 @@ class MainActivity : AppCompatActivity() {
 
         folders = FolderRepository(this)
         binding.folderButton.setOnClickListener { showFolderDialog() }
+        binding.themeButton.setOnClickListener { ThemePicker.show(this) }
         binding.lyricsButton.setOnClickListener { startActivity(Intent(this, LyricsActivity::class.java)) }
         binding.mixerButton.setOnClickListener { startActivity(Intent(this, MixerActivity::class.java)) }
 
         binding.list.layoutManager = LinearLayoutManager(this)
         binding.list.adapter = adapter
+        binding.list.setHasFixedSize(true)
+        binding.list.itemAnimator = null
 
-        binding.searchInput.doAfterTextChanged { applyFilter() }
+        binding.searchInput.doAfterTextChanged { applyFilter(debounce = true) }
         binding.micButton.setOnClickListener { startVoiceSearch() }
         binding.swipeRefresh.setOnRefreshListener {
             if (folders.active != null || hasMediaPermission()) loadLibrary() else requestMediaPermissions()
@@ -304,26 +308,50 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun applyFilter() {
-        val query = binding.searchInput.text?.toString().orEmpty()
-        val base = when (typeFilter) {
-            TypeFilter.ALL -> allEntries
-            TypeFilter.AUDIO -> allEntries.filter { !it.isVideo }
-            TypeFilter.VIDEO -> allEntries.filter { it.isVideo }
-        }
-        visibleEntries = if (query.isBlank()) base
-        else VoiceSearchMatcher.rank(query, base).map { it.entry }
+    private var filterJob: kotlinx.coroutines.Job? = null
+    private var searchIndex: Pair<List<MediaEntry>, List<VoiceSearchMatcher.Prepared>>? = null
 
-        adapter.submit(visibleEntries)
-        binding.countText.text = resources.getQuantityString(
-            R.plurals.files_count, visibleEntries.size, visibleEntries.size,
-        )
-        when {
-            allEntries.isEmpty() && folders.active != null -> showEmpty(getString(R.string.no_media_in_folder))
-            allEntries.isEmpty() && hasMediaPermission() -> showEmpty(getString(R.string.no_media))
-            allEntries.isEmpty() -> showEmpty(getString(R.string.permission_needed))
-            visibleEntries.isEmpty() -> showEmpty(getString(R.string.no_results, query))
-            else -> binding.emptyText.visibility = View.GONE
+    private fun matchesType(e: MediaEntry) = when (typeFilter) {
+        TypeFilter.ALL -> true
+        TypeFilter.AUDIO -> !e.isVideo
+        TypeFilter.VIDEO -> e.isVideo
+    }
+
+    /** Índice de búsqueda: se prepara una sola vez por biblioteca, en segundo plano. */
+    private suspend fun preparedIndex(): List<VoiceSearchMatcher.Prepared> {
+        val entries = allEntries
+        searchIndex?.takeIf { it.first === entries }?.let { return it.second }
+        val prepared = withContext(Dispatchers.Default) { VoiceSearchMatcher.prepare(entries) }
+        if (allEntries === entries) searchIndex = entries to prepared
+        return prepared
+    }
+
+    /** Filtra la lista sin bloquear la pantalla; al escribir espera una pausa breve. */
+    private fun applyFilter(debounce: Boolean = false) {
+        filterJob?.cancel()
+        filterJob = lifecycleScope.launch {
+            if (debounce) kotlinx.coroutines.delay(150)
+            val query = binding.searchInput.text?.toString().orEmpty()
+            val result = if (query.isBlank()) {
+                allEntries.filter { matchesType(it) }
+            } else {
+                val index = preparedIndex().filter { matchesType(it.entry) }
+                withContext(Dispatchers.Default) {
+                    VoiceSearchMatcher.rankPrepared(query, index).map { it.entry }
+                }
+            }
+            visibleEntries = result
+            adapter.submit(visibleEntries)
+            binding.countText.text = resources.getQuantityString(
+                R.plurals.files_count, visibleEntries.size, visibleEntries.size,
+            )
+            when {
+                allEntries.isEmpty() && folders.active != null -> showEmpty(getString(R.string.no_media_in_folder))
+                allEntries.isEmpty() && hasMediaPermission() -> showEmpty(getString(R.string.no_media))
+                allEntries.isEmpty() -> showEmpty(getString(R.string.permission_needed))
+                visibleEntries.isEmpty() -> showEmpty(getString(R.string.no_results, query))
+                else -> binding.emptyText.visibility = View.GONE
+            }
         }
     }
 
@@ -348,33 +376,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Busca lo que se dijo y deja elegir cuál reproducir (no reproduce solo). */
     private fun handleVoiceResults(alternatives: List<String>) {
         if (alternatives.isEmpty()) return
-        val candidates = visibleTypeEntries()
-        val match = VoiceSearchMatcher.bestVoiceMatch(alternatives, candidates)
-        val spoken = match?.spokenText ?: alternatives.first()
-
-        // Muestra en la lista todo lo que se parece a lo que se dijo.
-        binding.searchInput.setText(spoken)
-        binding.searchInput.setSelection(spoken.length)
-
-        if (match != null && match.best.score >= VoiceSearchMatcher.AUTO_PLAY_THRESHOLD) {
-            val index = visibleEntries.indexOfFirst { it.uri == match.best.entry.uri }
-            if (index >= 0) {
-                playFromVisible(index)
-                toast(getString(R.string.now_playing, match.best.entry.title))
+        lifecycleScope.launch {
+            val index = preparedIndex().filter { matchesType(it.entry) }
+            val (spoken, results) = withContext(Dispatchers.Default) {
+                val match = VoiceSearchMatcher.bestVoiceMatchPrepared(alternatives, index)
+                val said = match?.spokenText ?: alternatives.first()
+                said to VoiceSearchMatcher.rankPrepared(said, index)
             }
-        } else if (visibleEntries.isNotEmpty()) {
-            toast(getString(R.string.choose_result, visibleEntries.size))
-        } else {
-            toast(getString(R.string.no_results, spoken))
+            binding.searchInput.setText(spoken)
+            binding.searchInput.setSelection(spoken.length)
+            if (results.isEmpty()) {
+                toast(getString(R.string.no_results, spoken))
+            } else {
+                showVoiceChooser(spoken, results.take(8).map { it.entry })
+            }
         }
     }
 
-    private fun visibleTypeEntries(): List<MediaEntry> = when (typeFilter) {
-        TypeFilter.ALL -> allEntries
-        TypeFilter.AUDIO -> allEntries.filter { !it.isVideo }
-        TypeFilter.VIDEO -> allEntries.filter { it.isVideo }
+    private fun showVoiceChooser(spoken: String, options: List<MediaEntry>) {
+        val labels = options.map { e ->
+            (if (e.isVideo) "🎬  " else "🎵  ") + e.title + (if (e.artist.isNotBlank()) "  —  " + e.artist else "")
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.voice_choose_title, spoken))
+            .setItems(labels.toTypedArray()) { _, which ->
+                playQueue(options, which)
+                toast(getString(R.string.now_playing, options[which].title))
+            }
+            .setNegativeButton(R.string.voice_choose_list, null)
+            .show()
     }
 
     // ---------------------------------------------------------------- Reproducción
@@ -393,9 +426,18 @@ class MainActivity : AppCompatActivity() {
             .build()
 
     /** Reproduce el elemento elegido y deja como cola el resto de la lista visible. */
-    private fun playFromVisible(position: Int) {
+    private fun playFromVisible(position: Int) = playQueue(visibleEntries, position)
+
+    /**
+     * Reproduce la pista elegida con una cola alrededor de ella. La cola se limita a
+     * unas 200 pistas: enviar cientos de pistas al reproductor de una vez hacía lento el inicio.
+     */
+    private fun playQueue(list: List<MediaEntry>, position: Int) {
         val c = controller ?: return toast(getString(R.string.player_connecting))
-        c.setMediaItems(visibleEntries.map { it.toMediaItem() }, position, 0L)
+        if (position !in list.indices) return
+        val from = maxOf(0, position - 50)
+        val to = minOf(list.size, position + 150)
+        c.setMediaItems(list.subList(from, to).map { it.toMediaItem() }, position - from, 0L)
         c.prepare()
         c.play()
         updatePlayerMode()

@@ -82,4 +82,8 @@
     <string name="np_next">Siguiente</string>
     <string name="np_repeat">Repetir</string>
     <string name="mixer_subtitle">Ajusta tu sonido como en una consola</string>
+    <string name="voice_choose_title">Encontré esto para «%1$s»</string>
+    <string name="voice_choose_list">Ver en la lista</string>
+    <string name="theme_title">Elige el aspecto</string>
+    <string name="theme_message">Toca una plantilla para aplicarla al instante. Puedes cambiarla cuando quieras.</string>
 </resources>

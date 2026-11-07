@@ -42,6 +42,7 @@ class LyricsActivity : AppCompatActivity() {
     private var currentEntry: MediaEntry? = null
     private var synced: List<LyricLine> = emptyList()
     private var loadJob: Job? = null
+    private var lastLine = -1
     private val handler = Handler(Looper.getMainLooper())
 
     private val ticker = object : Runnable {
@@ -49,12 +50,11 @@ class LyricsActivity : AppCompatActivity() {
             val c = controller
             if (c != null && synced.isNotEmpty()) {
                 val idx = LrcParser.currentIndex(synced, c.currentPosition)
-                if (idx >= 0) {
+                // Solo se mueve la letra cuando cambia la línea (antes se movía 4 veces por segundo).
+                if (idx >= 0 && idx != lastLine) {
+                    lastLine = idx
                     adapter.setCurrent(idx)
-                    val offset = binding.lyricsList.height / 3
-                    if (layoutManager.findFirstVisibleItemPosition() != idx || offset > 0) {
-                        layoutManager.scrollToPositionWithOffset(idx, offset)
-                    }
+                    layoutManager.scrollToPositionWithOffset(idx, binding.lyricsList.height / 3)
                 }
             }
             handler.postDelayed(this, 250)
@@ -66,6 +66,7 @@ class LyricsActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeManager.apply(this)
         super.onCreate(savedInstanceState)
         binding = ActivityLyricsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -181,6 +182,7 @@ class LyricsActivity : AppCompatActivity() {
             listOf(who, sourceText).filter { it.isNotBlank() }.joinToString("  ·  "),
         ).joinToString("\n")
         synced = lyrics.synced
+        lastLine = -1
         if (synced.isNotEmpty()) {
             adapter.submit(synced, isSynced = true)
         } else {

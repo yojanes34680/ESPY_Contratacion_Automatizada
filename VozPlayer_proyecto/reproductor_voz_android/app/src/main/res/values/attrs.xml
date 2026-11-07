@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="neonChipStyle" format="reference" />
+
+    <!-- Colores de la plantilla de diseño elegida -->
+    <attr name="vpBgTop" format="color" />
+    <attr name="vpBgMid" format="color" />
+    <attr name="vpBgBottom" format="color" />
+    <attr name="vpAccent" format="color" />
+    <attr name="vpAccent2" format="color" />
+    <attr name="vpAccent3" format="color" />
+    <attr name="vpAccent4" format="color" />
+    <attr name="vpAccentSoft" format="color" />
+    <attr name="vpOnAccent" format="color" />
+    <attr name="vpCardStart" format="color" />
+    <attr name="vpCardMid" format="color" />
+    <attr name="vpCardEnd" format="color" />
 </resources>

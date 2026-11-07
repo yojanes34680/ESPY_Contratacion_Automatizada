@@ -20,8 +20,11 @@ class MediaAdapter(
 
     fun setPlaying(uri: String?) {
         if (uri == playingUri) return
+        val old = playingUri
         playingUri = uri
-        notifyDataSetChanged()
+        // Solo se redibujan las dos filas que cambian, no toda la lista.
+        items.indexOfFirst { it.uri == old }.takeIf { it >= 0 }?.let { notifyItemChanged(it) }
+        items.indexOfFirst { it.uri == uri }.takeIf { it >= 0 }?.let { notifyItemChanged(it) }
     }
 
     override fun getItemCount() = items.size

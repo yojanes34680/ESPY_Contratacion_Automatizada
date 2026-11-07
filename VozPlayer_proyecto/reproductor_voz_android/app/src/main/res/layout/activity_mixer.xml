@@ -88,7 +88,7 @@
                     android:stepSize="1"
                     android:valueFrom="0"
                     android:valueTo="12"
-                    app:trackColorActive="@color/neon_orange" />
+                    app:trackColorActive="?attr/vpAccent4" />
             </LinearLayout>
 
             <!-- Ecualizador -->
@@ -154,7 +154,7 @@
                     android:stepSize="1"
                     android:valueFrom="0"
                     android:valueTo="100"
-                    app:trackColorActive="@color/neon_purple" />
+                    app:trackColorActive="?attr/vpAccent2" />
             </LinearLayout>
 
             <!-- Tono y velocidad -->
@@ -226,7 +226,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="@string/mixer_pitch_reset"
-                    android:textColor="@color/neon_cyan" />
+                    android:textColor="?attr/vpAccent3" />
 
                 <TextView
                     style="@style/MixerLabel"
@@ -240,7 +240,7 @@
                     android:stepSize="5"
                     android:valueFrom="50"
                     android:valueTo="150"
-                    app:trackColorActive="@color/neon_cyan" />
+                    app:trackColorActive="?attr/vpAccent3" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -251,7 +251,7 @@
                 android:layout_marginTop="20dp"
                 android:text="@string/mixer_reset_all"
                 app:icon="@drawable/ic_repeat"
-                app:iconTint="@color/neon_pink" />
+                app:iconTint="?attr/vpAccent" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

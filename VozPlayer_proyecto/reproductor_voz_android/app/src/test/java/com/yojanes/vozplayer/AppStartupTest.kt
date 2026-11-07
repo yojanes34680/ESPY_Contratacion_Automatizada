@@ -100,6 +100,33 @@ class AppStartupTest {
     }
 
     @Test
+    fun todasLasPlantillasAbrenSinErrores() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        for (t in ThemeManager.templates) {
+            ThemeManager.select(app, t)
+            for (screen in listOf(MainActivity::class.java, MixerActivity::class.java, LyricsActivity::class.java)) {
+                ActivityScenario.launch(screen).use { s ->
+                    s.onActivity { a ->
+                        assertEquals("plantilla ${t.name}", false, a.isFinishing)
+                        // Dibuja la pantalla completa para comprobar que los colores de la plantilla se resuelven.
+                        val root = a.window.decorView
+                        root.measure(
+                            android.view.View.MeasureSpec.makeMeasureSpec(1080, android.view.View.MeasureSpec.EXACTLY),
+                            android.view.View.MeasureSpec.makeMeasureSpec(2200, android.view.View.MeasureSpec.EXACTLY),
+                        )
+                        root.layout(0, 0, 1080, 2200)
+                        root.draw(android.graphics.Canvas(android.graphics.Bitmap.createBitmap(1080, 2200, android.graphics.Bitmap.Config.ARGB_8888)))
+                    }
+                }
+            }
+            ActivityScenario.launch(MainActivity::class.java).use { s ->
+                s.onActivity { a -> ThemePicker.show(a) }
+            }
+        }
+        ThemeManager.select(app, ThemeManager.templates.first())
+    }
+
+    @Test
     fun iniciaServicioDeReproduccion() {
         val controller = Robolectric.buildService(PlaybackService::class.java).create()
         controller.destroy()
