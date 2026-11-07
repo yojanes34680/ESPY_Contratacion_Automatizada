@@ -64,6 +64,8 @@ class SetlistActivity : AppCompatActivity() {
     private lateinit var touchHelper: ItemTouchHelper
     private val adapter = SongAdapter(
         onClick = { pos -> playFrom(pos) },
+        onRemove = { pos -> removeAt(pos) },
+        onMenu = { pos -> showSongMenu(pos) },
         onStartDrag = { holder -> touchHelper.startDrag(holder) },
     )
 
@@ -339,13 +341,63 @@ class SetlistActivity : AppCompatActivity() {
 
     private fun toast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
+    /** Quita una canción del repertorio (no la borra del teléfono), con opción de deshacer. */
+    private fun removeAt(pos: Int) {
+        if (pos !in items.indices) return
+        val removed = items.removeAt(pos)
+        persist()
+        Snackbar.make(binding.root, getString(R.string.setlist_removed, removed.title), Snackbar.LENGTH_LONG)
+            .setAnchorView(binding.nowPlaying)
+            .setAction(R.string.setlist_undo) {
+                items.add(pos.coerceAtMost(items.size), removed)
+                persist()
+            }
+            .show()
+    }
+
+    private fun move(pos: Int, delta: Int) {
+        val target = pos + delta
+        if (pos !in items.indices || target !in items.indices) return
+        val e = items.removeAt(pos)
+        items.add(target, e)
+        persist()
+    }
+
+    private fun showSongMenu(pos: Int) {
+        val e = items.getOrNull(pos) ?: return
+        MaterialAlertDialogBuilder(this)
+            .setTitle("${pos + 1}. ${e.title}")
+            .setItems(
+                arrayOf(
+                    getString(R.string.setlist_play_from_here),
+                    getString(R.string.setlist_move_up),
+                    getString(R.string.setlist_move_down),
+                    getString(R.string.setlist_view_lyrics),
+                    getString(R.string.setlist_remove),
+                ),
+            ) { _, which ->
+                when (which) {
+                    0 -> playFrom(pos)
+                    1 -> move(pos, -1)
+                    2 -> move(pos, +1)
+                    3 -> {
+                        playFrom(pos)
+                        startActivity(Intent(this, LyricsActivity::class.java))
+                    }
+                    else -> removeAt(pos)
+                }
+            }
+            .show()
+    }
+
     // ---------------------------------------------------------------- Ordenar / quitar
 
     private inner class TouchCallback : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN,
         ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT,
     ) {
-        override fun isLongPressDragEnabled() = true
+        // Arrastrar solo desde el asa ≡; mantener presionado abre el menú de la canción.
+        override fun isLongPressDragEnabled() = false
 
         override fun onMove(rv: RecyclerView, from: RecyclerView.ViewHolder, to: RecyclerView.ViewHolder): Boolean {
             val a = from.bindingAdapterPosition
@@ -363,22 +415,14 @@ class SetlistActivity : AppCompatActivity() {
         }
 
         override fun onSwiped(holder: RecyclerView.ViewHolder, direction: Int) {
-            val pos = holder.bindingAdapterPosition
-            if (pos !in items.indices) return
-            val removed = items.removeAt(pos)
-            persist()
-            Snackbar.make(binding.root, getString(R.string.setlist_removed, removed.title), Snackbar.LENGTH_LONG)
-                .setAnchorView(binding.nowPlaying)
-                .setAction(R.string.setlist_undo) {
-                    items.add(pos.coerceAtMost(items.size), removed)
-                    persist()
-                }
-                .show()
+            removeAt(holder.bindingAdapterPosition)
         }
     }
 
     private class SongAdapter(
         val onClick: (Int) -> Unit,
+        val onRemove: (Int) -> Unit,
+        val onMenu: (Int) -> Unit,
         val onStartDrag: (RecyclerView.ViewHolder) -> Unit,
     ) : RecyclerView.Adapter<SongAdapter.Holder>() {
         private var items: List<MediaEntry> = emptyList()
@@ -414,6 +458,15 @@ class SetlistActivity : AppCompatActivity() {
             b.root.setOnClickListener {
                 val pos = holder.bindingAdapterPosition
                 if (pos != RecyclerView.NO_POSITION) onClick(pos)
+            }
+            b.root.setOnLongClickListener {
+                val pos = holder.bindingAdapterPosition
+                if (pos != RecyclerView.NO_POSITION) onMenu(pos)
+                true
+            }
+            b.removeButton.setOnClickListener {
+                val pos = holder.bindingAdapterPosition
+                if (pos != RecyclerView.NO_POSITION) onRemove(pos)
             }
             b.dragHandle.setOnTouchListener { _, ev ->
                 if (ev.actionMasked == MotionEvent.ACTION_DOWN) onStartDrag(holder)

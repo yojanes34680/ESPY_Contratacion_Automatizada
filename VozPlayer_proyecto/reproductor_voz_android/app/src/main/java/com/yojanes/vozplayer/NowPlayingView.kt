@@ -1,6 +1,7 @@
 package com.yojanes.vozplayer
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
@@ -29,6 +30,13 @@ class NowPlayingView @JvmOverloads constructor(
         override fun onEvents(player: Player, events: Player.Events) = refresh()
     }
 
+    /** Oculta el botón "Letra" (por ejemplo, dentro de la propia pantalla de letra). */
+    var showLyricsButton: Boolean = true
+        set(value) {
+            field = value
+            b.npLyrics.visibility = if (value) View.VISIBLE else View.GONE
+        }
+
     var player: Player? = null
         set(value) {
             field?.removeListener(listener)
@@ -46,6 +54,12 @@ class NowPlayingView @JvmOverloads constructor(
 
     init {
         b.npArtImage.clipToOutline = true
+        b.npLyrics.setOnClickListener {
+            context.startActivity(Intent(context, LyricsActivity::class.java))
+        }
+        b.npMixer.setOnClickListener {
+            context.startActivity(Intent(context, MixerActivity::class.java))
+        }
         b.npPlay.setOnClickListener {
             val p = player ?: return@setOnClickListener
             if (p.isPlaying) {

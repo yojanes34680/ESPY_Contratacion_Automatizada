@@ -291,6 +291,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/lyricsButton"
+            android:visibility="gone"
             style="@style/GlassButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -305,6 +306,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/mixerButton"
+            android:visibility="gone"
             style="@style/GlassButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -324,12 +326,11 @@
             style="@style/GlassButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_weight="1.25"
+            android:layout_weight="1"
             android:paddingStart="6dp"
             android:paddingEnd="6dp"
             android:text="@string/setlists_button"
-            android:textSize="13sp"
+            android:textSize="15sp"
             app:icon="@drawable/ic_queue_music"
             app:iconPadding="4dp"
             app:iconTint="?attr/vpAccent" />

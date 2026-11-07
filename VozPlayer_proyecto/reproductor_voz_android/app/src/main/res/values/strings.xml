@@ -112,7 +112,7 @@
     <string name="setlist_dictate">Dictar</string>
     <string name="setlist_search_add">Buscar</string>
     <string name="setlist_search_message">Escribe una o varias canciones separadas por coma.</string>
-    <string name="setlist_hint">Arrastra ≡ para ordenar · desliza a un lado para quitar</string>
+    <string name="setlist_hint">Arrastra ≡ para ordenar · 🗑 para quitar · mantén presionada para más opciones</string>
     <string name="setlist_empty">Repertorio vacío.\n\nToca «Dictar» y di el nombre de una canción. Puedes decir varias seguidas: «Amor indio, luego La camisa negra».\n\nEl micrófono se vuelve a abrir solo para la siguiente; para terminar, toca fuera o «Terminar».</string>
     <string name="setlist_dictate_prompt">Canción #%1$d (o varias separadas por «luego»)</string>
     <string name="setlist_choose_for">¿Cuál es «%1$s»?</string>
@@ -130,4 +130,9 @@
         <item quantity="one">%d canción</item>
         <item quantity="other">%d canciones</item>
     </plurals>
+    <string name="setlist_remove">Quitar del repertorio</string>
+    <string name="setlist_play_from_here">Reproducir desde aquí</string>
+    <string name="setlist_move_up">Subir una posición</string>
+    <string name="setlist_move_down">Bajar una posición</string>
+    <string name="setlist_view_lyrics">Ver letra</string>
 </resources>

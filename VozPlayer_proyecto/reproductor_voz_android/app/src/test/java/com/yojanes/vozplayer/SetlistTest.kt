@@ -73,6 +73,25 @@ class SetlistTest {
     }
 
     @Test
+    fun laPapeleraQuitaLaCancion() {
+        val s = SetlistStore.create(app, "Con error")
+        (1..3).forEach { SetlistStore.add(app, s.id, song(it)) }
+        ActivityScenario.launch<SetlistActivity>(SetlistActivity.intent(app, s.id)).use { sc ->
+            sc.onActivity { a ->
+                val rv = a.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.songsList)
+                rv.measure(
+                    android.view.View.MeasureSpec.makeMeasureSpec(1080, android.view.View.MeasureSpec.EXACTLY),
+                    android.view.View.MeasureSpec.makeMeasureSpec(1800, android.view.View.MeasureSpec.EXACTLY),
+                )
+                rv.layout(0, 0, 1080, 1800)
+                val holder = rv.findViewHolderForAdapterPosition(1)!!
+                holder.itemView.findViewById<android.view.View>(R.id.removeButton).performClick()
+            }
+        }
+        assertEquals(listOf("Canción 1", "Canción 3"), SetlistStore.get(app, s.id)!!.items.map { it.title })
+    }
+
+    @Test
     fun pantallasDeRepertorioAbren() {
         val s = SetlistStore.create(app, "Prueba")
         (1..3).forEach { SetlistStore.add(app, s.id, song(it)) }

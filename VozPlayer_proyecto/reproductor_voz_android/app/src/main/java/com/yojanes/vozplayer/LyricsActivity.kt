@@ -72,6 +72,7 @@ class LyricsActivity : AppCompatActivity() {
         setContentView(binding.root)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         repo = LyricsRepository(this)
+        binding.nowPlaying.showLyricsButton = false
 
         val prefs = getSharedPreferences("letras_vista", MODE_PRIVATE)
         adapter.textSizeSp = prefs.getFloat("tamano", 26f)
