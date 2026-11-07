@@ -1,0 +1,5 @@
+# Motores de inteligencia artificial (opcionales, recomendados para mejor calidad).
+# Demucs: separa voz, batería, bajo, piano, guitarra y otros instrumentos.
+demucs>=4.0
+# Basic Pitch (Spotify): transcripción polifónica. Requiere Python 3.10 o 3.11.
+basic-pitch>=0.3 ; python_version < "3.12"
