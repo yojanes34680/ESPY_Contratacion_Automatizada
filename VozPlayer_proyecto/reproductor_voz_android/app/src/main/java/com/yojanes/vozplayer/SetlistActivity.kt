@@ -97,7 +97,8 @@ class SetlistActivity : AppCompatActivity() {
             return
         }
         setlist = s
-        items += s.items
+        items += relink(s.items)
+        if (items != s.items) SetlistStore.save(this, s.copy(items = items.toList()))
 
         binding.songsList.layoutManager = LinearLayoutManager(this)
         binding.songsList.adapter = adapter
@@ -156,6 +157,21 @@ class SetlistActivity : AppCompatActivity() {
         adapter.submit(items)
         binding.emptyText.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
         binding.playAllButton.isEnabled = items.isNotEmpty()
+    }
+
+    /**
+     * Si una canción del repertorio ya no está en la biblioteca con la misma dirección
+     * (por ejemplo, tras reinstalar o volver a elegir la carpeta), se busca por nombre de archivo.
+     */
+    private fun relink(list: List<MediaEntry>): List<MediaEntry> {
+        val lib = Library.entries
+        if (lib.isEmpty()) return list
+        val byUri = lib.associateBy { it.uri }
+        val byName = lib.groupBy { it.displayName.lowercase() }
+        return list.map { e ->
+            if (byUri.containsKey(e.uri)) e
+            else byName[e.displayName.lowercase()]?.firstOrNull() ?: e
+        }
     }
 
     private fun addEntry(e: MediaEntry): Boolean {

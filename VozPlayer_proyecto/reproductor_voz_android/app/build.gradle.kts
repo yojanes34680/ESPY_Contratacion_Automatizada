@@ -11,11 +11,29 @@ android {
         applicationId = "com.yojanes.vozplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "2.2"
+        versionCode = 14
+        versionName = "2.3"
+    }
+
+    // Firma fija para que cada actualización se instale encima de la anterior y conserve
+    // los datos. La llave NO está en el repositorio: GitHub Actions la toma de los secretos
+    // VOZPLAYER_KEYSTORE_B64 y VOZPLAYER_KEYSTORE_PASSWORD. Sin ellos se usa la firma de depuración.
+    val fixedKeystore = System.getenv("VOZPLAYER_KEYSTORE")?.let { file(it) }?.takeIf { it.exists() }
+    signingConfigs {
+        if (fixedKeystore != null) {
+            create("vozplayer") {
+                storeFile = fixedKeystore
+                storePassword = System.getenv("VOZPLAYER_KEYSTORE_PASSWORD")
+                keyAlias = "vozplayer"
+                keyPassword = System.getenv("VOZPLAYER_KEYSTORE_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            if (fixedKeystore != null) signingConfig = signingConfigs.getByName("vozplayer")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

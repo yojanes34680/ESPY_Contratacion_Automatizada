@@ -138,4 +138,26 @@
     <string name="np_toggle">Abrir o esconder el panel</string>
     <string name="np_expand">Abrir panel</string>
     <string name="np_collapse">Esconder panel</string>
+
+    <!-- Importar y copia de seguridad -->
+    <string name="setlist_import">Importar lista</string>
+    <string name="setlist_import_hint">🎤 Serenata\n1. Amor Indio — Caballero Gaucho\n2. No Quiero Envejecer — Lucho y Rafa</string>
+    <string name="setlist_import_message">Pega aquí una lista compartida desde VozPlayer (o escribe una canción por línea). La app busca cada canción en tu carpeta y arma el repertorio.</string>
+    <string name="setlist_import_go">Importar</string>
+    <string name="setlist_import_nothing">No encontré canciones en el texto.</string>
+    <string name="setlist_imported_name">Repertorio importado</string>
+    <string name="setlist_import_result">Se agregaron %1$d de %2$d canciones.</string>
+    <string name="setlist_import_missing">No las encontré en tu carpeta:</string>
+    <string name="setlist_open">Abrir repertorio</string>
+    <string name="backup_button">Copia de seguridad</string>
+    <string name="backup_title">Copia de seguridad</string>
+    <string name="backup_message">Guarda todos tus repertorios en un archivo (por ejemplo en Descargas o en Google Drive) para recuperarlos si cambias de celular o reinstalas la app.</string>
+    <string name="backup_save">Guardar copia</string>
+    <string name="backup_restore">Restaurar</string>
+    <string name="backup_saved">Copia de seguridad guardada ✅</string>
+    <string name="backup_error">No se pudo leer o guardar el archivo.</string>
+    <plurals name="backup_restored">
+        <item quantity="one">Se restauró %d repertorio ✅</item>
+        <item quantity="other">Se restauraron %d repertorios ✅</item>
+    </plurals>
 </resources>

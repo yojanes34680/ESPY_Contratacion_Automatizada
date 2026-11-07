@@ -56,6 +56,35 @@ object SetlistStore {
         return true
     }
 
+    /** Contenido completo para la copia de seguridad. */
+    @Synchronized
+    fun exportJson(context: Context): String {
+        val arr = JSONArray()
+        all(context).forEach { arr.put(toJson(it)) }
+        return JSONObject()
+            .put("app", "VozPlayer")
+            .put("version", 1)
+            .put("plantilla", context.getSharedPreferences("aspecto", Context.MODE_PRIVATE).getString("plantilla", null) ?: "")
+            .put("repertorios", arr)
+            .toString(2)
+    }
+
+    /** Restaura una copia: agrega o reemplaza los repertorios del archivo. Devuelve cuántos se restauraron. */
+    @Synchronized
+    fun importJson(context: Context, json: String): Int {
+        val root = JSONObject(json)
+        val arr = root.optJSONArray("repertorios") ?: return 0
+        val incoming = (0 until arr.length()).mapNotNull { arr.optJSONObject(it)?.let { o -> fromJson(o) } }
+            .filter { it.id.isNotBlank() }
+        val byId = all(context).associateBy { it.id }.toMutableMap()
+        incoming.forEach { byId[it.id] = it }
+        write(context, byId.values.toList())
+        root.optString("plantilla").takeIf { it.isNotBlank() }?.let {
+            context.getSharedPreferences("aspecto", Context.MODE_PRIVATE).edit().putString("plantilla", it).apply()
+        }
+        return incoming.size
+    }
+
     private fun write(context: Context, lists: List<Setlist>) {
         val arr = JSONArray()
         lists.forEach { arr.put(toJson(it)) }

@@ -23,7 +23,21 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Preparar firma fija (desde los secretos del repositorio)
+        env:
+          KEYSTORE_B64: ${{ secrets.VOZPLAYER_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/vozplayer.keystore"
+            echo "VOZPLAYER_KEYSTORE=$RUNNER_TEMP/vozplayer.keystore" >> "$GITHUB_ENV"
+            echo "Firma: FIJA (las actualizaciones conservan los datos)"
+          else
+            echo "::warning::Firma: TEMPORAL. Falta el secreto VOZPLAYER_KEYSTORE_B64; este APK no se podrá instalar encima de la versión anterior."
+          fi
+
       - name: Compilar APK
+        env:
+          VOZPLAYER_KEYSTORE_PASSWORD: ${{ secrets.VOZPLAYER_KEYSTORE_PASSWORD }}
         run: bash ./gradlew --no-daemon assembleDebug
 
       - uses: actions/upload-artifact@v4

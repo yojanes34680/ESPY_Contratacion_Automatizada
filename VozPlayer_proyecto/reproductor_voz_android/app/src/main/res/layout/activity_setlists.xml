@@ -62,6 +62,40 @@
         app:iconTint="?attr/vpOnAccent"
         android:textColor="?attr/vpOnAccent" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/importButton"
+            style="@style/GlassButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:text="@string/setlist_import"
+            android:textSize="13sp"
+            app:icon="@drawable/ic_paste"
+            app:iconPadding="6dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backupButton"
+            style="@style/GlassButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:text="@string/backup_button"
+            android:textSize="13sp"
+            app:icon="@drawable/ic_backup"
+            app:iconPadding="6dp"
+            app:iconTint="?attr/vpAccent4" />
+    </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -65,6 +65,31 @@ class SetlistTest {
     }
 
     @Test
+    fun copiaDeSeguridadSeRestauraCompleta() {
+        val s = SetlistStore.create(app, "Serenata")
+        (1..3).forEach { SetlistStore.add(app, s.id, song(it)) }
+        val copia = SetlistStore.exportJson(app)
+        // Simula reinstalar: se borra todo y se restaura el archivo.
+        SetlistStore.delete(app, s.id)
+        assertNull(SetlistStore.get(app, s.id))
+        assertEquals(1, SetlistStore.importJson(app, copia))
+        val r = SetlistStore.get(app, s.id)!!
+        assertEquals("Serenata", r.name)
+        assertEquals(listOf("Canción 1", "Canción 2", "Canción 3"), r.items.map { it.title })
+    }
+
+    @Test
+    fun listaCompartidaSeVuelveAImportar() {
+        val s = SetlistStore.create(app, "Boda")
+        (1..2).forEach { SetlistStore.add(app, s.id, song(it, "Caballero Gaucho")) }
+        val texto = SetlistStore.asText(SetlistStore.get(app, s.id)!!)
+        val p = SharedListParser.parse(texto)
+        assertEquals("Boda", p.name)
+        assertEquals(listOf("Canción 1", "Canción 2"), p.songs.map { it.title })
+        assertEquals("Caballero Gaucho", p.songs[0].artist)
+    }
+
+    @Test
     fun textoParaCompartir() {
         val s = SetlistStore.create(app, "Serenata")
         SetlistStore.add(app, s.id, song(1, "Caballero Gaucho"))
@@ -97,6 +122,7 @@ class SetlistTest {
         (1..3).forEach { SetlistStore.add(app, s.id, song(it)) }
         Library.entries = (1..10).map { song(it) }
         ActivityScenario.launch(SetlistsActivity::class.java).use { sc ->
+            sc.onActivity { a -> a.findViewById<android.view.View>(R.id.importButton).performClick() }
             sc.onActivity { assertFalse(it.isFinishing) }
         }
         ActivityScenario.launch<SetlistActivity>(SetlistActivity.intent(app, s.id)).use { sc ->
