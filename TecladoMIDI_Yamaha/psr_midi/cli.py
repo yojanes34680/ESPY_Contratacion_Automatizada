@@ -26,14 +26,19 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--formato", type=int, choices=[0, 1], default=0, help="SMF 0 (recomendado) o 1")
     ap.add_argument("--bpm", type=float, default=None, help="Forzar el tempo en lugar de detectarlo")
     ap.add_argument("--sin-melodia", action="store_true", help="No incluir la línea de la voz (canal 1)")
+    ap.add_argument("--voz-acompanamiento", default=None, help="Sonido del acompañamiento, p. ej. 'Acordeón'")
     ap.add_argument("--gpu", action="store_true", help="Usar la tarjeta gráfica NVIDIA para Demucs")
     args = ap.parse_args(argv)
 
     from .converter import configuracion_por_defecto
 
     config = configuracion_por_defecto()
+    if args.voz_acompanamiento:
+        from .converter import VOCES_GM
+
+        config["acompanamiento"].programa = VOCES_GM[args.voz_acompanamiento]
     if args.sin_melodia:
-        config["vocals"].activo = False
+        config["melodia"].activo = False
 
     try:
         res = convertir(
@@ -49,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as exc:  # noqa: BLE001
         print(f"Error: {exc}", file=sys.stderr)
         return 1
-    print(f"\nArchivo creado: {res.archivo}  ({res.bpm:.1f} BPM)")
+    print(f"\nArchivo creado: {res.archivo}  ({res.bpm:.1f} BPM, parecido armónico {res.parecido * 100:.0f} %)")
     for nombre, n in res.notas_por_parte.items():
         print(f"  {nombre}: {n} notas")
     return 0

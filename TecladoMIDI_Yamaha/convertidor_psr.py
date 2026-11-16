@@ -59,12 +59,14 @@ def _autoprueba(salida: Path) -> int:
                 entrada = mp3
             else:
                 raise RuntimeError("ffmpeg no quedó incluido en el programa")
-            res = convertir(entrada, salida, usar_ia=False, log=print)
-        # Comprobar que la IA quedó empaquetada (sin descargar el modelo).
-        import demucs.apply  # noqa: F401
-        import demucs.pretrained  # noqa: F401
-        import torch  # noqa: F401
+            # Proceso completo con IA: separación de voz (MDX) + Basic Pitch.
+            res = convertir(entrada, salida, usar_ia=True, log=print)
+        if res.motor_separacion != "mdx":
+            raise RuntimeError(f"No se usó el separador de voz (motor: {res.motor_separacion})")
+        from psr_midi.transcription import basic_pitch_disponible
 
+        if not basic_pitch_disponible():
+            raise RuntimeError("Basic Pitch no quedó incluido en el programa")
         print(f"AUTOPRUEBA OK: {res.archivo} {res.notas_por_parte}")
         return 0
     except Exception:  # noqa: BLE001

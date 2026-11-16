@@ -1,5 +1,10 @@
-# Motores de inteligencia artificial (opcionales, recomendados para mejor calidad).
-# Demucs: separa voz, batería, bajo, piano, guitarra y otros instrumentos.
-demucs>=4.0
-# Basic Pitch (Spotify): transcripción polifónica. Requiere Python 3.10 o 3.11.
-basic-pitch>=0.3 ; python_version < "3.12"
+# Motores de inteligencia artificial (recomendados).
+# - onnxruntime: ejecuta el separador de voz MDX-Net y Basic Pitch (Spotify).
+# - basic-pitch se instala SIN dependencias (--no-deps) para no arrastrar TensorFlow:
+#     pip install --no-deps basic-pitch
+#   y luego estas, que son las que realmente usa con ONNX:
+onnxruntime>=1.16
+pretty_midi>=0.2.10
+mir_eval>=0.7
+resampy>=0.4
+importlib_resources>=6.0

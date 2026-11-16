@@ -21,12 +21,11 @@ CARPETA.mkdir(exist_ok=True)
 TRABAJOS: dict[str, dict] = {}
 
 PISTAS = {
-    "vocals": "Melodía de la voz (canal 1)",
-    "piano": "Piano / acordes (canal 2)",
-    "bass": "Bajo (canal 3)",
-    "guitar": "Guitarra (canal 4)",
-    "other": "Cuerdas / teclados (canal 5)",
-    "drums": "Batería (canal 10)",
+    "melodia": "Melodía de la voz (canal 1 · TRACK 1)",
+    "acompanamiento": "Acordes / acompañamiento (canal 2 · TRACK 2)",
+    "bajo": "Bajo (canal 3)",
+    "agudos": "Instrumentos agudos: punteos, vientos (canal 4)",
+    "bateria": "Batería / percusión (canal 10)",
 }
 
 PAGINA = """<!doctype html>
@@ -63,6 +62,10 @@ a.dl{display:block;text-align:center;padding:14px;border-radius:10px;background:
   <input type="number" name="bpm" min="30" max="250" step="0.1" placeholder="Ej: 72">
   <label>Sonido de la melodía</label>
   <select name="voz">%VOCES%</select>
+  <label>Sonido del acompañamiento</label>
+  <select name="voz_acomp">%VOCES_ACOMP%</select>
+  <label>Sonido de los instrumentos agudos</label>
+  <select name="voz_agudos">%VOCES_AGUDOS%</select>
   <label>Instrumentos</label>
   <div class="grid">%PISTAS%</div>
   <button id="btn" type="submit">Convertir a MIDI</button>
@@ -93,21 +96,27 @@ f.onsubmit=async ev=>{ev.preventDefault();
 
 
 def _pagina() -> str:
-    from .separation import demucs_disponible
+    from .mdx import mdx_disponible
 
     voces = "".join(
         f'<option value="{n}"{" selected" if n == "Flauta" else ""}>{n}</option>' for n in VOCES_GM
+    )
+    voces_acomp = "".join(
+        f'<option value="{n}"{" selected" if n == "Piano de cola" else ""}>{n}</option>' for n in VOCES_GM
+    )
+    voces_agudos = "".join(
+        f'<option value="{n}"{" selected" if n == "Guitarra eléctrica limpia" else ""}>{n}</option>' for n in VOCES_GM
     )
     pistas = "".join(
         f'<label><input type="checkbox" name="pistas" value="{k}" checked> {v}</label>' for k, v in PISTAS.items()
     )
     aviso = (
-        "Se intentará usar inteligencia artificial (Demucs) para separar voz, piano, bajo, guitarra, cuerdas y batería; "
-        "si su modelo no se puede descargar, se usará el modo básico (batería, bajo y acordes, sin melodía de la voz)."
-        if demucs_disponible()
-        else "Modo básico (sin inteligencia artificial): se obtienen batería, bajo y acordes; la melodía de la voz no."
+        "La voz se separa de los instrumentos con inteligencia artificial; los instrumentos se transcriben "
+        "sin la voz para que el acompañamiento quede limpio."
+        if mdx_disponible()
+        else "Sin separación de voz: la melodía se toma de la línea más aguda de la mezcla."
     )
-    return PAGINA.replace("%VOCES%", voces).replace("%PISTAS%", pistas).replace("%AVISO%", aviso)
+    return PAGINA.replace("%VOCES_AGUDOS%", voces_agudos).replace("%VOCES_ACOMP%", voces_acomp).replace("%VOCES%", voces).replace("%PISTAS%", pistas).replace("%AVISO%", aviso)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -121,6 +130,8 @@ async def api_convertir(
     cuantizar: int = Form(4),
     bpm: str = Form(""),
     voz: str = Form("Flauta"),
+    voz_acomp: str = Form("Piano de cola"),
+    voz_agudos: str = Form("Guitarra eléctrica limpia"),
     pistas: list[str] = Form(default=[]),
 ):
     id_ = uuid.uuid4().hex[:12]
@@ -134,7 +145,9 @@ async def api_convertir(
     config = configuracion_por_defecto()
     for clave, c in config.items():
         c.activo = clave in pistas
-    config["vocals"].programa = VOCES_GM.get(voz, VOCES_GM["Flauta"])
+    config["melodia"].programa = VOCES_GM.get(voz, VOCES_GM["Flauta"])
+    config["acompanamiento"].programa = VOCES_GM.get(voz_acomp, VOCES_GM["Piano de cola"])
+    config["agudos"].programa = VOCES_GM.get(voz_agudos, VOCES_GM["Guitarra eléctrica limpia"])
     try:
         bpm_manual = float(bpm.replace(",", ".")) if bpm.strip() else None
     except ValueError:

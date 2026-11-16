@@ -30,8 +30,12 @@ teclado (Song Creator) o en un editor MIDI gratuito como **MuseScore** o
 La calidad sube mucho al instalar los motores de inteligencia artificial
 (paso 3 de la instalación):
 
-- **Demucs** (Meta): separa la canción en voz, batería, bajo, piano, guitarra y otros.
-- **Basic Pitch** (Spotify): reconoce acordes y notas simultáneas con mayor precisión.
+- **Separador de voz MDX-Net** (proyecto Ultimate Vocal Remover): separa la voz de los instrumentos.
+- **Basic Pitch** (Spotify): reconoce acordes y notas simultáneas.
+
+Proceso: se separa la voz; del instrumental se transcriben por aparte el bajo, los
+acordes (sin graves ni percusión, lo que duplicó la fidelidad del acompañamiento en
+las mediciones) y los instrumentos agudos; la percusión se convierte a batería GM.
 
 Sin ellos el programa sigue funcionando en un **modo básico** (separa solo
 batería, bajo y acordes, sin la melodía de la voz).
@@ -43,11 +47,10 @@ batería, bajo y acordes, sin la melodía de la voz).
 | Canal | Instrumento | Botón del PSR-S950 |
 |---|---|---|
 | 1 | Melodía de la voz (sonido elegible: flauta, coro, violín...) | **[TRACK 1]** |
-| 2 | Piano / acordes | **[TRACK 2]** |
+| 2 | Acordes / acompañamiento (sonido elegible: piano, acordeón, órgano...) | **[TRACK 2]** |
 | 3 | Bajo | [EXTRA TRACKS] |
-| 4 | Guitarra | [EXTRA TRACKS] |
-| 5 | Cuerdas / teclados | [EXTRA TRACKS] |
-| 10 | Batería | [EXTRA TRACKS] |
+| 4 | Instrumentos agudos: punteos, vientos (sonido elegible) | [EXTRA TRACKS] |
+| 10 | Batería / percusión | [EXTRA TRACKS] |
 
 Así, para **cantar con la pista**, se apaga **[TRACK 1]** y la melodía deja de
 sonar mientras el resto del acompañamiento sigue. Para tocar el piano en vivo,
@@ -121,7 +124,9 @@ TecladoMIDI_Yamaha/
 ├── requirements.txt / requirements-ia.txt   Dependencias (núcleo / IA opcional)
 ├── psr_midi/
 │   ├── audio_io.py       Lectura de MP3/MP4/WAV con ffmpeg
-│   ├── separation.py     Separación de instrumentos (Demucs o modo básico)
+│   ├── mdx.py            Separador de voz MDX-Net (ONNX)
+│   ├── separation.py     Separación voz / instrumental / percusión
+│   ├── calidad.py        Medición del parecido con la canción original
 │   ├── transcription.py  Audio → notas (Basic Pitch, motor CQT propio, pYIN)
 │   ├── drums.py          Batería → bombo, redoblante, hi-hat, platillo (GM)
 │   ├── yamaha.py         Escritura del .mid (GM/XG, canales, voces)

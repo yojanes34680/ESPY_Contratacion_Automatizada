@@ -25,12 +25,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Instalar dependencias (núcleo + IA en CPU + empaquetador)
+      - name: Instalar dependencias (núcleo + IA con ONNX + empaquetador)
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt pytest pyinstaller
-          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
-          pip install demucs
+          pip install -r requirements.txt -r requirements-ia.txt pytest pyinstaller
+          pip install --no-deps basic-pitch
+
+      - name: Descargar el separador de voz (MDX-Net, proyecto Ultimate Vocal Remover)
+        run: |
+          New-Item -ItemType Directory -Force modelos | Out-Null
+          Invoke-WebRequest -Uri "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Voc_FT.onnx" -OutFile modelos\UVR-MDX-NET-Voc_FT.onnx
+          (Get-Item modelos\UVR-MDX-NET-Voc_FT.onnx).Length
 
       - name: Pruebas
         run: python -m pytest -q
@@ -46,8 +51,9 @@ jobs:
         run: |
           pyinstaller --noconfirm --clean --windowed --name ConvertidorPSR `
             --add-binary "ffmpeg\ffmpeg.exe;ffmpeg" `
-            --collect-all librosa --collect-all demucs --collect-all soundfile `
-            --collect-all julius --collect-all lameenc `
+            --add-data "modelos;modelos" `
+            --collect-all librosa --collect-all soundfile --collect-all basic_pitch `
+            --collect-all onnxruntime --collect-all pretty_midi --collect-all mir_eval --collect-all resampy `
             --collect-submodules scipy --collect-submodules sklearn `
             --hidden-import mido.backends `
             convertidor_psr.py

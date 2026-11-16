@@ -10,19 +10,30 @@ import numpy as np
 from .audio_io import SAMPLE_RATE
 from .drums import transcribir_bateria
 from .separation import Separacion, separar, tiene_senal
-from .transcription import transcribir_monofonico, transcribir_polifonico
+from .calidad import similitud
+from .transcription import (
+    Nota,
+    basic_pitch_disponible,
+    linea_monofonica,
+    transcribir_basic_pitch,
+    transcribir_monofonico,
+    transcribir_polifonico,
+)
 from .yamaha import Parte, escribir_midi, nombre_archivo_seguro
 
 # Voces GM (número base 0) con nombres en español, para la interfaz.
 VOCES_GM = {
     "Piano de cola": 0,
+    "Piano brillante": 1,
     "Piano eléctrico": 4,
     "Órgano de iglesia": 19,
     "Órgano rock": 18,
+    "Acordeón": 21,
+    "Armónica": 22,
     "Guitarra acústica (nylon)": 24,
     "Guitarra acústica (acero)": 25,
     "Guitarra eléctrica limpia": 27,
-    "Guitarra distorsionada": 30,
+    "Bajo acústico": 32,
     "Bajo eléctrico (dedos)": 33,
     "Bajo eléctrico (púa)": 34,
     "Violín": 40,
@@ -32,6 +43,7 @@ VOCES_GM = {
     "Voz Oohs": 53,
     "Trompeta": 56,
     "Saxofón alto": 65,
+    "Clarinete": 71,
     "Flauta": 73,
     "Sintetizador Pad cálido": 89,
 }
@@ -42,25 +54,24 @@ class ConfigInstrumento:
     nombre: str
     canal: int
     programa: int
-    tipo: str  # "poli", "mono" o "bateria"
-    rango: tuple[int, int] = (21, 108)
     volumen: int = 100
     paneo: int = 64
     activo: bool = True
 
 
 def configuracion_por_defecto() -> dict[str, ConfigInstrumento]:
-    """Pista separada -> instrumento del teclado.
+    """Partes de la secuencia y su lugar en el teclado.
 
-    Canal 1 = melodía ([TRACK 1]), canal 2 = piano ([TRACK 2]), canal 10 = batería.
+    Canal 1 = melodía de la voz ([TRACK 1]), canal 2 = acordes ([TRACK 2]),
+    canal 3 = bajo, canal 4 = instrumentos agudos (punteos, vientos),
+    canal 10 = batería/percusión ([EXTRA TRACKS]).
     """
     return {
-        "vocals": ConfigInstrumento("Melodia (voz)", 0, VOCES_GM["Flauta"], "mono", (48, 84), 90),
-        "piano": ConfigInstrumento("Piano / acordes", 1, VOCES_GM["Piano de cola"], "poli", (21, 108), 95),
-        "bass": ConfigInstrumento("Bajo", 2, VOCES_GM["Bajo eléctrico (dedos)"], "mono", (28, 62), 105),
-        "guitar": ConfigInstrumento("Guitarra", 3, VOCES_GM["Guitarra acústica (acero)"], "poli", (40, 88), 85, 40),
-        "other": ConfigInstrumento("Cuerdas / teclados", 4, VOCES_GM["Cuerdas (ensamble)"], "poli", (36, 96), 75, 88),
-        "drums": ConfigInstrumento("Bateria", 9, 0, "bateria", (35, 81), 100),
+        "melodia": ConfigInstrumento("Melodia (voz)", 0, VOCES_GM["Flauta"], 95),
+        "acompanamiento": ConfigInstrumento("Acompanamiento", 1, VOCES_GM["Piano de cola"], 90),
+        "bajo": ConfigInstrumento("Bajo", 2, VOCES_GM["Bajo eléctrico (dedos)"], 105),
+        "agudos": ConfigInstrumento("Instrumentos agudos", 3, VOCES_GM["Guitarra eléctrica limpia"], 80, 40),
+        "bateria": ConfigInstrumento("Bateria", 9, 0, 95),
     }
 
 
@@ -70,6 +81,7 @@ class Resultado:
     bpm: float
     motor_separacion: str
     notas_por_parte: dict[str, int] = field(default_factory=dict)
+    parecido: float = 0.0  # similitud armónica con la canción original (0 a 1)
 
 
 def detectar_tempo(sep: Separacion) -> tuple[float, float | None]:
@@ -124,6 +136,96 @@ def afinar_tempo_y_fase(env: np.ndarray, fps: float, bpm: float) -> tuple[float,
     return round(mejor[1], 2), mejor[2]
 
 
+RANGO_MELODIA = (40, 84)  # cubre voces de hombre y de mujer
+LIMITE_BAJO = 52  # por debajo de E3: bajo
+LIMITE_AGUDOS = 72  # desde C5: instrumentos agudos (punteos, vientos)
+CORTE_GRAVES_HZ = 170.0
+
+
+def _transcribir(y: np.ndarray, sr: int, rango: tuple[int, int], usar_ia: bool, **umbrales) -> list[Nota]:
+    if usar_ia and basic_pitch_disponible():
+        return transcribir_basic_pitch(y, sr, rango, **umbrales)
+    return transcribir_polifonico(y, sr, rango, usar_ia=False)
+
+
+def quitar_armonicos(notas: list[Nota], solape: float = 0.6) -> list[Nota]:
+    """Quita notas que son armónicos (octava, quinta sobre la octava...) de otra nota
+    más fuerte que suena al mismo tiempo; típico error al transcribir una voz."""
+    intervalos = {12, 19, 24, 28, 31}
+    salida = []
+    for n in notas:
+        fantasma = False
+        for m in notas:
+            if m is n or (n.tono - m.tono) not in intervalos or m.velocidad < n.velocidad:
+                continue
+            comun = min(n.fin, m.fin) - max(n.inicio, m.inicio)
+            if comun >= solape * n.duracion:
+                fantasma = True
+                break
+        if not fantasma:
+            salida.append(n)
+    return salida
+
+
+def transcribir_partes(
+    sep: Separacion,
+    usar_ia: bool = True,
+    activas: set[str] | None = None,
+    log: Callable[[str], None] = print,
+) -> dict[str, list[Nota]]:
+    """Convierte las pistas separadas en melodía, acordes, bajo, agudos y batería.
+
+    Lo medido con canciones reales: transcribir los instrumentos medios SIN los graves
+    ni la percusión duplica la fidelidad del acompañamiento; el bajo sale mejor de la
+    parte armónica completa.
+    """
+    from .separation import _filtro
+
+    activas = activas if activas is not None else {"melodia", "acompanamiento", "bajo", "agudos", "bateria"}
+    p = sep.pistas
+    armonica = p.get("armonica", sep.mezcla)
+    salida: dict[str, list[Nota]] = {}
+
+    if "bajo" in activas:
+        log("  - Transcribiendo el bajo...")
+        if usar_ia and basic_pitch_disponible():
+            graves = [n for n in transcribir_basic_pitch(armonica, sep.sr, (28, 64)) if n.tono < LIMITE_BAJO]
+            salida["bajo"] = linea_monofonica(graves, aguda=False)
+        else:  # sin red neuronal: seguimiento de tono (pYIN) sobre los graves filtrados
+            solo_graves = _filtro(armonica, sep.sr, "lowpass", 250.0)
+            salida["bajo"] = transcribir_monofonico(solo_graves, sep.sr, (28, LIMITE_BAJO + 8))
+
+    log("  - Transcribiendo acordes e instrumentos...")
+    sin_graves = _filtro(armonica, sep.sr, "highpass", CORTE_GRAVES_HZ)
+    medios = _transcribir(sin_graves, sep.sr, (48, 96), usar_ia, umbral_ataque=0.4, umbral_nota=0.2)
+
+    if "melodia" in activas:
+        if "vocals" in p and tiene_senal(p["vocals"]):
+            log("  - Transcribiendo la melodía de la voz...")
+            voz = _transcribir(p["vocals"], sep.sr, RANGO_MELODIA, usar_ia, umbral_ataque=0.3, umbral_nota=0.2)
+            salida["melodia"] = linea_monofonica(quitar_armonicos(voz), aguda=True, dur_min=0.08)
+        else:
+            # Sin la voz aislada, la línea más aguda es la mejor aproximación a la melodía.
+            melodia = linea_monofonica([n for n in medios if n.tono >= 60], aguda=True, dur_min=0.1)
+            salida["melodia"] = melodia
+            clave = {(round(n.inicio, 3), n.tono) for n in melodia}
+            medios = [n for n in medios if (round(n.inicio, 3), n.tono) not in clave]
+
+    if "agudos" in activas:
+        salida["agudos"] = [n for n in medios if n.tono >= LIMITE_AGUDOS]
+        medios = [n for n in medios if n.tono < LIMITE_AGUDOS]
+    if "acompanamiento" in activas:
+        salida["acompanamiento"] = medios
+
+    if "bateria" in activas and "drums" in p and tiene_senal(p["drums"]):
+        log("  - Transcribiendo la batería y percusión...")
+        salida["bateria"] = transcribir_bateria(p["drums"], sep.sr, mezcla=sep.mezcla)
+
+    for clave, lista in salida.items():
+        log(f"      {clave}: {len(lista)} notas")
+    return salida
+
+
 def convertir(
     entrada: str | Path,
     salida: str | Path | None = None,
@@ -145,45 +247,35 @@ def convertir(
     sep = separar(entrada, usar_ia=usar_ia, sr=SAMPLE_RATE, log=log, dispositivo=dispositivo)
     log(f"Pistas obtenidas ({sep.motor}): {', '.join(sep.pistas)}")
 
-    modo_basico = sep.motor == "basico"
     bpm, primer_pulso = detectar_tempo(sep)
     if bpm_manual:
         bpm, primer_pulso = float(bpm_manual), None
     log(f"Tempo: {bpm:.1f} BPM")
 
+    activas = {k for k, c in config.items() if c.activo}
+    notas = transcribir_partes(sep, usar_ia=usar_ia, activas=activas, log=log)
+
     partes: list[Parte] = []
     conteo: dict[str, int] = {}
-    for clave, y in sep.pistas.items():
-        cfg = config.get(clave)
-        if cfg is None or not cfg.activo:
-            continue
-        if not tiene_senal(y):
-            log(f"  - {cfg.nombre}: sin sonido en la canción, se omite.")
-            continue
-        log(f"  - Transcribiendo {cfg.nombre}...")
-        rango = cfg.rango
-        if modo_basico and clave == "piano":
-            rango = (max(rango[0], 43), rango[1])  # el bajo se transcribe aparte
-        if cfg.tipo == "bateria":
-            notas = transcribir_bateria(y, sep.sr, mezcla=sep.mezcla)
-        elif cfg.tipo == "mono":
-            notas = transcribir_monofonico(y, sep.sr, rango)
-        else:
-            notas = transcribir_polifonico(y, sep.sr, rango, usar_ia=usar_ia)
-        conteo[cfg.nombre] = len(notas)
-        log(f"      {len(notas)} notas")
-        if notas:
+    for clave, lista in notas.items():
+        cfg = config[clave]
+        conteo[cfg.nombre] = len(lista)
+        if lista and cfg.activo:
             partes.append(
                 Parte(
                     nombre=cfg.nombre,
                     canal=cfg.canal,
                     programa=cfg.programa,
-                    notas=notas,
+                    notas=lista,
                     volumen=cfg.volumen,
                     paneo=cfg.paneo,
-                    bateria=cfg.tipo == "bateria",
+                    bateria=clave == "bateria",
                 )
             )
+
+    tonales = [n for p in partes if not p.bateria for n in p.notas]
+    parecido = similitud(sep.mezcla, sep.sr, tonales)
+    log(f"Parecido armónico con la canción original: {parecido * 100:.0f} %")
 
     partes.sort(key=lambda p: p.canal)
     escribir_midi(
@@ -196,4 +288,6 @@ def convertir(
         formato=formato,
     )
     log(f"Listo: {salida}")
-    return Resultado(archivo=salida, bpm=bpm, motor_separacion=sep.motor, notas_por_parte=conteo)
+    return Resultado(
+        archivo=salida, bpm=bpm, motor_separacion=sep.motor, notas_por_parte=conteo, parecido=parecido
+    )

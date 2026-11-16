@@ -10,18 +10,19 @@ COMO ABRIRLO
 
 COMO USARLO
 1. Pulse "Buscar..." y elija la canción (MP3, MP4, M4A, WAV...).
-2. Deje marcada "Usar inteligencia artificial" para separar voz, piano, bajo,
-   guitarra, cuerdas y batería. La primera vez descarga el modelo (~80 MB),
-   así que debe haber Internet.
-3. Pulse "Convertir a MIDI" y espere (una canción de 4 minutos puede tardar
-   entre 5 y 15 minutos en un computador normal).
-4. El archivo .mid queda junto a la canción (o donde usted indique).
+2. Deje marcada "Usar inteligencia artificial": separa la voz de los
+   instrumentos y reconoce las notas (no necesita Internet).
+3. Elija el sonido de cada parte (melodía, acordes, instrumentos agudos).
+4. Pulse "Convertir a MIDI" y espere (una canción de 3 minutos tarda unos
+   2 a 5 minutos en un computador normal).
+5. El archivo .mid queda junto a la canción (o donde usted indique).
 
 EN EL TECLADO PSR-S950
 1. Copie el .mid a una memoria USB y conéctela en "USB TO DEVICE".
 2. SONG SELECT > pestaña USB > elija la canción > PLAY/PAUSE.
 3. [TRACK 1] apaga la melodía de la voz (para cantar encima).
-   [TRACK 2] apaga el piano. [EXTRA TRACKS] apaga bajo, guitarra, cuerdas y batería.
+   [TRACK 2] apaga los acordes. [EXTRA TRACKS] apaga bajo, instrumentos
+   agudos y batería.
 
 Si algo falla, los mensajes quedan en:
 %LOCALAPPDATA%\ConvertidorPSR\registro.txt

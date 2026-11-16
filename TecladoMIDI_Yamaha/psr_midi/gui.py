@@ -8,6 +8,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from .converter import VOCES_GM, configuracion_por_defecto, convertir
+from .mdx import mdx_disponible
 from .separation import demucs_disponible
 from .yamaha import nombre_archivo_seguro
 
@@ -17,12 +18,11 @@ TIPOS = [
 ]
 CUANTIZACION = {"Tiempo exacto (sin ajustar)": None, "Corcheas": 2, "Semicorcheas": 4, "Fusas": 8}
 NOMBRES_PISTA = {
-    "vocals": "Melodía de la voz (canal 1)",
-    "piano": "Piano / acordes (canal 2)",
-    "bass": "Bajo (canal 3)",
-    "guitar": "Guitarra (canal 4)",
-    "other": "Cuerdas / teclados (canal 5)",
-    "drums": "Batería (canal 10)",
+    "melodia": "Melodía de la voz (canal 1 · TRACK 1)",
+    "acompanamiento": "Acordes / acompañamiento (canal 2 · TRACK 2)",
+    "bajo": "Bajo (canal 3)",
+    "agudos": "Instrumentos agudos: punteos, vientos (canal 4)",
+    "bateria": "Batería / percusión (canal 10)",
 }
 
 
@@ -43,6 +43,8 @@ class App(tk.Tk):
         self.var_formato = tk.StringVar(value="0")
         self.var_bpm = tk.StringVar()
         self.var_voz_melodia = tk.StringVar(value="Flauta")
+        self.var_voz_acomp = tk.StringVar(value="Piano de cola")
+        self.var_voz_agudos = tk.StringVar(value="Guitarra eléctrica limpia")
         self.var_pistas = {k: tk.BooleanVar(value=True) for k in NOMBRES_PISTA}
 
         self._construir()
@@ -66,8 +68,8 @@ class App(tk.Tk):
         opciones = ttk.LabelFrame(marco, text="Opciones")
         opciones.grid(row=2, column=0, columnspan=3, sticky="ew", **pad)
         texto_ia = (
-            "Usar inteligencia artificial (separa voz, piano, bajo, guitarra, cuerdas y batería)"
-            if demucs_disponible()
+            "Usar inteligencia artificial (separa la voz de los instrumentos)"
+            if mdx_disponible() or demucs_disponible()
             else "Usar inteligencia artificial (no instalada: se usará el modo básico)"
         )
         ttk.Checkbutton(opciones, text=texto_ia, variable=self.var_ia).grid(
@@ -87,6 +89,14 @@ class App(tk.Tk):
         ttk.Combobox(
             opciones, textvariable=self.var_formato, values=["0", "1"], state="readonly", width=6
         ).grid(row=2, column=3, sticky="w", **pad)
+        ttk.Label(opciones, text="Sonido del acompañamiento:").grid(row=3, column=0, sticky="w", **pad)
+        ttk.Combobox(
+            opciones, textvariable=self.var_voz_acomp, values=list(VOCES_GM), state="readonly", width=26
+        ).grid(row=3, column=1, sticky="w", **pad)
+        ttk.Label(opciones, text="Sonido de los agudos:").grid(row=4, column=0, sticky="w", **pad)
+        ttk.Combobox(
+            opciones, textvariable=self.var_voz_agudos, values=list(VOCES_GM), state="readonly", width=26
+        ).grid(row=4, column=1, sticky="w", **pad)
 
         pistas = ttk.LabelFrame(marco, text="Instrumentos a incluir")
         pistas.grid(row=3, column=0, columnspan=3, sticky="ew", **pad)
@@ -153,7 +163,9 @@ class App(tk.Tk):
         config = configuracion_por_defecto()
         for clave, var in self.var_pistas.items():
             config[clave].activo = var.get()
-        config["vocals"].programa = VOCES_GM[self.var_voz_melodia.get()]
+        config["melodia"].programa = VOCES_GM[self.var_voz_melodia.get()]
+        config["acompanamiento"].programa = VOCES_GM[self.var_voz_acomp.get()]
+        config["agudos"].programa = VOCES_GM[self.var_voz_agudos.get()]
 
         kwargs = dict(
             entrada=entrada,
@@ -173,7 +185,10 @@ class App(tk.Tk):
         try:
             res = convertir(**kwargs)
             resumen = "\n".join(f"  {k}: {v} notas" for k, v in res.notas_por_parte.items())
-            self.cola.put(f"\n✔ Archivo listo ({res.bpm:.1f} BPM):\n{res.archivo}\n{resumen}")
+            self.cola.put(
+                f"\n✔ Archivo listo ({res.bpm:.1f} BPM, parecido armónico {res.parecido * 100:.0f} %):"
+                f"\n{res.archivo}\n{resumen}"
+            )
             self.cola.put(lambda: messagebox.showinfo(
                 "Conversión terminada",
                 f"Se creó:\n{res.archivo}\n\nCópielo a una memoria USB y ábralo en el teclado con el botón SONG.",

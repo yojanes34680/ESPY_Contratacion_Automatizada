@@ -186,39 +186,91 @@ def transcribir_polifonico_propio(
     return notas_desde_roll(activo, nivel_db, MIDI_MIN_88, sr, HOP)
 
 
-def transcribir_basic_pitch(y: np.ndarray, sr: int, rango: tuple[int, int]) -> list[Nota]:
+_MODELO_BP = None
+
+
+def _modelo_basic_pitch():
+    """Carga una sola vez el modelo de Basic Pitch (ONNX, TFLite o TensorFlow)."""
+    global _MODELO_BP
+    if _MODELO_BP is None:
+        from basic_pitch import ICASSP_2022_MODEL_PATH
+        from basic_pitch.inference import Model
+
+        _MODELO_BP = Model(ICASSP_2022_MODEL_PATH)
+    return _MODELO_BP
+
+
+def transcribir_basic_pitch(
+    y: np.ndarray,
+    sr: int,
+    rango: tuple[int, int] = (MIDI_MIN_88, MIDI_MAX_88),
+    umbral_ataque: float = 0.5,
+    umbral_nota: float = 0.3,
+    duracion_min_ms: float = 127.7,
+) -> list[Nota]:
+    """Transcripción con Basic Pitch (red neuronal de Spotify)."""
+    import logging
+
     import librosa
-    from basic_pitch import ICASSP_2022_MODEL_PATH
     from basic_pitch.inference import predict
 
     from .audio_io import guardar_wav
 
+    logging.getLogger().setLevel(logging.ERROR)  # Basic Pitch avisa de motores no instalados
     with tempfile.TemporaryDirectory(prefix="psr_bp_") as tmp:
         wav = Path(tmp) / "pista.wav"
         guardar_wav(wav, y, sr)
         _, _, eventos = predict(
             str(wav),
-            ICASSP_2022_MODEL_PATH,
+            _modelo_basic_pitch(),
+            onset_threshold=umbral_ataque,
+            frame_threshold=umbral_nota,
+            minimum_note_length=duracion_min_ms,
             minimum_frequency=float(librosa.midi_to_hz(rango[0])),
             maximum_frequency=float(librosa.midi_to_hz(rango[1])),
         )
+    eventos = [e for e in eventos if rango[0] <= int(e[2]) <= rango[1]]
+    if not eventos:
+        return []
+    amp_max = max(float(e[3]) for e in eventos) or 1.0
     notas = [
-        Nota(float(e[0]), float(e[1]), int(e[2]), int(np.clip(round(float(e[3]) * 127), 1, 127)))
+        Nota(float(e[0]), float(e[1]), int(e[2]), int(np.clip(round(40 + 85 * float(e[3]) / amp_max), 1, 127)))
         for e in eventos
-        if rango[0] <= int(e[2]) <= rango[1]
     ]
     notas.sort(key=lambda n: (n.inicio, n.tono))
     return notas
 
 
+def linea_monofonica(notas: list[Nota], aguda: bool = True, dur_min: float = 0.06) -> list[Nota]:
+    """Reduce notas simultáneas a una sola línea (la más aguda para la melodía,
+    la más grave para el bajo), recortando la nota anterior cuando entra otra."""
+    if not notas:
+        return []
+    orden = sorted(notas, key=lambda n: (n.inicio, -n.tono if aguda else n.tono))
+    linea: list[Nota] = []
+    for n in orden:
+        if linea and n.inicio < linea[-1].fin:
+            actual = linea[-1]
+            gana = n.tono > actual.tono if aguda else n.tono < actual.tono
+            if not gana:
+                # La nota descartada puede seguir sonando después de que termine la actual.
+                if n.fin - actual.fin >= dur_min and n.inicio >= actual.inicio:
+                    linea.append(Nota(actual.fin, n.fin, n.tono, n.velocidad))
+                continue
+            if n.inicio - actual.inicio < dur_min:
+                linea.pop()
+            else:
+                linea[-1] = Nota(actual.inicio, n.inicio, actual.tono, actual.velocidad)
+        linea.append(n)
+    return [n for n in linea if n.duracion >= dur_min]
+
+
 def transcribir_polifonico(
     y: np.ndarray, sr: int, rango: tuple[int, int] = (MIDI_MIN_88, MIDI_MAX_88), usar_ia: bool = True
 ) -> list[Nota]:
+    """Basic Pitch si está disponible (mucho más preciso); si no, el motor propio."""
     if usar_ia and basic_pitch_disponible():
-        try:
-            return transcribir_basic_pitch(y, sr, rango)
-        except Exception:  # noqa: BLE001 - si falla la IA se usa el motor propio
-            pass
+        return transcribir_basic_pitch(y, sr, rango)
     return transcribir_polifonico_propio(y, sr, rango)
 
 

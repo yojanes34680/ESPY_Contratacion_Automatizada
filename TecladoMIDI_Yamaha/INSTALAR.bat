@@ -18,8 +18,9 @@ call .venv\Scripts\activate.bat
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 echo.
-echo Instalando motores de inteligencia artificial (puede tardar y descargar ~2 GB)...
+echo Instalando motores de inteligencia artificial (puede tardar unos minutos)...
 pip install -r requirements-ia.txt
+pip install --no-deps basic-pitch
 echo.
 echo Instalacion terminada. Use INICIAR_CONVERTIDOR.bat para abrir el programa.
 pause
