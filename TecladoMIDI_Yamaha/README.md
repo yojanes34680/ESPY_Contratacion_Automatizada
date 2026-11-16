@@ -84,6 +84,14 @@ para que todo quede listo antes de empezar.
 3. Pulse **Convertir a MIDI**. Con IA y sin tarjeta gráfica, una canción de
    4 minutos puede tardar entre 5 y 15 minutos.
 
+### Versión web (opcional)
+
+```bat
+python -m psr_midi.web
+```
+
+Luego abra <http://localhost:8765> en el navegador (también desde el celular, si está en la misma red WiFi, con la IP del computador).
+
 ### Por consola (opcional)
 
 ```bat
@@ -119,6 +127,7 @@ TecladoMIDI_Yamaha/
 │   ├── yamaha.py         Escritura del .mid (GM/XG, canales, voces)
 │   ├── converter.py      Proceso completo + detección de tempo y compás
 │   ├── cli.py / gui.py   Consola y ventana
+│   ├── web.py            Versión web (navegador)
 └── tests/                Pruebas con audio sintético
 ```
 
