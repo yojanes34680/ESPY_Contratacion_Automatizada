@@ -196,14 +196,14 @@ def test_conversion_completa_modo_basico(tmp_path):
     assert len(notas[1]) > 20
 
 
-def test_lectura_de_pistas_demucs(tmp_path, monkeypatch):
-    """Simula la ejecución de Demucs (sin descargar el modelo) y verifica que
-    las pistas generadas se cargan con su nombre correcto."""
-    import subprocess
+def test_separacion_demucs_en_proceso(tmp_path, monkeypatch):
+    """Simula el modelo de Demucs (sin descargarlo) y verifica que las pistas
+    salen con su nombre, en mono y a la frecuencia de trabajo."""
+    import sys
     import types
-    from pathlib import Path
 
     import soundfile as sf
+    import torch
 
     from psr_midi import separation
 
@@ -211,18 +211,25 @@ def test_lectura_de_pistas_demucs(tmp_path, monkeypatch):
     wav = tmp_path / "x.wav"
     sf.write(str(wav), y, 44100)
 
-    def falso_run(cmd, capture_output=True, text=True):
-        salida = Path(cmd[cmd.index("-o") + 1]) / cmd[cmd.index("-n") + 1] / "cancion"
-        salida.mkdir(parents=True)
-        for nombre in separation.STEMS_DEMUCS:
-            sf.write(str(salida / f"{nombre}.wav"), np.stack([y, y], axis=1), 44100)
-        return types.SimpleNamespace(returncode=0, stderr="")
+    class RedFalsa:
+        samplerate = 44100
+        sources = list(separation.STEMS_DEMUCS)
 
-    monkeypatch.setattr(subprocess, "run", falso_run)
-    monkeypatch.setattr(separation.subprocess, "run", falso_run)
-    monkeypatch.setattr(separation, "cargar_audio", lambda ruta, sr=SR, estereo=False: (
-        __import__("librosa").load(str(ruta), sr=sr, mono=not estereo)[0]
-    ))
+        def eval(self):
+            return self
+
+    def apply_falso(red, mezcla, **_kw):
+        return mezcla[:, None].repeat(1, len(red.sources), 1, 1)
+
+    monkeypatch.setitem(sys.modules, "demucs.pretrained", types.SimpleNamespace(get_model=lambda _n: RedFalsa()))
+    monkeypatch.setitem(sys.modules, "demucs.apply", types.SimpleNamespace(apply_model=apply_falso))
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+
     sep = separation.separar_demucs(wav, log=lambda _m: None)
     assert set(sep.pistas) == set(separation.STEMS_DEMUCS)
     assert sep.motor == "demucs:htdemucs_6s"
+    largo = int(len(y) * SR / 44100)
+    for pista in sep.pistas.values():
+        assert pista.ndim == 1 and abs(len(pista) - largo) < 50
+    # La pista reconstruida debe parecerse a la mezcla (el modelo falso la copia).
+    assert np.corrcoef(sep.pistas["drums"][:largo - 50], sep.mezcla[:largo - 50])[0, 1] > 0.99

@@ -9,9 +9,6 @@ mezcla en parte percusiva (batería), registro grave (bajo) y parte armónica.
 from __future__ import annotations
 
 import importlib.util
-import subprocess
-import sys
-import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -19,7 +16,7 @@ from typing import Callable
 import numpy as np
 from scipy.signal import butter, sosfiltfilt
 
-from .audio_io import SAMPLE_RATE, cargar_audio, guardar_wav
+from .audio_io import SAMPLE_RATE, cargar_audio
 
 STEMS_DEMUCS = ("vocals", "drums", "bass", "piano", "guitar", "other")
 
@@ -69,31 +66,34 @@ def separar_demucs(
     dispositivo: str | None = None,
     log: Callable[[str], None] = print,
 ) -> Separacion:
-    """Ejecuta Demucs en un proceso aparte y carga las pistas resultantes."""
-    with tempfile.TemporaryDirectory(prefix="psr_midi_") as tmp:
-        tmp = Path(tmp)
-        wav = tmp / "cancion.wav"
-        # Demucs trabaja a 44.1 kHz estéreo.
-        guardar_wav(wav, cargar_audio(ruta, sr=44100, estereo=True), 44100)
+    """Ejecuta Demucs dentro del mismo proceso (funciona también en el .exe)."""
+    import librosa
+    import torch
+    from demucs.apply import apply_model
+    from demucs.pretrained import get_model
 
-        cmd = [sys.executable, "-m", "demucs", "-n", modelo, "-o", str(tmp / "sep"), str(wav)]
-        if dispositivo:
-            cmd += ["-d", dispositivo]
-        log(f"Separando instrumentos con Demucs ({modelo}). Esto puede tardar varios minutos...")
-        proc = subprocess.run(cmd, capture_output=True, text=True)
-        if proc.returncode != 0:
-            raise RuntimeError("Demucs falló:\n" + proc.stderr[-2000:])
+    log(f"Cargando el modelo de IA {modelo} (la primera vez se descarga de Internet, ~80 MB)...")
+    red = get_model(modelo)
+    red.eval()
+    if dispositivo is None:
+        dispositivo = "cuda" if torch.cuda.is_available() else "cpu"
 
-        carpeta = tmp / "sep" / modelo / "cancion"
-        pistas: dict[str, np.ndarray] = {}
-        for nombre in STEMS_DEMUCS:
-            archivo = carpeta / f"{nombre}.wav"
-            if archivo.exists():
-                pistas[nombre] = cargar_audio(archivo, sr=sr)
-        if not pistas:
-            raise RuntimeError(f"Demucs no generó pistas en {carpeta}")
+    audio = cargar_audio(ruta, sr=red.samplerate, estereo=True)
+    if audio.ndim == 1:
+        audio = np.stack([audio, audio])
+    wav = torch.from_numpy(np.ascontiguousarray(audio, dtype=np.float32))
+    ref = wav.mean(0)
+    media, desv = ref.mean(), ref.std() + 1e-8
+    log("Separando instrumentos con IA. Puede tardar varios minutos...")
+    with torch.no_grad():
+        fuentes = apply_model(red, ((wav - media) / desv)[None], device=dispositivo, split=True, overlap=0.25)[0]
+    fuentes = fuentes * desv + media
 
-    mezcla = cargar_audio(ruta, sr=sr)
+    pistas: dict[str, np.ndarray] = {}
+    for nombre, fuente in zip(red.sources, fuentes):
+        mono = fuente.mean(0).cpu().numpy().astype(np.float32)
+        pistas[nombre] = librosa.resample(mono, orig_sr=red.samplerate, target_sr=sr).astype(np.float32)
+    mezcla = librosa.resample(audio.mean(0), orig_sr=red.samplerate, target_sr=sr).astype(np.float32)
     return Separacion(sr=sr, mezcla=mezcla, pistas=pistas, motor=f"demucs:{modelo}")
 
 

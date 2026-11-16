@@ -1,0 +1,27 @@
+CONVERTIDOR DE CANCIONES A MIDI PARA YAMAHA PSR-S950
+====================================================
+
+COMO ABRIRLO
+1. Descomprima el archivo ZIP (clic derecho > "Extraer todo...").
+2. Entre a la carpeta ConvertidorPSR y haga doble clic en ConvertidorPSR.exe.
+   - Si Windows muestra "Windows protegió su PC", pulse "Más información"
+     y luego "Ejecutar de todas formas" (el programa no tiene firma comercial).
+   - No mueva el .exe fuera de su carpeta: necesita los archivos que lo acompañan.
+
+COMO USARLO
+1. Pulse "Buscar..." y elija la canción (MP3, MP4, M4A, WAV...).
+2. Deje marcada "Usar inteligencia artificial" para separar voz, piano, bajo,
+   guitarra, cuerdas y batería. La primera vez descarga el modelo (~80 MB),
+   así que debe haber Internet.
+3. Pulse "Convertir a MIDI" y espere (una canción de 4 minutos puede tardar
+   entre 5 y 15 minutos en un computador normal).
+4. El archivo .mid queda junto a la canción (o donde usted indique).
+
+EN EL TECLADO PSR-S950
+1. Copie el .mid a una memoria USB y conéctela en "USB TO DEVICE".
+2. SONG SELECT > pestaña USB > elija la canción > PLAY/PAUSE.
+3. [TRACK 1] apaga la melodía de la voz (para cantar encima).
+   [TRACK 2] apaga el piano. [EXTRA TRACKS] apaga bajo, guitarra, cuerdas y batería.
+
+Si algo falla, los mensajes quedan en:
+%LOCALAPPDATA%\ConvertidorPSR\registro.txt

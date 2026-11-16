@@ -9,7 +9,6 @@ from tkinter import filedialog, messagebox, ttk
 
 from .converter import VOCES_GM, configuracion_por_defecto, convertir
 from .separation import demucs_disponible
-from .transcription import basic_pitch_disponible
 from .yamaha import nombre_archivo_seguro
 
 TIPOS = [
@@ -66,12 +65,14 @@ class App(tk.Tk):
 
         opciones = ttk.LabelFrame(marco, text="Opciones")
         opciones.grid(row=2, column=0, columnspan=3, sticky="ew", **pad)
-        estado_ia = []
-        estado_ia.append("Demucs ✔" if demucs_disponible() else "Demucs ✘")
-        estado_ia.append("Basic Pitch ✔" if basic_pitch_disponible() else "Basic Pitch ✘")
-        ttk.Checkbutton(
-            opciones, text=f"Usar inteligencia artificial ({', '.join(estado_ia)})", variable=self.var_ia
-        ).grid(row=0, column=0, columnspan=4, sticky="w", **pad)
+        texto_ia = (
+            "Usar inteligencia artificial (separa voz, piano, bajo, guitarra, cuerdas y batería)"
+            if demucs_disponible()
+            else "Usar inteligencia artificial (no instalada: se usará el modo básico)"
+        )
+        ttk.Checkbutton(opciones, text=texto_ia, variable=self.var_ia).grid(
+            row=0, column=0, columnspan=4, sticky="w", **pad
+        )
         ttk.Label(opciones, text="Ajuste rítmico:").grid(row=1, column=0, sticky="w", **pad)
         ttk.Combobox(
             opciones, textvariable=self.var_cuant, values=list(CUANTIZACION), state="readonly", width=26

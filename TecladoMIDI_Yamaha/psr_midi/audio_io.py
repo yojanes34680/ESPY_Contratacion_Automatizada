@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -33,7 +34,9 @@ def cargar_audio(ruta: str | Path, sr: int = SAMPLE_RATE, estereo: bool = False)
             "ffmpeg", "-v", "error", "-nostdin", "-i", str(ruta),
             "-vn", "-ac", str(canales), "-ar", str(sr), "-f", "f32le", "-",
         ]
-        proc = subprocess.run(cmd, capture_output=True)
+        # En Windows, evitar que se abra una ventana negra de consola.
+        extra = {"creationflags": 0x08000000} if sys.platform == "win32" else {}
+        proc = subprocess.run(cmd, capture_output=True, **extra)
         if proc.returncode != 0:
             raise RuntimeError(
                 "ffmpeg no pudo leer el archivo: " + proc.stderr.decode(errors="ignore")
