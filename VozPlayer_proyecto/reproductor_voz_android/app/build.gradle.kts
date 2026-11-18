@@ -11,8 +11,8 @@ android {
         applicationId = "com.yojanes.vozplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 17
-        versionName = "2.6"
+        versionCode = 18
+        versionName = "2.7"
     }
 
     // Firma fija para que cada actualización se instale encima de la anterior y conserve
@@ -75,6 +75,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.media3:media3-exoplayer:$media3")
+    implementation("androidx.media3:media3-extractor:$media3")
     implementation("androidx.media3:media3-session:$media3")
     implementation("androidx.media3:media3-ui:$media3")
     implementation("com.google.guava:guava:33.3.1-android")

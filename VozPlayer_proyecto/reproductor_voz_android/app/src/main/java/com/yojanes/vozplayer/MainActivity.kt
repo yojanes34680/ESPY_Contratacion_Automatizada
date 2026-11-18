@@ -110,6 +110,10 @@ class MainActivity : AppCompatActivity() {
         folders = FolderRepository(this)
         binding.folderButton.setOnClickListener { showFolderDialog() }
         binding.themeButton.setOnClickListener { ThemePicker.show(this) }
+        binding.brandLogo.setOnLongClickListener {
+            showDiagnostics()
+            true
+        }
         binding.videoFullscreen.setOnClickListener { startActivity(Intent(this, VideoActivity::class.java)) }
         binding.videoHide.setOnClickListener {
             videoHiddenFor = controller?.currentMediaItem?.mediaId
@@ -129,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         binding.searchInput.doAfterTextChanged { applyFilter(debounce = true) }
         binding.micButton.setOnClickListener { startVoiceSearch() }
         binding.swipeRefresh.setOnRefreshListener {
-            if (folders.active != null || hasMediaPermission()) loadLibrary() else requestMediaPermissions()
+            if (folders.active != null || hasMediaPermission()) loadLibrary(force = true) else requestMediaPermissions()
         }
         binding.typeChips.setOnCheckedStateChangeListener { _, checkedIds ->
             typeFilter = when (checkedIds.firstOrNull()) {
@@ -228,24 +232,50 @@ class MainActivity : AppCompatActivity() {
 
     // ---------------------------------------------------------------- Biblioteca
 
-    private fun loadLibrary() {
+    /**
+     * Carga la biblioteca. Con una carpeta elegida: muestra AL INSTANTE la lista guardada de la
+     * última vez y luego, en segundo plano y sin estorbar a la música, recorre la carpeta para
+     * detectar pistas nuevas o borradas. [force] (deslizar hacia abajo) recorre de inmediato.
+     */
+    private fun loadLibrary(force: Boolean = false) {
         val folder = folders.active
         binding.folderButton.text = folder?.name ?: getString(R.string.folder_whole_phone)
         binding.swipeRefresh.isRefreshing = true
         loadJob?.cancel()
         enrichJob?.cancel()
         loadJob = lifecycleScope.launch {
-            allEntries = withContext(Dispatchers.IO) {
+            var showedCache = false
+            if (folder != null && !force) {
+                val cached = withContext(Dispatchers.IO) { LibraryCache.load(this@MainActivity, folder.uri) }
+                if (!cached.isNullOrEmpty()) {
+                    publishEntries(cached)
+                    binding.swipeRefresh.isRefreshing = false
+                    showedCache = true
+                    startEnrichment()
+                    // Si la música ya arrancó, el recorrido espera (máx. 2 min) para no competir con ella.
+                    kotlinx.coroutines.delay(3_000)
+                    var waited = 0
+                    while (PlayGate.busy() && waited < 120) {
+                        kotlinx.coroutines.delay(1_000)
+                        waited++
+                    }
+                }
+            }
+            val t0 = android.os.SystemClock.elapsedRealtime()
+            val fresh = withContext(Dispatchers.IO) {
                 if (folder != null) {
                     runCatching { FolderScanner(contentResolver).scan(folder.uri) }.getOrDefault(emptyList())
                 } else {
                     MediaRepository(contentResolver).loadAll()
                 }
             }
-            Library.entries = allEntries
+            val ms = android.os.SystemClock.elapsedRealtime() - t0
+            PerfLog.add((if (folder != null) "📁 recorrer carpeta" else "📱 leer teléfono") + ": $ms ms (${fresh.size} archivos)")
             binding.swipeRefresh.isRefreshing = false
-            applyFilter()
-            if (folder != null && allEntries.isNotEmpty()) startEnrichment()
+            if (folder != null) withContext(Dispatchers.IO) { LibraryCache.save(this@MainActivity, folder.uri, fresh) }
+            if (showedCache && LibraryCache.sameFiles(allEntries, fresh)) return@launch // sin cambios
+            publishEntries(fresh)
+            if (folder != null && fresh.isNotEmpty()) startEnrichment()
         }
     }
 
@@ -310,6 +340,28 @@ class MainActivity : AppCompatActivity() {
         allEntries = list
         Library.entries = list
         applyFilter()
+    }
+
+    /** Diagnóstico de velocidad: tiempos reales medidos en este teléfono (mantener presionado el logo). */
+    private fun showDiagnostics() {
+        val text = buildString {
+            append("VozPlayer ").append(BuildConfig.VERSION_NAME).append(" · ")
+            append(android.os.Build.MANUFACTURER).append(' ').append(android.os.Build.MODEL)
+            append(" · Android ").append(android.os.Build.VERSION.RELEASE).append('\n')
+            append(folders.active?.name ?: getString(R.string.folder_whole_phone)).append(" · ")
+            append(allEntries.size).append(" archivos\n\n")
+            append(PerfLog.dump().ifBlank { getString(R.string.diag_empty) })
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.diag_title)
+            .setMessage(text)
+            .setPositiveButton(R.string.diag_copy) { _, _ ->
+                val cm = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("VozPlayer", text))
+                toast(getString(R.string.diag_copied))
+            }
+            .setNegativeButton(R.string.close, null)
+            .show()
     }
 
     // ---------------------------------------------------------------- Carpetas
@@ -491,8 +543,9 @@ class MainActivity : AppCompatActivity() {
         val c = controller ?: return toast(getString(R.string.player_connecting))
         if (position !in list.indices) return
         PlayGate.markPlayRequested()
-        val from = maxOf(0, position - 50)
-        val to = minOf(list.size, position + 150)
+        // Cola corta alrededor de la pista: enviar muchas pistas al reproductor retrasaba el arranque.
+        val from = maxOf(0, position - 10)
+        val to = minOf(list.size, position + 60)
         c.setMediaItems(list.subList(from, to).map { it.toMediaItem() }, position - from, 0L)
         c.prepare()
         c.play()

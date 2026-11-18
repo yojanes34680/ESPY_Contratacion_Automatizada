@@ -7,7 +7,11 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.DefaultExtractorsFactory
+import androidx.media3.extractor.mp3.Mp3Extractor
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -27,7 +31,23 @@ class PlaybackService : MediaSessionService() {
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
             .build()
-        val player = ExoPlayer.Builder(this)
+        // Pistas MP3: no se leen las etiquetas ID3 internas (título, carátula...). La app ya
+        // tiene título y artista, y muchas pistas traen carátulas de varios MB que había que
+        // leer completas antes de empezar a sonar, en cada canción.
+        val extractors = DefaultExtractorsFactory()
+            .setMp3ExtractorFlags(Mp3Extractor.FLAG_DISABLE_ID3_METADATA)
+            .setConstantBitrateSeekingEnabled(true)
+        // Archivos locales: basta con un búfer corto para empezar a sonar enseguida.
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                /* minBufferMs = */ 15_000,
+                /* maxBufferMs = */ 50_000,
+                /* bufferForPlaybackMs = */ 500,
+                /* bufferForPlaybackAfterRebufferMs = */ 1_000,
+            )
+            .build()
+        val player = ExoPlayer.Builder(this, DefaultMediaSourceFactory(this, extractors))
+            .setLoadControl(loadControl)
             .setAudioAttributes(audioAttributes, /* handleAudioFocus = */ true)
             .setHandleAudioBecomingNoisy(true) // pausa si se desconectan los audífonos
             .setWakeMode(C.WAKE_MODE_LOCAL)
@@ -48,6 +68,16 @@ class PlaybackService : MediaSessionService() {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 PlayGate.playing = isPlaying
+                if (isPlaying && PlayGate.awaitingStart) {
+                    PlayGate.awaitingStart = false
+                    val ms = android.os.SystemClock.elapsedRealtime() - PlayGate.lastPlayRequestAt
+                    PerfLog.add("▶ tocar → sonando: $ms ms")
+                }
+            }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                PlayGate.awaitingStart = false
+                PerfLog.add("⚠ error al reproducir: ${error.errorCodeName}")
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {

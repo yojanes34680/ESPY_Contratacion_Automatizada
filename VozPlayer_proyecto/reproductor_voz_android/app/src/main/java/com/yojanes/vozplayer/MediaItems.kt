@@ -28,8 +28,12 @@ object PlayGate {
     @Volatile var buffering = false
     @Volatile var playing = false
 
+    /** Hay un "play" pedido que todavía no empieza a sonar (para medir la demora). */
+    @Volatile var awaitingStart = false
+
     fun markPlayRequested() {
         lastPlayRequestAt = SystemClock.elapsedRealtime()
+        awaitingStart = true
     }
 
     /**

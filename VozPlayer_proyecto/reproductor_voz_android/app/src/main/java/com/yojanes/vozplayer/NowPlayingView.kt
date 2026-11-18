@@ -189,14 +189,27 @@ class NowPlayingView @JvmOverloads constructor(
         lastArtKey = artKey
         b.npArtwork.background = Artwork.background(key, 16 * density)
         b.npArtwork.text = initial
-        val bmp = artwork?.let { runCatching { BitmapFactory.decodeByteArray(it, 0, it.size) }.getOrNull() }
-        if (bmp != null) {
-            b.npArtImage.setImageBitmap(bmp)
-            b.npArtImage.visibility = View.VISIBLE
-        } else {
-            b.npArtImage.setImageDrawable(null)
-            b.npArtImage.visibility = View.GONE
-        }
+        b.npArtImage.setImageDrawable(null)
+        b.npArtImage.visibility = View.GONE
+        if (artwork == null || artwork.size > 4_000_000) return
+        // Se decodifica en segundo plano y reducida al tamaño del recuadro (antes se decodificaba
+        // a tamaño completo en el hilo de la pantalla y la congelaba al cambiar de canción).
+        Thread {
+            val bmp = runCatching {
+                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                BitmapFactory.decodeByteArray(artwork, 0, artwork.size, bounds)
+                var sample = 1
+                val target = (64 * density).toInt().coerceAtLeast(64)
+                while (bounds.outWidth / (sample * 2) >= target && bounds.outHeight / (sample * 2) >= target) sample *= 2
+                BitmapFactory.decodeByteArray(artwork, 0, artwork.size, BitmapFactory.Options().apply { inSampleSize = sample })
+            }.getOrNull()
+            post {
+                if (bmp != null && lastArtKey == artKey) {
+                    b.npArtImage.setImageBitmap(bmp)
+                    b.npArtImage.visibility = View.VISIBLE
+                }
+            }
+        }.start()
     }
 
     private fun updateProgress() {

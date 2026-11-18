@@ -172,4 +172,8 @@
     <string name="voice_play_not_found">«%1$s» no está en este repertorio. Cambia a «Agregar canciones» para agregarla.</string>
     <string name="voice_play_choose">¿Cuál de tu repertorio es «%1$s»?</string>
     <string name="setlist_empty_play">Tu repertorio está vacío: primero agrega canciones.</string>
+    <string name="diag_title">Diagnóstico de velocidad</string>
+    <string name="diag_empty">Aún no hay mediciones. Reproduce algunas canciones y vuelve a abrir este diagnóstico.</string>
+    <string name="diag_copy">Copiar</string>
+    <string name="diag_copied">Diagnóstico copiado: pégalo en el chat con Claude</string>
 </resources>

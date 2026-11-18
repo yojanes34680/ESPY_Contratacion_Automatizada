@@ -95,34 +95,13 @@ object SetlistStore {
 
     private fun toJson(s: Setlist): JSONObject {
         val items = JSONArray()
-        s.items.forEach { e ->
-            items.put(
-                JSONObject()
-                    .put("uri", e.uri).put("titulo", e.title).put("artista", e.artist)
-                    .put("album", e.album).put("archivo", e.displayName).put("duracion", e.durationMs)
-                    .put("video", e.isVideo).put("letra", e.lyricsUri ?: "").put("mod", e.modified),
-            )
-        }
+        s.items.forEach { items.put(EntryJson.to(it)) }
         return JSONObject().put("id", s.id).put("nombre", s.name).put("creado", s.created).put("canciones", items)
     }
 
     private fun fromJson(o: JSONObject): Setlist {
         val arr = o.optJSONArray("canciones") ?: JSONArray()
-        val items = (0 until arr.length()).mapNotNull { i ->
-            arr.optJSONObject(i)?.let { e ->
-                MediaEntry(
-                    uri = e.optString("uri"),
-                    title = e.optString("titulo"),
-                    artist = e.optString("artista"),
-                    album = e.optString("album"),
-                    displayName = e.optString("archivo"),
-                    durationMs = e.optLong("duracion"),
-                    isVideo = e.optBoolean("video"),
-                    lyricsUri = e.optString("letra").ifBlank { null },
-                    modified = e.optLong("mod"),
-                )
-            }
-        }.filter { it.uri.isNotBlank() }
+        val items = (0 until arr.length()).mapNotNull { i -> arr.optJSONObject(i)?.let { EntryJson.from(it) } }
         return Setlist(o.optString("id"), o.optString("nombre"), items, o.optLong("creado"))
     }
 
