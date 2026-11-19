@@ -27,7 +27,7 @@ object AudioConverter {
     fun init(context: Context) {
         val d = File(context.cacheDir, "convertidas").apply { mkdirs() }
         dir = d
-        d.listFiles()?.filter { it.extension == "wav" }?.forEach { ready[it.nameWithoutExtension] = it }
+        d.listFiles()?.filter { it.extension == "wav" || it.extension == "mp3" }?.forEach { ready[it.nameWithoutExtension] = it }
     }
 
     private fun key(uri: String): String =
@@ -42,6 +42,18 @@ object AudioConverter {
     fun convert(context: Context, source: Uri, originalUri: String): File? {
         convertedFor(originalUri)?.let { return it }
         val d = dir ?: File(context.cacheDir, "convertidas").apply { mkdirs() }
+        // 1) Variantes de WAV que la app arregla por sí misma (MP3 dentro de WAV, ADPCM de Microsoft).
+        runCatching {
+            context.contentResolver.openInputStream(source)?.use { WavRepair.repair(it, d, key(originalUri)) }
+        }.getOrNull()?.let { r ->
+            r.fmt?.let { PerfLog.add("🔎 WAV interno: ${WavRepair.describe(it.tag)} · ${it.sampleRate} Hz · ${it.channels} canales") }
+            r.file?.let { f ->
+                ready[f.nameWithoutExtension] = f
+                trimCache(f)
+                return f
+            }
+        }
+        // 2) Lo demás, con los decodificadores del teléfono.
         val out = File(d, key(originalUri) + ".wav")
         val tmp = File(d, key(originalUri) + ".tmp")
         val extractor = MediaExtractor()
@@ -165,7 +177,7 @@ object AudioConverter {
 
     /** Mantiene las conversiones por debajo de ~800 MB borrando las más antiguas. */
     private fun trimCache(keep: File) {
-        val files = dir?.listFiles()?.filter { it.extension == "wav" }?.sortedBy { it.lastModified() } ?: return
+        val files = dir?.listFiles()?.filter { it.extension == "wav" || it.extension == "mp3" }?.sortedBy { it.lastModified() } ?: return
         var total = files.sumOf { it.length() }
         for (f in files) {
             if (total <= MAX_CACHE_BYTES) break
