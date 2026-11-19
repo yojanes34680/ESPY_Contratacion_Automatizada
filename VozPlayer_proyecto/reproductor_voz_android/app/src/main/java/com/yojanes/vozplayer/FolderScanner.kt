@@ -82,7 +82,10 @@ class FolderScanner(private val resolver: ContentResolver) {
 
     companion object {
         private const val MAX_DIRS = 2000
-        val AUDIO_EXT = setOf("mp3", "m4a", "aac", "wav", "flac", "ogg", "oga", "opus", "amr", "wma", "aif", "aiff", "mka")
+        val AUDIO_EXT = setOf(
+            "mp3", "m4a", "aac", "wav", "wave", "bwf", "flac", "ogg", "oga", "opus", "amr", "wma",
+            "aif", "aiff", "aifc", "mka", "3ga", "mid", "midi",
+        )
         val VIDEO_EXT = setOf("mp4", "m4v", "mkv", "webm", "3gp", "mov", "avi", "ts")
     }
 }

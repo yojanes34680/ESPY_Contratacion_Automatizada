@@ -77,7 +77,10 @@ class PlaybackService : MediaSessionService() {
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                 PlayGate.awaitingStart = false
-                PerfLog.add("⚠ error al reproducir: ${error.errorCodeName}")
+                val item = player.currentMediaItem
+                val name = item?.mediaMetadata?.title ?: "?"
+                PerfLog.add("⚠ error al reproducir «$name»: ${error.errorCodeName}")
+                if (item != null && error.errorCode in FORMAT_ERRORS) convertAndRetry(player, item)
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -85,6 +88,46 @@ class PlaybackService : MediaSessionService() {
             }
         })
         session = MediaSession.Builder(this, player).build()
+    }
+
+    private val converter = java.util.concurrent.Executors.newSingleThreadExecutor()
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /**
+     * La pista usa una variante que el reproductor no entiende (p. ej. WAV con MP3 o ADPCM por
+     * dentro): se convierte con los decodificadores del teléfono y se vuelve a reproducir.
+     */
+    private fun convertAndRetry(player: ExoPlayer, item: MediaItem) {
+        val source = item.localConfiguration?.uri ?: return
+        if (AudioConverter.isConverted(source)) {
+            toast(getString(R.string.format_unsupported, item.mediaMetadata.title ?: ""))
+            return
+        }
+        toast(getString(R.string.format_converting, item.mediaMetadata.title ?: ""))
+        converter.execute {
+            val t0 = android.os.SystemClock.elapsedRealtime()
+            val file = AudioConverter.convert(this, source, item.mediaId)
+            val ms = android.os.SystemClock.elapsedRealtime() - t0
+            main.post {
+                if (file == null) {
+                    PerfLog.add("⚠ formato no compatible ni convertible: ${item.mediaMetadata.title}")
+                    toast(getString(R.string.format_unsupported, item.mediaMetadata.title ?: ""))
+                    return@post
+                }
+                PerfLog.add("🔄 convertida «${item.mediaMetadata.title}»: $ms ms")
+                val index = (0 until player.mediaItemCount).firstOrNull { player.getMediaItemAt(it).mediaId == item.mediaId }
+                    ?: return@post
+                player.replaceMediaItem(index, item.buildUpon().setUri(android.net.Uri.fromFile(file)).build())
+                player.seekTo(index, 0)
+                PlayGate.markPlayRequested()
+                player.prepare()
+                player.play()
+            }
+        }
+    }
+
+    private fun toast(msg: String) {
+        main.post { android.widget.Toast.makeText(applicationContext, msg, android.widget.Toast.LENGTH_LONG).show() }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
@@ -96,7 +139,22 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
+    companion object {
+        /** Errores que indican formato no compatible (se intenta convertir la pista). */
+        private val FORMAT_ERRORS = setOf(
+            androidx.media3.common.PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED,
+            androidx.media3.common.PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED,
+            androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
+            androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
+            androidx.media3.common.PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
+            androidx.media3.common.PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED,
+            androidx.media3.common.PlaybackException.ERROR_CODE_DECODING_FAILED,
+            androidx.media3.common.PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED,
+        )
+    }
+
     override fun onDestroy() {
+        converter.shutdownNow()
         AudioFx.releaseEffects()
         session?.run {
             player.release()

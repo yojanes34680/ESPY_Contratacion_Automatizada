@@ -9,7 +9,8 @@ import androidx.media3.common.MediaMetadata
 fun MediaEntry.toMediaItem(): MediaItem =
     MediaItem.Builder()
         .setMediaId(uri)
-        .setUri(Uri.parse(uri))
+        // Si la pista ya se convirtió antes (formato no compatible), se usa la versión convertida.
+        .setUri(AudioConverter.convertedFor(uri)?.let { Uri.fromFile(it) } ?: Uri.parse(uri))
         .setMediaMetadata(
             MediaMetadata.Builder()
                 .setTitle(title)

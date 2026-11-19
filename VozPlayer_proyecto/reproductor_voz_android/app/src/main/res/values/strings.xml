@@ -176,4 +176,6 @@
     <string name="diag_empty">Aún no hay mediciones. Reproduce algunas canciones y vuelve a abrir este diagnóstico.</string>
     <string name="diag_copy">Copiar</string>
     <string name="diag_copied">Diagnóstico copiado: pégalo en el chat con Claude</string>
+    <string name="format_converting">Preparando «%1$s» (formato especial)… sonará en unos segundos y la próxima vez será instantánea.</string>
+    <string name="format_unsupported">«%1$s» usa un formato que este teléfono no puede reproducir.</string>
 </resources>
