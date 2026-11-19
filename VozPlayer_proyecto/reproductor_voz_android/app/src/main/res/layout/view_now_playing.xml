@@ -73,26 +73,6 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/npChips"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:orientation="vertical">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/npLyrics"
-                style="@style/NowPlayingChip"
-                android:text="@string/lyrics_button"
-                app:icon="@drawable/ic_lyrics" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/npMixer"
-                style="@style/NowPlayingChip"
-                android:layout_marginTop="4dp"
-                android:text="@string/mixer_button"
-                app:icon="@drawable/ic_tune" />
-        </LinearLayout>
 
         <!-- Solo en modo compacto: reproducir/pausar -->
         <ImageButton
@@ -223,5 +203,26 @@
             android:contentDescription="@string/np_repeat"
             android:src="@drawable/ic_repeat" />
     </LinearLayout>
+        <LinearLayout
+            android:id="@+id/npChips"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/npLyrics"
+                style="@style/NowPlayingChip"
+                android:text="@string/lyrics_button"
+                app:icon="@drawable/ic_lyrics" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/npMixer"
+                style="@style/NowPlayingChip"
+                android:layout_marginStart="10dp"
+                android:text="@string/mixer_button"
+                app:icon="@drawable/ic_tune" />
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>
